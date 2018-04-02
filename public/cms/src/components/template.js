@@ -1,5 +1,10 @@
 
 
-export default el => createEls('div', 'app-wrp', el, [
+export default (el, children) => createEls('div', 'app-wrp', el, [
     
+    // TODO menu
+
+
+    {tag: 'div', children: children}
+
 ]);

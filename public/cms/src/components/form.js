@@ -1,18 +1,23 @@
+import inputAcl from './input-acl';
 
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
-            return {tag: 'input', className: 'btn btn-success', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder}};
+            return {tag: 'input', className: 'btn btn-success', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
         case 'password':
-            return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder}};
+            return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder || ''}};
+        case 'acl':
+            return inputAcl(meta);
         default:
-            return {tag: 'input', className: 'form-control', attrs: {type: 'text', name: meta.name, placeholder: meta.placeholder}};
+            return {tag: 'input', className: 'form-control', attrs: {type: 'text', name: meta.name, placeholder: meta.placeholder || ''}};
     }
 }
 
-export default ({fields, fieldCol, onSubmit}) => ({tag: 'form', children: fields.map(f => {
+export default ({fields, fieldCol, onSubmit}) => ({tag: 'form', className: 'row', children: fields.map(f => {
     if (f.type === 'submit') {
-        return createField(f);
+        return {tag: 'div', className: 'col-md-12', children: [
+            createField(f)
+        ]};
     }
 
     return {tag: 'div', className: `form-group col-md-${fieldCol || 4}`, children: [
@@ -21,7 +26,22 @@ export default ({fields, fieldCol, onSubmit}) => ({tag: 'form', children: fields
     ]};
 }), bootstrap(el) {
     el.addEventListener('submit', e => {
+        let data = {};
         e.preventDefault();
-        onSubmit();
+        const fields = getEls(el, 'input, select, textarea').filter(el => el.type !== 'submit');
+
+        fields.filter(input => !input.skipbind).forEach(input => {
+            data[input.name] = input.value || input.innerHTML;
+        });
+
+        let acl = '';
+        fields.filter(input => input.acl).forEach(input => {
+            acl += input.checked ? `${input.name};` : '';
+        });
+        if (acl) {
+            data.acl = acl;
+        }
+
+        onSubmit(data, e);
     })
 }})

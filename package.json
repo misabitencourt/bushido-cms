@@ -4,7 +4,8 @@
   "description": "A simple and fast CMS with Node, Express and Riak",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cms-front-watch": "rollup -c -w",
+    "cms-front-compile": "rollup -c"
   },
   "author": "",
   "license": "ISC",
@@ -13,7 +14,10 @@
     "express": "^4.16.2",
     "glob": "^7.1.2",
     "handlebars": "^4.0.11",
-    "npm-dom-helper": "^1.3.2"
+    "knex": "^0.14.4",
+    "npm-dom-helper": "^1.3.2",
+    "sha1": "^1.1.1",
+    "sqlite3": "^4.0.0"
   },
   "devDependencies": {
     "rollup": "^0.56.5"
