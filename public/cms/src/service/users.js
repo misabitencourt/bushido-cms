@@ -1,5 +1,5 @@
 import config from '../config';
-
+import headers from './headers'
 
 export default {
 
@@ -11,17 +11,11 @@ export default {
 
 
     create: async user => {
-        let data = '';
-        for (let i in user) {
-            data += `${i}=${encodeURIComponent(user[i])}&`;
-        }
-
         const response = await fetch(`${config.API_URL}/cms/user/`, {
             method: 'POST',
-            body: data
+            headers,
+            body: JSON.stringify(user)
         });
-
-        console.log(user);
 
         let newUser = await response.json();
 
@@ -45,7 +39,8 @@ export default {
     },
 
 
-    destroy: async id => fetch(`${config.API_URL}/${id}`, {
+    destroy: async id => fetch(`${config.API_URL}/cms/user/${id}`, {
+        headers,
         method: 'DELETE'
     })
 

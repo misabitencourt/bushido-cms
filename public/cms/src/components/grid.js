@@ -1,0 +1,54 @@
+export default async ({columns, loadData, onEdit, onDelete}) => {
+    const table = document.createElement('table');
+    table.className = 'table table-bordered table-stripped';
+
+    table.innerHTML = `
+        <thead>
+            <tr>
+                ${columns.map(col => `<th>${col.label}</th>`).join('')}
+            </tr>
+        </thead>
+        <tbody>            
+        </tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
+    let data = await loadData();
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        columns.forEach(column => {
+            const tableData = document.createElement('td');
+            tableData.textContent = column.prop(item);
+            row.appendChild(tableData);
+        });
+
+        const actionsTableData = document.createElement('td');
+
+        if (onEdit) {
+            const editLink = document.createElement('a');
+            editLink.textContent = 'Editar';
+            editLink.addEventListener('click', e => {
+                e.preventDefault();
+                onEdit(item);
+            });
+            actionsTableData.appendChild(editLink);
+        }
+
+        if (onDelete) {
+            const deleteLink = document.createElement('a');
+            deleteLink.textContent = 'Deletar';
+            deleteLink.addEventListener('click', e => {
+                e.preventDefault();
+                onDelete(item);
+            });
+            actionsTableData.appendChild(deleteLink);
+        }
+
+        row.appendChild(actionsTableData);
+        tbody.appendChild(row);
+    });
+
+    return table;
+}

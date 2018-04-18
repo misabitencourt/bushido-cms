@@ -13,11 +13,17 @@ module.exports.create = user => {
     });
 };
 
-module.exports.retrieve = search => cms.retrieve({
-    modelName: 'users',
-    filters: 'name LIKE :search OR email LIKE :search',
-    params: {search: `%${search || ''}%`}
-});
+module.exports.retrieve = search => {
+    if (search.trim()) {
+        return cms.retrieve({
+            modelName: 'users',
+            filters: 'name LIKE :search OR email LIKE :search',
+            params: {search: `%${search || ''}%`}
+        })
+    }
+
+    return cms.list({modelName: 'users'})
+};
 
 module.exports.update = user => cms.update({
     modelName: 'users',

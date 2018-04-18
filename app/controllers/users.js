@@ -1,16 +1,37 @@
 const userSrv = require('../services/users');
 
 module.exports = app => {
+    app.get('/cms/user', (req, res) => {
+        userSrv.retrieve('').then(users => {
+            return res.json(users.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone
+            })));
+        });
+    });
+
     app.get('/cms/user/:search', (req, res) => {
         const search = req.param.search;
         userSrv.retrieve(search).then(users => {
-            return res.json(users);
+            return res.json(users.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone
+            })));
         });
     });
 
     app.post('/cms/user/', (req, res) => {
         console.log(req.body);
-        userSrv.create(req.body).then(user => {
+        userSrv.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            phone: req.body.phone
+        }).then(user => {
             return res.json(user);
         });
     });
