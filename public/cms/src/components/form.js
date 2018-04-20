@@ -35,12 +35,12 @@ export default ({fields, fieldCol, onSubmit}) => ({
             let data = {};        
             const fields = getEls(el, 'input, select, textarea').filter(el => el.type !== 'submit');
 
-            fields.filter(input => !input.skipbind).forEach(input => {
+            fields.filter(input => !input.dataset.skipbind).forEach(input => {
                 data[input.name] = input.value || input.innerHTML;
             });
 
             let acl = '';
-            fields.filter(input => input.acl).forEach(input => {
+            fields.filter(input => input.dataset.acl).forEach(input => {
                 acl += input.checked ? `${input.name};` : '';
             });
             if (acl) {

@@ -205,7 +205,10 @@ const screens = [
 var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
     return {tag: 'div', className: 'col-md-3', children: [
         {tag: 'label', children: [
-            {tag: 'input', attrs: {type: 'checkbox', name: screen.name, skipbind: 1, acl: 1}},
+            {tag: 'input', attrs: {type: 'checkbox', name: screen.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                el.dataset.acl = '1';
+            }},
             {tag: 'span', textContent: screen.label}
         ]}
     ]}
@@ -246,12 +249,12 @@ var form = ({fields, fieldCol, onSubmit}) => ({
             let data = {};        
             const fields = getEls(el, 'input, select, textarea').filter(el => el.type !== 'submit');
 
-            fields.filter(input => !input.skipbind).forEach(input => {
+            fields.filter(input => !input.dataset.skipbind).forEach(input => {
                 data[input.name] = input.value || input.innerHTML;
             });
 
             let acl = '';
-            fields.filter(input => input.acl).forEach(input => {
+            fields.filter(input => input.dataset.acl).forEach(input => {
                 acl += input.checked ? `${input.name};` : '';
             });
             if (acl) {
@@ -499,16 +502,23 @@ const render = el => {
     
             onEdit(user) {
                 dataToForm(user, formEl);
+                user.acl.split(';').forEach(resource => {
+                    const el = getEls(formEl, 'input[type="checkbox"]').find(input => {
+                        return input.dataset.acl && input.name === resource;
+                    });
+                    if (el) {
+                        el.checked = true;
+                    }
+                });
             },
     
             onDelete(user) {
-                console.log(user);
                 service.destroy(user.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Usuário excluído com sucesso'
                     });
-                    // window.location.reload();    
+                    window.location.reload();    
                 });
             }
         });

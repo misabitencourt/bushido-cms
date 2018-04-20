@@ -69,23 +69,30 @@ const render = el => {
     
             onEdit(user) {
                 dataToForm(user, formEl)
+                user.acl.split(';').forEach(resource => {
+                    const el = getEls(formEl, 'input[type="checkbox"]').find(input => {
+                        return input.dataset.acl && input.name === resource;
+                    });
+                    if (el) {
+                        el.checked = true;
+                    }
+                });
             },
     
             onDelete(user) {
-                console.log(user)
                 service.destroy(user.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Usuário excluído com sucesso'
                     });
-                    // window.location.reload();    
+                    window.location.reload();    
                 })
             }
         })
-        mainEl.appendChild(gridEl)
+        mainEl.appendChild(gridEl);
     }
 
-    renderGrid()
+    renderGrid();
 };
 
 
