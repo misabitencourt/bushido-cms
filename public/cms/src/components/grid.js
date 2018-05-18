@@ -3,9 +3,10 @@ export default async ({columns, loadData, onEdit, onDelete}) => {
     table.className = 'table table-bordered table-stripped';
 
     table.innerHTML = `
-        <thead>
+        <thead class="thead-dark">
             <tr>
                 ${columns.map(col => `<th>${col.label}</th>`).join('')}
+                <th></th>
             </tr>
         </thead>
         <tbody>            

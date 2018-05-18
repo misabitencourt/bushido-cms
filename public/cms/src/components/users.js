@@ -4,9 +4,7 @@ import service from '../service/users';
 import grid from '../components/grid';
 import {dataToForm, formToData} from '../common/form-bind';
 
-const render = el => {
-    template(el);
-
+const render = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -34,7 +32,8 @@ const render = el => {
         }
     });
         
-    const mainEl = createEls('div', '', el, [
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
         {tag: 'h2', textContent: 'Cadastro de usuários'},
         formObj,
         {tag: 'div', className: 'p-4'},
@@ -78,7 +77,7 @@ const render = el => {
                         type: 'success',
                         msg: 'Usuário excluído com sucesso'
                     });
-                    // window.location.reload();    
+                    window.location.reload();    
                 })
             }
         })
@@ -86,6 +85,7 @@ const render = el => {
     }
 
     renderGrid()
+    appEl.appendChild(template(wrpEl));
 };
 
 

@@ -301,13 +301,43 @@ var login$1 = {
     }
 }
 
-var template = (el, children) => createEls('div', 'app-wrp', el, [
+var topnav = menus => ({
+    tag: 'ul',
+    className: 'nav nav-tabs bg-primary',
+    children: menus.map(menu => ({
+        tag: 'li',
+        className: 'nav-item',
+        children: [
+            {tag: 'a', className: `nav-link ${menu.active ? 'active' : ''}`, 
+                textContent: menu.name,
+                attrs: {href: 'javascript:;'}, on: ['click', menu.onclick], title: menu.tooltip}
+        ]
+    }))
+})
+
+const menus = [
+    {id: 'users', name: 'Usuários', tooltip: 'Cadastro de usuários', onclick() {
+        window.location = '#/';
+    }}
+];
+
+var menuService = {
+
+    getMainMenu() {
+        return menus;
+    }
+
+}
+
+var template = child => createEls('div', 'app-wrp', document.body, [
     
-    // TODO menu
+    topnav(menuService.getMainMenu()),
 
-
-    {tag: 'div', children: children}
-
+    {tag: 'div', className: 'container', children: [
+        {tag: 'div', className: 'p-3', bootstrap(el) {
+            el.appendChild(child);
+        }}
+    ]}    
 ]);
 
 var config = {
@@ -369,9 +399,10 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
     table.className = 'table table-bordered table-stripped';
 
     table.innerHTML = `
-        <thead>
+        <thead class="thead-dark">
             <tr>
                 ${columns.map(col => `<th>${col.label}</th>`).join('')}
+                <th></th>
             </tr>
         </thead>
         <tbody>            
@@ -434,9 +465,7 @@ const dataToForm = (data, form) => {
 
 };
 
-const render = el => {
-    template(el);
-
+const render = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -464,7 +493,8 @@ const render = el => {
         }
     });
         
-    const mainEl = createEls('div', '', el, [
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
         {tag: 'h2', textContent: 'Cadastro de usuários'},
         formObj,
         {tag: 'div', className: 'p-4'},
@@ -508,7 +538,7 @@ const render = el => {
                         type: 'success',
                         msg: 'Usuário excluído com sucesso'
                     });
-                    // window.location.reload();    
+                    window.location.reload();    
                 });
             }
         });
@@ -516,6 +546,7 @@ const render = el => {
     };
 
     renderGrid();
+    appEl.appendChild(template(wrpEl));
 };
 
 var users = {
@@ -530,7 +561,7 @@ var routes = [
     users
 ]
 
-var index$1 = (el, routeChange) => {
+function routeChange (el, routeChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
@@ -550,6 +581,6 @@ var index$1 = (el, routeChange) => {
     }
 }
 
-return index$1;
+return routeChange;
 
 }());

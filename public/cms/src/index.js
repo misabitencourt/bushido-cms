@@ -1,7 +1,7 @@
 import '../../../node_modules/npm-dom-helper/index'
 import routes from './routes/index'
 
-export default (el, routeChange) => {
+export default function routeChange (el, routeChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 

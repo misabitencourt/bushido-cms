@@ -1,10 +1,13 @@
+import topnav from './topnav'
+import menuService from '../service/menu'
 
-
-export default (el, children) => createEls('div', 'app-wrp', el, [
+export default child => createEls('div', 'app-wrp', document.body, [
     
-    // TODO menu
+    topnav(menuService.getMainMenu()),
 
-
-    {tag: 'div', children: children}
-
+    {tag: 'div', className: 'container', children: [
+        {tag: 'div', className: 'p-3', bootstrap(el) {
+            el.appendChild(child)
+        }}
+    ]}    
 ]);

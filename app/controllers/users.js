@@ -43,7 +43,11 @@ module.exports = app => {
     });
 
     app.delete('/cms/user/:id', (req, res) => {
-        userSrv.destroy(req.param.id, () => {
+        const id = req.originalUrl.split('/').pop()*1;
+        if (isNaN(id)) {
+            return res.status(400);
+        }
+        userSrv.destroy(id).then(() => {
             return res.json({ok: true});
         });
     });
