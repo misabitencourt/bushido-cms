@@ -214,7 +214,9 @@ var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
-            return {tag: 'input', className: 'btn btn-success', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+        case 'cancel':
+            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', placeholder: meta.placeholder || ''}, textContent: meta.label};
         case 'password':
             return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder || ''}};
         case 'acl':
@@ -226,11 +228,12 @@ function createField(meta) {
 
 var form = ({fields, fieldCol, onSubmit}) => ({
     tag: 'form', 
-    className: 'row', 
+    className: 'row p-2', 
     children: fields.map(f => {
         if (f.type === 'submit') {
             return {tag: 'div', className: 'col-md-12', children: [
-                createField(f)
+                createField(f),
+                createField({type: 'cancel', label: 'Cancelar'})
             ]};
         }
 
@@ -329,16 +332,23 @@ var menuService = {
 
 }
 
-var template = child => createEls('div', 'app-wrp', document.body, [
+var template = (child, currentMenuId = '') => {
+    const menus = menuService.getMainMenu();
+    const currentMenu = menus.find(m => m.id === currentMenuId);
     
-    topnav(menuService.getMainMenu()),
+    if (currentMenu) {
+        currentMenu.active = true;
+    }
 
-    {tag: 'div', className: 'container', children: [
-        {tag: 'div', className: 'p-3', bootstrap(el) {
-            el.appendChild(child);
-        }}
-    ]}    
-]);
+    return createEls('div', 'app-wrp', document.body, [    
+        topnav(menus),    
+        {tag: 'div', className: 'container', children: [
+            {tag: 'div', className: 'p-3', bootstrap(el) {
+                el.appendChild(child);
+            }}
+        ]}    
+    ])
+}
 
 var config = {
     API_URL: 'http://localhost:3000'
@@ -350,6 +360,28 @@ var headers = {
 }
 
 var service = {
+
+    validate(data) {
+        let errors = '';
+
+        if (! data.name) {
+            errors += ' Informe o nome.';
+        }
+
+        if (! data.email) {
+            errors += ' Informe o e-mail.';
+        }
+
+        if (! data.phone) {
+            errors += ' Informe o telefone.';
+        }
+
+        if (! data.password) {
+            errors += ' Informe a senha.';
+        }
+
+        return errors;
+    },
 
     retrieve: async search => {
         let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`);
@@ -465,6 +497,17 @@ const dataToForm = (data, form) => {
 
 };
 
+var msg = (txt, type) => {
+    const alert = createEls('div', `alert alert-${type} fade show`, document.body, [], txt);
+    alert.style.position = 'fixed';
+    alert.style.zIndex = '99999';
+    alert.style.right = '13px';
+    alert.style.bottom = '13px';
+    setTimeout(() => document.body.removeChild(alert), 5e3);
+}
+
+var error = txt => msg(txt, 'danger')
+
 const render = appEl => {
     let formEl, searchInput;
 
@@ -479,6 +522,11 @@ const render = appEl => {
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
+            const errors = service.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
             if (e.target.dataset.id) {
                 // TODO
             } else {
@@ -546,7 +594,7 @@ const render = appEl => {
     };
 
     renderGrid();
-    appEl.appendChild(template(wrpEl));
+    appEl.appendChild(template(wrpEl, 'users'));
 };
 
 var users = {
@@ -569,7 +617,14 @@ function routeChange (el, routeChange) {
     //     route = '#/login';
     // }
 
-    const render = (routes.find(r => r.route === route) || {}).render;
+    const render = el => {
+        (routes.find(r => r.route === route) || {}).render(el);
+        if (sessionStorage.flash) {
+            const msgData = JSON.parse(sessionStorage.flash);
+            msg(msgData.msg, msgData.type);
+        }
+    };
+
     if (! render) {
         return console.error('Route not found');
     }

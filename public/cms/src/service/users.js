@@ -3,6 +3,28 @@ import headers from './headers'
 
 export default {
 
+    validate(data) {
+        let errors = '';
+
+        if (! data.name) {
+            errors += ' Informe o nome.';
+        }
+
+        if (! data.email) {
+            errors += ' Informe o e-mail.';
+        }
+
+        if (! data.phone) {
+            errors += ' Informe o telefone.';
+        }
+
+        if (! data.password) {
+            errors += ' Informe a senha.';
+        }
+
+        return errors;
+    },
+
     retrieve: async search => {
         let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`);
         let json = await response.json();

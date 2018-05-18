@@ -3,6 +3,7 @@ import form from '../components/form';
 import service from '../service/users';
 import grid from '../components/grid';
 import {dataToForm, formToData} from '../common/form-bind';
+import error from '../dialogs/error'
 
 const render = appEl => {
     let formEl, searchInput;
@@ -18,6 +19,11 @@ const render = appEl => {
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
+            const errors = service.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
             if (e.target.dataset.id) {
                 // TODO
             } else {
@@ -85,7 +91,7 @@ const render = appEl => {
     }
 
     renderGrid()
-    appEl.appendChild(template(wrpEl));
+    appEl.appendChild(template(wrpEl, 'users'));
 };
 
 

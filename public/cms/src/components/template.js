@@ -1,13 +1,20 @@
 import topnav from './topnav'
 import menuService from '../service/menu'
 
-export default child => createEls('div', 'app-wrp', document.body, [
+export default (child, currentMenuId = '') => {
+    const menus = menuService.getMainMenu();
+    const currentMenu = menus.find(m => m.id === currentMenuId);
     
-    topnav(menuService.getMainMenu()),
+    if (currentMenu) {
+        currentMenu.active = true;
+    }
 
-    {tag: 'div', className: 'container', children: [
-        {tag: 'div', className: 'p-3', bootstrap(el) {
-            el.appendChild(child)
-        }}
-    ]}    
-]);
+    return createEls('div', 'app-wrp', document.body, [    
+        topnav(menus),    
+        {tag: 'div', className: 'container', children: [
+            {tag: 'div', className: 'p-3', bootstrap(el) {
+                el.appendChild(child)
+            }}
+        ]}    
+    ])
+}
