@@ -24,8 +24,7 @@ module.exports = app => {
         });
     });
 
-    app.post('/cms/user/', (req, res) => {
-        console.log(req.body);
+    app.post('/cms/user/', (req, res) => {        
         userSrv.create({
             name: req.body.name,
             email: req.body.email,

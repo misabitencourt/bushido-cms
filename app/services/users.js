@@ -2,6 +2,53 @@ const cms = require('../repos/cms');
 const sha1 = require('sha1');
 const config = require('dotenv').config().parsed;
 
+
+module.exports.checkToken = token => new Promise((resolve, reject) => {
+    if (! token) {
+        return resolve(null);
+    }
+
+    return cms.retrieve({
+        modelName: 'users',
+        filters: 'token=:token LIMIT 1',
+        params: {token}
+    }).then(users => {
+        if (! (users && users.length)) {
+            return;
+        }
+
+        return users.pop();
+    });
+})
+
+
+module.exports.login = login => {
+    if (! (login && login.email && login.pass)) {
+        return null;
+    }
+
+    let email = login.email;
+    let password = sha1(`${user.password}${config.SECRET_WORD}`);    
+
+    return cms.retrieve({
+        modelName: 'users',
+        filters: 'email=:email AND password=:password LIMIT 1',
+        params: {email, password}
+    }).then(users => {
+        if (! (users && users.length)) {
+            return;
+        }
+
+        const user = users.pop();
+        
+        return {
+            name: user.name,
+            email: user.email,
+            token: user.token
+        };
+    });
+}
+
 module.exports.create = user => {
     if (user.password) {
         user.password = sha1(`${user.password}${config.SECRET_WORD}`);

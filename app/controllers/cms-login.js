@@ -1,6 +1,13 @@
+const userSrv = require('../services/users');
 
 module.exports = app => {
     app.post('/cms/login', (req, res) => {
-        console.log('TODO')
+        userSrv.login(req.body).then(user => {
+            if (! user) {
+                return res.status(403);
+            }
+            
+            res.json(user);
+        });
     });
 }
