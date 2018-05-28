@@ -12,19 +12,19 @@ module.exports.checkToken = token => new Promise((resolve, reject) => {
         modelName: 'users',
         filters: 'token=:token LIMIT 1',
         params: {token}
-    }).then(users => {
+    }).then(users => {        
         if (! (users && users.length)) {
-            return;
+            return resolve(null);
         }
 
-        return users.pop();
+        return resolve(users.pop());
     });
 })
 
 
-module.exports.login = login => {
+module.exports.login = login => new Promise((resolve, reject) => {
     if (! (login && login.email && login.pass)) {
-        return null;
+        return resolve(null);
     }
 
     let email = login.email;
@@ -36,18 +36,19 @@ module.exports.login = login => {
         params: {email, password}
     }).then(users => {
         if (! (users && users.length)) {
-            return;
+            return resolve(null);
         }
 
         const user = users.pop();
         
-        return {
+        return resolve({
             name: user.name,
             email: user.email,
             token: user.token
-        };
+        });
     });
-}
+})
+
 
 module.exports.create = user => {
     if (user.password) {

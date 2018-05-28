@@ -6,9 +6,9 @@ export default function routeChange (el, routeChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
-    // if (! currentUser) {
-    //     route = '#/login';
-    // }
+    if (! currentUser) {
+        route = '#/login';
+    }
 
     const render = el => {
         (routes.find(r => r.route === route) || {}).render(el);

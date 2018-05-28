@@ -25,8 +25,19 @@ export default {
         return errors;
     },
 
+    login: async auth => {
+        const response = await fetch(`${config.API_URL}/cms/login`, {
+            method: 'POST',
+            body: JSON.stringify(auth)
+        });        
+        const json = await response.json();
+        sessionStorage.user = JSON.stringify(json);
+        headers['Auth-Token'] = json.token;
+        return json;
+    },
+
     retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`);
+        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`, {headers});
         let json = await response.json();
         return json;
     },
@@ -52,7 +63,8 @@ export default {
         }
         const response = await fetch(config.API_URL, {
             method: 'PUT',
-            body: JSON.stringify(params)
+            body: JSON.stringify(params),
+            headers
         });
 
         let newUser = await response.json();

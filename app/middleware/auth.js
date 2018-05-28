@@ -15,7 +15,7 @@ module.exports = function (req, res, next) {
     if (url.indexOf('/cms') === 0) {
         return userSrv.checkToken(token).then(user => {
             if (! user) {
-                return res.status(403);
+                return res.status(403).json({error: 'AUTH_REQUIRED'});
             }
             req.currentUser = user;
             next();

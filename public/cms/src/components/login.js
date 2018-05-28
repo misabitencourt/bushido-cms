@@ -1,5 +1,7 @@
 import card from './card'
 import form from './form'
+import service from '../service/users'
+import error from '../dialogs/error';
 
 export default el => createEls('div', 'app-wrp container', el, [
     {tag: 'div', className: 'login-wrp', children: [
@@ -16,8 +18,13 @@ export default el => createEls('div', 'app-wrp container', el, [
                                 {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
                                 {type: 'submit', name: 'submit', label: 'Entrar'}
                             ],
-                            onSubmit() {
-                                
+                            onSubmit(auth) {                                
+                                service.login(auth).then(() => {
+                                    if (! auth.token) {
+                                        return error('Usuário ou senha inválidos');
+                                    }
+                                    window.location.reload();
+                                });
                             }
                         })
                     ]

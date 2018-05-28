@@ -266,6 +266,105 @@ var form = ({fields, fieldCol, onSubmit}) => ({
     }
 })
 
+var config = {
+    API_URL: 'http://localhost:3000'
+}
+
+var headers = {
+    'Accept': 'application/json, text/plain, */*',
+    'Content-Type': 'application/json'
+}
+
+var service = {
+
+    validate(data) {
+        let errors = '';
+
+        if (! data.name) {
+            errors += ' Informe o nome.';
+        }
+
+        if (! data.email) {
+            errors += ' Informe o e-mail.';
+        }
+
+        if (! data.phone) {
+            errors += ' Informe o telefone.';
+        }
+
+        if (! data.password) {
+            errors += ' Informe a senha.';
+        }
+
+        return errors;
+    },
+
+    login: async auth => {
+        const response = await fetch(`${config.API_URL}/cms/login`, {
+            method: 'POST',
+            body: JSON.stringify(auth)
+        });        
+        const json = await response.json();
+        sessionStorage.user = JSON.stringify(json);
+        headers['Auth-Token'] = json.token;
+        return json;
+    },
+
+    retrieve: async search => {
+        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`, {headers});
+        let json = await response.json();
+        return json;
+    },
+
+
+    create: async user => {
+        const response = await fetch(`${config.API_URL}/cms/user/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(user)
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    update: async (id, user) => {
+        const params = {id};
+        for (let i in user) {
+            params[`user_${i}`] = user[i];
+        }
+        const response = await fetch(config.API_URL, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    destroy: async id => fetch(`${config.API_URL}/cms/user/${id}`, {
+        headers,
+        method: 'DELETE'
+    })
+
+}
+
+var msg = (txt, type) => {
+    const alert = createEls('div', `alert alert-${type} fade show`, document.body, [], txt);
+    alert.style.position = 'fixed';
+    alert.style.zIndex = '99999';
+    alert.style.right = '13px';
+    alert.style.bottom = '13px';
+    setTimeout(() => document.body.removeChild(alert), 5e3);
+}
+
+var error = txt => msg(txt, 'danger')
+
 var login = el => createEls('div', 'app-wrp container', el, [
     {tag: 'div', className: 'login-wrp', children: [
         {tag: 'div', className: 'row', children: [
@@ -281,8 +380,13 @@ var login = el => createEls('div', 'app-wrp container', el, [
                                 {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
                                 {type: 'submit', name: 'submit', label: 'Entrar'}
                             ],
-                            onSubmit() {
-                                
+                            onSubmit(auth) {                                
+                                service.login(auth).then(() => {
+                                    if (! auth.token) {
+                                        return error('Usuário ou senha inválidos');
+                                    }
+                                    window.location.reload();
+                                });
                             }
                         })
                     ]
@@ -348,82 +452,6 @@ var template = (child, currentMenuId = '') => {
             }}
         ]}    
     ])
-}
-
-var config = {
-    API_URL: 'http://localhost:3000'
-}
-
-var headers = {
-    'Accept': 'application/json, text/plain, */*',
-    'Content-Type': 'application/json'
-}
-
-var service = {
-
-    validate(data) {
-        let errors = '';
-
-        if (! data.name) {
-            errors += ' Informe o nome.';
-        }
-
-        if (! data.email) {
-            errors += ' Informe o e-mail.';
-        }
-
-        if (! data.phone) {
-            errors += ' Informe o telefone.';
-        }
-
-        if (! data.password) {
-            errors += ' Informe a senha.';
-        }
-
-        return errors;
-    },
-
-    retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`);
-        let json = await response.json();
-        return json;
-    },
-
-
-    create: async user => {
-        const response = await fetch(`${config.API_URL}/cms/user/`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(user)
-        });
-
-        let newUser = await response.json();
-
-        return newUser;
-    },
-
-
-    update: async (id, user) => {
-        const params = {id};
-        for (let i in user) {
-            params[`user_${i}`] = user[i];
-        }
-        const response = await fetch(config.API_URL, {
-            method: 'PUT',
-            body: JSON.stringify(params)
-        });
-
-        let newUser = await response.json();
-
-        return newUser;
-    },
-
-
-    destroy: async id => fetch(`${config.API_URL}/cms/user/${id}`, {
-        headers,
-        method: 'DELETE'
-    })
-
 }
 
 var grid = async ({columns, loadData, onEdit, onDelete}) => {
@@ -496,17 +524,6 @@ const dataToForm = (data, form) => {
     }
 
 };
-
-var msg = (txt, type) => {
-    const alert = createEls('div', `alert alert-${type} fade show`, document.body, [], txt);
-    alert.style.position = 'fixed';
-    alert.style.zIndex = '99999';
-    alert.style.right = '13px';
-    alert.style.bottom = '13px';
-    setTimeout(() => document.body.removeChild(alert), 5e3);
-}
-
-var error = txt => msg(txt, 'danger')
 
 const render = appEl => {
     let formEl, searchInput;
@@ -613,9 +630,9 @@ function routeChange (el, routeChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
-    // if (! currentUser) {
-    //     route = '#/login';
-    // }
+    if (! currentUser) {
+        route = '#/login';
+    }
 
     const render = el => {
         (routes.find(r => r.route === route) || {}).render(el);
