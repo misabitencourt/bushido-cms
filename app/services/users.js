@@ -10,7 +10,8 @@ module.exports.checkToken = token => new Promise((resolve, reject) => {
 
     return cms.retrieve({
         modelName: 'users',
-        filters: 'token=:token LIMIT 1',
+        filters: 'token=:token',
+        limit: 1,
         params: {token}
     }).then(users => {        
         if (! (users && users.length)) {
@@ -23,16 +24,17 @@ module.exports.checkToken = token => new Promise((resolve, reject) => {
 
 
 module.exports.login = login => new Promise((resolve, reject) => {
-    if (! (login && login.email && login.pass)) {
+    if (! (login && login.email && login.passwd)) {
         return resolve(null);
     }
 
     let email = login.email;
-    let password = sha1(`${user.password}${config.SECRET_WORD}`);    
+    let password = sha1(`${login.passwd}${config.SECRET_WORD}`);
 
     return cms.retrieve({
         modelName: 'users',
-        filters: 'email=:email AND password=:password LIMIT 1',
+        filters: 'email=:email AND password=:password',
+        limit: 1,
         params: {email, password}
     }).then(users => {
         if (! (users && users.length)) {
@@ -40,11 +42,17 @@ module.exports.login = login => new Promise((resolve, reject) => {
         }
 
         const user = users.pop();
-        
-        return resolve({
-            name: user.name,
-            email: user.email,
-            token: user.token
+        user.token = sha1(`${user.email}${config.SECRET_WORD}${new Date().getTime()}`);
+        cms.update({
+            modelName: 'users', 
+            id: user.id, 
+            values: user
+        }).then(() => {
+            resolve({
+                name: user.name,
+                email: user.email,
+                token: user.token
+            });
         });
     });
 })

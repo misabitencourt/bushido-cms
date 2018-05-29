@@ -25,7 +25,13 @@ const render = appEl => {
             }
 
             if (e.target.dataset.id) {
-                // TODO
+                service.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Usuário atualizado com sucesso'
+                    });
+                    window.location.reload();                    
+                });
             } else {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
@@ -42,7 +48,6 @@ const render = appEl => {
     const mainEl = createEls('div', '', wrpEl, [
         {tag: 'h2', textContent: 'Cadastro de usuários'},
         formObj,
-        {tag: 'div', className: 'p-4'},
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
             {tag: 'div', className: 'col-md-4', children: [
@@ -53,8 +58,7 @@ const render = appEl => {
     ])
 
     formEl = mainEl.querySelector('form')
-
-    const loadData = () => service.retrieve(searchInput.value)
+    const loadData = () => service.retrieve(searchInput.value)    
 
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table')
@@ -74,6 +78,7 @@ const render = appEl => {
     
             onEdit(user) {
                 dataToForm(user, formEl)
+                formEl.dataset.id = user.id
             },
     
             onDelete(user) {
@@ -88,9 +93,14 @@ const render = appEl => {
             }
         })
         mainEl.appendChild(gridEl)
-    }
+    };
 
-    renderGrid()
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    })
+
+    renderGrid();
     appEl.appendChild(template(wrpEl, 'users'));
 };
 

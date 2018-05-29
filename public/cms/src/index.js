@@ -11,10 +11,11 @@ export default function routeChange (el, routeChange) {
     }
 
     const render = el => {
-        (routes.find(r => r.route === route) || {}).render(el);
-        if (sessionStorage.flash) {
-            const msgData = JSON.parse(sessionStorage.flash)
-            msg(msgData.msg, msgData.type)
+        routes.find(r => r.route === route).render(el);
+        if (sessionStorage.flash) {            
+            const msgData = JSON.parse(sessionStorage.flash);
+            msg(msgData.msg, msgData.type);
+            sessionStorage.flash = '';
         }
     }
 

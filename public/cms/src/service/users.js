@@ -27,12 +27,17 @@ export default {
 
     login: async auth => {
         const response = await fetch(`${config.API_URL}/cms/login`, {
+            headers,
             method: 'POST',
             body: JSON.stringify(auth)
         });        
         const json = await response.json();
+        if (! json.token) {
+            return null;
+        }
         sessionStorage.user = JSON.stringify(json);
-        headers['Auth-Token'] = json.token;
+        sessionStorage.token = json.token;
+        
         return json;
     },
 
@@ -59,9 +64,9 @@ export default {
     update: async (id, user) => {
         const params = {id};
         for (let i in user) {
-            params[`user_${i}`] = user[i];
+            params[`${i}`] = user[i];
         }
-        const response = await fetch(config.API_URL, {
+        const response = await fetch(`${config.API_URL}/cms/user/${id}`, {
             method: 'PUT',
             body: JSON.stringify(params),
             headers

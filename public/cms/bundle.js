@@ -205,7 +205,7 @@ const screens = [
 var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
     return {tag: 'div', className: 'col-md-3', children: [
         {tag: 'label', children: [
-            {tag: 'input', attrs: {type: 'checkbox', name: screen.name, skipbind: 1, acl: 1}},
+            {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, skipbind: 1, acl: 1}},
             {tag: 'span', textContent: screen.label}
         ]}
     ]}
@@ -270,9 +270,13 @@ var config = {
     API_URL: 'http://localhost:3000'
 }
 
-var headers = {
+const headers = {
     'Accept': 'application/json, text/plain, */*',
     'Content-Type': 'application/json'
+};
+
+if (sessionStorage.token) {
+    headers['Auth-Token'] = sessionStorage.token;
 }
 
 var service = {
@@ -301,12 +305,17 @@ var service = {
 
     login: async auth => {
         const response = await fetch(`${config.API_URL}/cms/login`, {
+            headers,
             method: 'POST',
             body: JSON.stringify(auth)
         });        
         const json = await response.json();
+        if (! json.token) {
+            return null;
+        }
         sessionStorage.user = JSON.stringify(json);
-        headers['Auth-Token'] = json.token;
+        sessionStorage.token = json.token;
+        
         return json;
     },
 
@@ -333,9 +342,9 @@ var service = {
     update: async (id, user) => {
         const params = {id};
         for (let i in user) {
-            params[`user_${i}`] = user[i];
+            params[`${i}`] = user[i];
         }
-        const response = await fetch(config.API_URL, {
+        const response = await fetch(`${config.API_URL}/cms/user/${id}`, {
             method: 'PUT',
             body: JSON.stringify(params),
             headers
@@ -381,8 +390,8 @@ var login = el => createEls('div', 'app-wrp container', el, [
                                 {type: 'submit', name: 'submit', label: 'Entrar'}
                             ],
                             onSubmit(auth) {                                
-                                service.login(auth).then(() => {
-                                    if (! auth.token) {
+                                service.login(auth).then(user => {
+                                    if (! user.token) {
                                         return error('Usuário ou senha inválidos');
                                     }
                                     window.location.reload();
@@ -545,7 +554,13 @@ const render = appEl => {
             }
 
             if (e.target.dataset.id) {
-                // TODO
+                service.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Usuário atualizado com sucesso'
+                    });
+                    window.location.reload();                    
+                });
             } else {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
@@ -562,7 +577,6 @@ const render = appEl => {
     const mainEl = createEls('div', '', wrpEl, [
         {tag: 'h2', textContent: 'Cadastro de usuários'},
         formObj,
-        {tag: 'div', className: 'p-4'},
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
             {tag: 'div', className: 'col-md-4', children: [
@@ -573,8 +587,7 @@ const render = appEl => {
     ]);
 
     formEl = mainEl.querySelector('form');
-
-    const loadData = () => service.retrieve(searchInput.value);
+    const loadData = () => service.retrieve(searchInput.value);    
 
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
@@ -594,6 +607,7 @@ const render = appEl => {
     
             onEdit(user) {
                 dataToForm(user, formEl);
+                formEl.dataset.id = user.id;
             },
     
             onDelete(user) {
@@ -609,6 +623,11 @@ const render = appEl => {
         });
         mainEl.appendChild(gridEl);
     };
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
 
     renderGrid();
     appEl.appendChild(template(wrpEl, 'users'));
@@ -635,10 +654,11 @@ function routeChange (el, routeChange) {
     }
 
     const render = el => {
-        (routes.find(r => r.route === route) || {}).render(el);
-        if (sessionStorage.flash) {
+        routes.find(r => r.route === route).render(el);
+        if (sessionStorage.flash) {            
             const msgData = JSON.parse(sessionStorage.flash);
             msg(msgData.msg, msgData.type);
+            sessionStorage.flash = '';
         }
     };
 

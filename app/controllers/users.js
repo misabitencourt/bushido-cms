@@ -13,7 +13,7 @@ module.exports = app => {
     });
 
     app.get('/cms/user/:search', (req, res) => {
-        const search = req.param.search;
+        const search = req.originalUrl.split('/').pop();
         userSrv.retrieve(search).then(users => {
             return res.json(users.map(user => ({
                 id: user.id,
@@ -35,8 +35,15 @@ module.exports = app => {
         });
     });
 
-    app.put('/cms/user/:id', (req, res) => {
-        userSrv.update(req.body).then(user => {
+    app.put('/cms/user/:id', (req, res) => {        
+        const id = req.originalUrl.split('/').pop()*1;
+        userSrv.update({
+            id,
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            phone: req.body.phone
+        }).then(user => {
             return res.json(user);
         });
     });

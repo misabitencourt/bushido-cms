@@ -19,8 +19,8 @@ export default el => createEls('div', 'app-wrp container', el, [
                                 {type: 'submit', name: 'submit', label: 'Entrar'}
                             ],
                             onSubmit(auth) {                                
-                                service.login(auth).then(() => {
-                                    if (! auth.token) {
+                                service.login(auth).then(user => {
+                                    if (! user.token) {
                                         return error('Usuário ou senha inválidos');
                                     }
                                     window.location.reload();
