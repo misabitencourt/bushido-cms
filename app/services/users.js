@@ -81,11 +81,17 @@ module.exports.retrieve = search => {
     return cms.list({modelName: 'users'})
 };
 
-module.exports.update = user => cms.update({
-    modelName: 'users',
-    id: user.id,
-    values: user
-});
+module.exports.update = user => {
+    if (user.password) {
+        user.password = sha1(`${user.password}${config.SECRET_WORD}`);
+    }
+
+    return cms.update({
+        modelName: 'users',
+        id: user.id,
+        values: user
+    });
+}
 
 module.exports.destroy = id => cms.destroy({
     modelName: 'users',
