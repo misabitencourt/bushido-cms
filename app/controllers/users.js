@@ -1,22 +1,5 @@
 const userSrv = require('../services/users');
 
-function getAcl(data) {
-    let acl = [];
-
-    for (let i in data) {
-        let prop = `${i}`;
-        if (prop.indexOf('acl_') !== 0) {
-            continue;
-        }
-        if (`${data[i]}` === '0') {
-            continue;
-        }
-        acl.push(i.split('acl_').pop());
-    }
-
-    return acl.join(';');
-}
-
 module.exports = app => {
     app.get('/cms/user', (req, res) => {
         userSrv.retrieve('').then(users => {
@@ -24,7 +7,8 @@ module.exports = app => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone
+                phone: user.phone,
+                acl: user.acl
             })));
         });
     });
@@ -36,7 +20,8 @@ module.exports = app => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone
+                phone: user.phone,
+                acl: user.acl
             })));
         });
     });
@@ -47,7 +32,7 @@ module.exports = app => {
             email: req.body.email,
             password: req.body.password,
             phone: req.body.phone,
-            acl: getAcl(req.body)
+            acl: req.body.acl || ''
         }).then(user => {
             return res.json(user);
         });
@@ -61,7 +46,7 @@ module.exports = app => {
             email: req.body.email,
             password: req.body.password,
             phone: req.body.phone,
-            acl: getAcl(req.body)
+            acl: req.body.acl || ''
         }).then(user => {
             return res.json(user);
         });

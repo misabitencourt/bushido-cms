@@ -43,8 +43,8 @@ export default ({fields, fieldCol, onSubmit}) => ({
             });
 
             let acl = '';
-            fields.filter(input => input.acl).forEach(input => {
-                acl += input.checked ? `${input.name};` : '';
+            fields.filter(input => input.getAttribute('acl')).forEach(input => {
+                acl += input.checked ? `${input.name.replace('acl_', '')};` : '';
             });
             if (acl) {
                 data.acl = acl;

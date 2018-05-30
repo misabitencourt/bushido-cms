@@ -2,7 +2,7 @@ import template from './template';
 import form from '../components/form';
 import service from '../service/users';
 import grid from '../components/grid';
-import {dataToForm, formToData} from '../common/form-bind';
+import {dataToForm} from '../common/form-bind';
 import error from '../dialogs/error'
 
 const render = appEl => {
@@ -30,7 +30,7 @@ const render = appEl => {
                         type: 'success',
                         msg: 'Usuário atualizado com sucesso'
                     });
-                    window.location.reload();                    
+                    window.location.reload();
                 });
             } else {
                 service.create(data).then(() => {
@@ -38,7 +38,7 @@ const render = appEl => {
                         type: 'success',
                         msg: 'Usuário salvo com sucesso'
                     });
-                    window.location.reload();                    
+                    window.location.reload();
                 });
             }
         }
@@ -50,7 +50,7 @@ const render = appEl => {
         formObj,
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4', children: [
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
                 {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
                     bootstrap: el => searchInput = el}
             ]}
@@ -61,7 +61,7 @@ const render = appEl => {
     const loadData = () => service.retrieve(searchInput.value)    
 
     const renderGrid = async () => {
-        const oldGrid = mainEl.querySelector('table')
+        const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
             mainEl.removeChild(oldGrid);
         }
@@ -73,32 +73,31 @@ const render = appEl => {
             ],
 
             loadData() {
-                return loadData() 
+                return loadData();
             },
     
             onEdit(user) {
-                dataToForm(user, formEl)
-                formEl.dataset.id = user.id
+                dataToForm(user, formEl);
+                formEl.dataset.id = user.id;
             },
     
             onDelete(user) {
-                console.log(user)
                 service.destroy(user.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Usuário excluído com sucesso'
                     });
                     window.location.reload();    
-                })
+                });
             }
         })
-        mainEl.appendChild(gridEl)
+        mainEl.appendChild(gridEl);
     };
 
     searchInput.addEventListener('keyup', () => {
         window.searchTimeout && window.clearTimeout(window.searchTimeout);
         window.searchTimeout = setTimeout(renderGrid, 700);
-    })
+    });
 
     renderGrid();
     appEl.appendChild(template(wrpEl, 'users'));

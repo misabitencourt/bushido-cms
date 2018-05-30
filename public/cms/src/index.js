@@ -11,7 +11,11 @@ export default function routeChange (el, routeChange) {
     }
 
     const render = el => {
-        routes.find(r => r.route === route).render(el);
+        const routeFn = routes.find(r => r.route === route);
+        if (! routeFn) {
+            return window.location = '#/home';
+        }
+        routeFn.render(el);
         if (sessionStorage.flash) {            
             const msgData = JSON.parse(sessionStorage.flash);
             msg(msgData.msg, msgData.type);

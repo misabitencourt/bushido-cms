@@ -11,18 +11,18 @@ export const dataToForm = (data, form) => {
         }
     }
 
-}
-
-export const formToData = (form) => {
-    let obj = {};
-    
-    Array.from(form.querySelectorAll('[name]')).forEach(input => {
-        obj[input.name] = input.value;
+    // ACLs
+    const checkboxes = Array.from(form.querySelectorAll('input[type=checkbox]')).filter(input => {
+        return input.name.indexOf('acl_') === 0;
     });
-
-    Array.from(form.querySelectorAll('textarea')).forEach(input => {
-        obj[input.name] = input.value || input.innerHTML;
-    });
-
-    return obj;
+    if (checkboxes.length) {
+        checkboxes.forEach(chk => chk.checked = false);
+        const acls = (data.acl || '').split(';');
+        acls.forEach(acl => {
+            const checkbox = checkboxes.find(chk => chk.name === `acl_${acl}`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
 }

@@ -18,6 +18,15 @@ module.exports = function (req, res, next) {
                 return res.status(403).json({error: 'AUTH_REQUIRED'});
             }
             req.currentUser = user;
+            
+            let resource = url.replace('/cms/', '');
+            resource = resource.split('/').reverse().pop();
+                        
+            let canUseResource = !! (user.acl || '').split(';').find(acl => acl === resource);
+            if (! canUseResource) {
+                return res.status(403).json({error: 'NOT_AUTHORIZED'});
+            }
+
             next();
         });
     }

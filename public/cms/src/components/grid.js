@@ -29,6 +29,8 @@ export default async ({columns, loadData, onEdit, onDelete}) => {
 
         if (onEdit) {
             const editLink = document.createElement('a');
+            editLink.href = 'javascript:;';
+            editLink.style.marginRight = '13px';
             editLink.textContent = 'Editar';
             editLink.addEventListener('click', e => {
                 e.preventDefault();
@@ -39,6 +41,8 @@ export default async ({columns, loadData, onEdit, onDelete}) => {
 
         if (onDelete) {
             const deleteLink = document.createElement('a');
+            deleteLink.href = 'javascript:;';
+            deleteLink.style.marginRight = '13px';
             deleteLink.textContent = 'Deletar';
             deleteLink.addEventListener('click', e => {
                 e.preventDefault();

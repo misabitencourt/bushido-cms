@@ -254,8 +254,8 @@ var form = ({fields, fieldCol, onSubmit}) => ({
             });
 
             let acl = '';
-            fields.filter(input => input.acl).forEach(input => {
-                acl += input.checked ? `${input.name};` : '';
+            fields.filter(input => input.getAttribute('acl')).forEach(input => {
+                acl += input.checked ? `${input.name.replace('acl_', '')};` : '';
             });
             if (acl) {
                 data.acl = acl;
@@ -494,6 +494,8 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
 
         if (onEdit) {
             const editLink = document.createElement('a');
+            editLink.href = 'javascript:;';
+            editLink.style.marginRight = '13px';
             editLink.textContent = 'Editar';
             editLink.addEventListener('click', e => {
                 e.preventDefault();
@@ -504,6 +506,8 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
 
         if (onDelete) {
             const deleteLink = document.createElement('a');
+            deleteLink.href = 'javascript:;';
+            deleteLink.style.marginRight = '13px';
             deleteLink.textContent = 'Deletar';
             deleteLink.addEventListener('click', e => {
                 e.preventDefault();
@@ -532,6 +536,20 @@ const dataToForm = (data, form) => {
         }
     }
 
+    // ACLs
+    const checkboxes = Array.from(form.querySelectorAll('input[type=checkbox]')).filter(input => {
+        return input.name.indexOf('acl_') === 0;
+    });
+    if (checkboxes.length) {
+        checkboxes.forEach(chk => chk.checked = false);
+        const acls = (data.acl || '').split(';');
+        acls.forEach(acl => {
+            const checkbox = checkboxes.find(chk => chk.name === `acl_${acl}`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
 };
 
 const render = appEl => {
@@ -559,7 +577,7 @@ const render = appEl => {
                         type: 'success',
                         msg: 'Usuário atualizado com sucesso'
                     });
-                    window.location.reload();                    
+                    window.location.reload();
                 });
             } else {
                 service.create(data).then(() => {
@@ -567,7 +585,7 @@ const render = appEl => {
                         type: 'success',
                         msg: 'Usuário salvo com sucesso'
                     });
-                    window.location.reload();                    
+                    window.location.reload();
                 });
             }
         }
@@ -579,7 +597,7 @@ const render = appEl => {
         formObj,
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4', children: [
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
                 {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
                     bootstrap: el => searchInput = el}
             ]}
@@ -602,7 +620,7 @@ const render = appEl => {
             ],
 
             loadData() {
-                return loadData() 
+                return loadData();
             },
     
             onEdit(user) {
@@ -611,7 +629,6 @@ const render = appEl => {
             },
     
             onDelete(user) {
-                console.log(user);
                 service.destroy(user.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
@@ -640,9 +657,18 @@ var users = {
     }
 }
 
+var home = {
+    home: true,
+    route: '#/home',
+    render(el) {
+       
+    }
+}
+
 var routes = [
     login$1,
-    users
+    users,
+    home
 ]
 
 function routeChange (el, routeChange) {
@@ -654,7 +680,11 @@ function routeChange (el, routeChange) {
     }
 
     const render = el => {
-        routes.find(r => r.route === route).render(el);
+        const routeFn = routes.find(r => r.route === route);
+        if (! routeFn) {
+            return window.location = '#/home';
+        }
+        routeFn.render(el);
         if (sessionStorage.flash) {            
             const msgData = JSON.parse(sessionStorage.flash);
             msg(msgData.msg, msgData.type);
