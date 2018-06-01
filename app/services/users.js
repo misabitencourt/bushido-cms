@@ -51,7 +51,8 @@ module.exports.login = login => new Promise((resolve, reject) => {
             resolve({
                 name: user.name,
                 email: user.email,
-                token: user.token
+                token: user.token,
+                acl: user.acl
             });
         });
     });

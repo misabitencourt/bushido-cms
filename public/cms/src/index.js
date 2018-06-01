@@ -2,7 +2,7 @@ import '../../../node_modules/npm-dom-helper/index'
 import routes from './routes/index'
 import msg from './dialogs/msg'
 
-export default function routeChange (el, routeChange) {
+function routeChange (el, hasRouteChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
@@ -29,8 +29,12 @@ export default function routeChange (el, routeChange) {
 
     render(el);
 
-    if (routeChange) {
-        window.addEventListener('hashchange', e => routeChange(el, true));
+    if (! hasRouteChange) {
+        window.addEventListener('hashchange', e => {
+            el.innerHTML = '';
+            routeChange(el, true);
+        });
     }
 }
 
+export default routeChange;

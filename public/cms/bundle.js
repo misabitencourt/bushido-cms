@@ -199,7 +199,8 @@ var card = ({title, body}) => ({tag: 'div', className: 'card', children: [
 ]})
 
 const screens = [
-    {name: 'user', label: 'Usuários'}
+    {name: 'user', label: 'Usuários'},
+    {name: 'menu', label: 'Menus'}
 ];
 
 var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
@@ -431,22 +432,46 @@ var topnav = menus => ({
     }))
 })
 
+let currentUser;
+
+function getCurrentUser() {
+    if (! currentUser) {
+        currentUser = JSON.parse(sessionStorage.user);
+    }
+
+    return currentUser;
+}
+
 const menus = [
-    {id: 'users', name: 'Usuários', tooltip: 'Cadastro de usuários', onclick() {
-        window.location = '#/';
+    {id: 'user', name: 'Usuários', tooltip: 'Cadastro de usuários', onclick() {
+        window.location = '#/users';
+    }},
+
+    {id: 'menu', name: 'Menus', tooltip: 'Cadastro de menus', onclick() {
+        window.location = '#/menus';
     }}
 ];
 
 var menuService = {
 
+    getAcl() {
+        if (! this.acl) {
+            this.acl = getCurrentUser().acl.split(';').filter(acl => !!acl);
+        }
+
+        return this.acl;
+    },
+
     getMainMenu() {
-        return menus;
+        const acl = this.getAcl();
+        return menus.filter(menu => acl.indexOf(menu.id) !== -1);
     }
 
 }
 
 var template = (child, currentMenuId = '') => {
     const menus = menuService.getMainMenu();
+    menus.forEach(m => m.active = false);
     const currentMenu = menus.find(m => m.id === currentMenuId);
     
     if (currentMenu) {
@@ -647,7 +672,7 @@ const render = appEl => {
     });
 
     renderGrid();
-    appEl.appendChild(template(wrpEl, 'users'));
+    appEl.appendChild(template(wrpEl, 'user'));
 };
 
 var users = {
@@ -657,21 +682,197 @@ var users = {
     }
 }
 
+var service$1 = {
+
+    validate(data) {
+        let errors = '';
+
+        if (! data.name) {
+            errors += ' Informe o nome.';
+        }
+
+        if (! data.description) {
+            errors += ' Informe a descrição.';
+        }
+
+        return errors;
+    },
+
+    retrieve: async search => {
+        let response = await fetch(`${config.API_URL}/cms/menu/${encodeURIComponent(search)}`, {headers});
+        let json = await response.json();
+        return json;
+    },
+
+
+    create: async user => {
+        const response = await fetch(`${config.API_URL}/cms/menu/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(user)
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    update: async (id, user) => {
+        const params = {id};
+        for (let i in user) {
+            params[`${i}`] = user[i];
+        }
+        const response = await fetch(`${config.API_URL}/cms/menu/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    destroy: async id => fetch(`${config.API_URL}/cms/menu/${id}`, {
+        headers,
+        method: 'DELETE'
+    })
+
+}
+
+const render$1 = appEl => {
+    let formEl, searchInput;
+
+    const formObj = form({
+        fieldCol: 3,
+        fields: [
+            {type: 'text', label: 'Nome', name: 'name'},
+            {type: 'text', label: 'Descrição', name: 'description'},
+            {type: 'number', label: 'Ordem', name: 'order'},
+            {type: 'submit', label: 'Salvar'}
+        ],
+        onSubmit(data, e) {
+            const errors = service$1.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
+            if (e.target.dataset.id) {
+                service$1.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Menu atualizado com sucesso'
+                    });
+                    window.location.reload();
+                });
+            } else {
+                service$1.create(data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Menu salvo com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        }
+    });
+        
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
+        {tag: 'h2', textContent: 'Cadastro de menus do site'},
+        formObj,
+        {tag: 'div', className: 'row', children: [
+            {tag: 'div', className: 'col-md-8'},
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
+                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
+                    bootstrap: el => searchInput = el}
+            ]}
+        ]}
+    ]);
+
+    formEl = mainEl.querySelector('form');
+    const loadData = () => service$1.retrieve(searchInput.value);    
+
+    const renderGrid = async () => {
+        const oldGrid = mainEl.querySelector('table');
+        if (oldGrid) {
+            mainEl.removeChild(oldGrid);
+        }
+        const gridEl = await grid({
+            columns: [
+                {label: 'Nome', prop: menu => menu.name },
+                {label: 'Descrição', prop: menu => menu.description },
+                {label: 'Ordem', prop: menu => menu.order }
+            ],
+
+            loadData() {
+                return loadData();
+            },
+    
+            onEdit(menu) {
+                dataToForm(menu, formEl);
+                formEl.dataset.id = menu.id;
+            },
+    
+            onDelete(menu) {
+                service$1.destroy(menu.id).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Menu excluído com sucesso'
+                    });
+                    window.location.reload();    
+                });
+            }
+        });
+        mainEl.appendChild(gridEl);
+    };
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
+
+    renderGrid();
+    appEl.appendChild(template(wrpEl, 'menu'));
+};
+
+var menus$1 = {
+    route: '#/menus',
+    render(el) {
+        render$1(el);
+    }
+}
+
+var homePage = appEl => {
+    const wrpEl = document.createElement('div');
+
+    createEls('div', 'home-page', wrpEl, [
+        {tag: 'h1', textContent: 'Bem vindo'},
+        {tag: 'p', textContent: 'Através deste sistema você poderá modificar as informações que serão exibidas no website.'},
+        {tag: 'p', textContent: 'Utilize a ferramenta com prudência.'}
+    ]);
+
+    appEl.appendChild(template(wrpEl, 'home'));
+}
+
 var home = {
     home: true,
     route: '#/home',
     render(el) {
-       
+       homePage(el);
     }
 }
 
 var routes = [
     login$1,
     users,
+    menus$1,
     home
 ]
 
-function routeChange (el, routeChange) {
+function routeChange (el, hasRouteChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
@@ -698,8 +899,11 @@ function routeChange (el, routeChange) {
 
     render(el);
 
-    if (routeChange) {
-        window.addEventListener('hashchange', e => routeChange(el, true));
+    if (! hasRouteChange) {
+        window.addEventListener('hashchange', e => {
+            el.innerHTML = '';
+            routeChange(el, true);
+        });
     }
 }
 

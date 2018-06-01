@@ -1,9 +1,9 @@
 import template from './template';
 import form from '../components/form';
-import service from '../service/users';
+import service from '../service/menus';
 import grid from '../components/grid';
 import {dataToForm} from '../common/form-bind';
-import error from '../dialogs/error'
+import error from '../dialogs/error';
 
 const render = appEl => {
     let formEl, searchInput;
@@ -12,10 +12,8 @@ const render = appEl => {
         fieldCol: 3,
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
-            {type: 'text', label: 'E-mail', name: 'email'},
-            {type: 'text', label: 'Telefone', name: 'phone'},
-            {type: 'text', label: 'Senha', name: 'password'},
-            {type: 'acl', label: 'Acesso', name: 'acl'},
+            {type: 'text', label: 'Descrição', name: 'description'},
+            {type: 'number', label: 'Ordem', name: 'order'},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -28,7 +26,7 @@ const render = appEl => {
                 service.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Usuário atualizado com sucesso'
+                        msg: 'Menu atualizado com sucesso'
                     });
                     window.location.reload();
                 });
@@ -36,7 +34,7 @@ const render = appEl => {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Usuário salvo com sucesso'
+                        msg: 'Menu salvo com sucesso'
                     });
                     window.location.reload();
                 });
@@ -46,7 +44,7 @@ const render = appEl => {
         
     const wrpEl = document.createElement('div');
     const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de usuários'},
+        {tag: 'h2', textContent: 'Cadastro de menus do site'},
         formObj,
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
@@ -67,25 +65,25 @@ const render = appEl => {
         }
         const gridEl = await grid({
             columns: [
-                {label: 'Nome', prop: user => user.name },
-                {label: 'E-mail', prop: user => user.email },
-                {label: 'Telefone', prop: user => user.phone }
+                {label: 'Nome', prop: menu => menu.name },
+                {label: 'Descrição', prop: menu => menu.description },
+                {label: 'Ordem', prop: menu => menu.order }
             ],
 
             loadData() {
                 return loadData();
             },
     
-            onEdit(user) {
-                dataToForm(user, formEl);
-                formEl.dataset.id = user.id;
+            onEdit(menu) {
+                dataToForm(menu, formEl);
+                formEl.dataset.id = menu.id;
             },
     
-            onDelete(user) {
-                service.destroy(user.id).then(() => {
+            onDelete(menu) {
+                service.destroy(menu.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Usuário excluído com sucesso'
+                        msg: 'Menu excluído com sucesso'
                     });
                     window.location.reload();    
                 });
@@ -100,7 +98,7 @@ const render = appEl => {
     });
 
     renderGrid();
-    appEl.appendChild(template(wrpEl, 'user'));
+    appEl.appendChild(template(wrpEl, 'menu'));
 };
 
 

@@ -3,6 +3,7 @@ import menuService from '../service/menu'
 
 export default (child, currentMenuId = '') => {
     const menus = menuService.getMainMenu();
+    menus.forEach(m => m.active = false);
     const currentMenu = menus.find(m => m.id === currentMenuId);
     
     if (currentMenu) {
