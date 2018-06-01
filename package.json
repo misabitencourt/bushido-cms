@@ -1,7 +1,7 @@
 {
   "name": "bushido-cms",
   "version": "1.0.0",
-  "description": "A simple and fast CMS with Node, Express and Riak",
+  "description": "A simple and fast CMS with Node, Sqlite and Redis",
   "main": "index.js",
   "scripts": {
     "cms-front-watch": "rollup -c -w",
