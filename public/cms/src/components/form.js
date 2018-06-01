@@ -3,7 +3,9 @@ import inputAcl from './input-acl';
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
-            return {tag: 'input', className: 'btn btn-success', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+        case 'cancel':
+            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', placeholder: meta.placeholder || ''}, textContent: meta.label};
         case 'password':
             return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder || ''}};
         case 'acl':
@@ -15,11 +17,12 @@ function createField(meta) {
 
 export default ({fields, fieldCol, onSubmit}) => ({
     tag: 'form', 
-    className: 'row', 
+    className: 'row p-2', 
     children: fields.map(f => {
         if (f.type === 'submit') {
             return {tag: 'div', className: 'col-md-12', children: [
-                createField(f)
+                createField(f),
+                createField({type: 'cancel', label: 'Cancelar'})
             ]};
         }
 
@@ -40,8 +43,8 @@ export default ({fields, fieldCol, onSubmit}) => ({
             });
 
             let acl = '';
-            fields.filter(input => input.dataset.acl).forEach(input => {
-                acl += input.checked ? `${input.name};` : '';
+            fields.filter(input => input.getAttribute('acl')).forEach(input => {
+                acl += input.checked ? `${input.name.replace('acl_', '')};` : '';
             });
             if (acl) {
                 data.acl = acl;

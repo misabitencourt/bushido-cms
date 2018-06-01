@@ -2,11 +2,10 @@ import template from './template';
 import form from '../components/form';
 import service from '../service/users';
 import grid from '../components/grid';
-import {dataToForm, formToData} from '../common/form-bind';
+import {dataToForm} from '../common/form-bind';
+import error from '../dialogs/error'
 
-const render = el => {
-    template(el);
-
+const render = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -20,27 +19,38 @@ const render = el => {
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
+            const errors = service.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
             if (e.target.dataset.id) {
-                // TODO
+                service.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Usuário atualizado com sucesso'
+                    });
+                    window.location.reload();
+                });
             } else {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Usuário salvo com sucesso'
                     });
-                    window.location.reload();                    
+                    window.location.reload();
                 });
             }
         }
     });
         
-    const mainEl = createEls('div', '', el, [
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
         {tag: 'h2', textContent: 'Cadastro de usuários'},
         formObj,
-        {tag: 'div', className: 'p-4'},
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4', children: [
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
                 {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
                     bootstrap: el => searchInput = el}
             ]}
@@ -48,11 +58,10 @@ const render = el => {
     ])
 
     formEl = mainEl.querySelector('form')
-
-    const loadData = () => service.retrieve(searchInput.value)
+    const loadData = () => service.retrieve(searchInput.value)    
 
     const renderGrid = async () => {
-        const oldGrid = mainEl.querySelector('table')
+        const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
             mainEl.removeChild(oldGrid);
         }
@@ -64,19 +73,12 @@ const render = el => {
             ],
 
             loadData() {
-                return loadData() 
+                return loadData();
             },
     
             onEdit(user) {
-                dataToForm(user, formEl)
-                user.acl.split(';').forEach(resource => {
-                    const el = getEls(formEl, 'input[type="checkbox"]').find(input => {
-                        return input.dataset.acl && input.name === resource;
-                    });
-                    if (el) {
-                        el.checked = true;
-                    }
-                });
+                dataToForm(user, formEl);
+                formEl.dataset.id = user.id;
             },
     
             onDelete(user) {
@@ -86,13 +88,19 @@ const render = el => {
                         msg: 'Usuário excluído com sucesso'
                     });
                     window.location.reload();    
-                })
+                });
             }
         })
         mainEl.appendChild(gridEl);
-    }
+    };
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
 
     renderGrid();
+    appEl.appendChild(template(wrpEl, 'users'));
 };
 
 

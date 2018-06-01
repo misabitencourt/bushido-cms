@@ -205,10 +205,7 @@ const screens = [
 var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
     return {tag: 'div', className: 'col-md-3', children: [
         {tag: 'label', children: [
-            {tag: 'input', attrs: {type: 'checkbox', name: screen.name}, bootstrap(el) {
-                el.dataset.skipbind = '1';
-                el.dataset.acl = '1';
-            }},
+            {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, skipbind: 1, acl: 1}},
             {tag: 'span', textContent: screen.label}
         ]}
     ]}
@@ -217,7 +214,9 @@ var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
-            return {tag: 'input', className: 'btn btn-success', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+        case 'cancel':
+            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', placeholder: meta.placeholder || ''}, textContent: meta.label};
         case 'password':
             return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder || ''}};
         case 'acl':
@@ -229,11 +228,12 @@ function createField(meta) {
 
 var form = ({fields, fieldCol, onSubmit}) => ({
     tag: 'form', 
-    className: 'row', 
+    className: 'row p-2', 
     children: fields.map(f => {
         if (f.type === 'submit') {
             return {tag: 'div', className: 'col-md-12', children: [
-                createField(f)
+                createField(f),
+                createField({type: 'cancel', label: 'Cancelar'})
             ]};
         }
 
@@ -254,8 +254,8 @@ var form = ({fields, fieldCol, onSubmit}) => ({
             });
 
             let acl = '';
-            fields.filter(input => input.dataset.acl).forEach(input => {
-                acl += input.checked ? `${input.name};` : '';
+            fields.filter(input => input.getAttribute('acl')).forEach(input => {
+                acl += input.checked ? `${input.name.replace('acl_', '')};` : '';
             });
             if (acl) {
                 data.acl = acl;
@@ -266,102 +266,61 @@ var form = ({fields, fieldCol, onSubmit}) => ({
     }
 })
 
-var login = el => createEls('div', 'app-wrp container', el, [
-    {tag: 'div', className: 'login-wrp', children: [
-        {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-4'},
-            {tag: 'div', className: 'col-md-4 text-md-center', children: [
-                card({
-                    title: 'Login',
-                    body: [
-                        form({
-                            fieldCol: 12,
-                            fields: [
-                                {type: 'email', name: 'email', placeholder: 'E-mail', required: true},
-                                {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
-                                {type: 'submit', name: 'submit', label: 'Entrar'}
-                            ],
-                            onSubmit() {
-                                
-                            }
-                        })
-                    ]
-                })
-            ]},            
-            {tag: 'div', className: 'col-md-4'}
-        ]}
-    ], bootstrap(el) {
-        if (window.innerHeight > 500) {
-            el.style.paddingTop = '13%';
-        }
-    }}
-]);
-
-var login$1 = {
-    route: '#/login',
-    render(el) {
-        login(el);
-    }
-}
-
-var menus = [
-    {id: 'users', name: 'Usuários', location: '#/users'}
-]
-
-var template = (el, children) => createEls('div', 'app-wrp', el, [
-    
-    // TODO menu
-    {tag: 'nav', className: 'navbar navbar-dark bg-dark', children: [
-        {tag: 'div', className: 'collapse navbar-collapse', children: [
-            {tag: 'ul', className: 'navbar-nav mr-auto', children: menus.map(menu => {
-                return {tag: 'li', className: 'nav-item', children: [
-                    {tag: 'a', className: 'nav-link', attrs: {href: menu.href}, textContent: menu.name}
-                ], bootstrap: el => el.dataset.menu = menu.id}
-            })}
-        ]}
-    ]},
-
-
-    {tag: 'div', className: 'container mt-3', children: children}
-
-]);
-
-
-
-/*
-
-<div class="collapse navbar-collapse" id="navbarText">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Features</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pricing</a>
-      </li>
-    </ul>
-    <span class="navbar-text">
-      Navbar text with an inline element
-    </span>
-  </div>
-
-*/
-
 var config = {
     API_URL: 'http://localhost:3000'
 }
 
-var headers = {
+const headers = {
     'Accept': 'application/json, text/plain, */*',
     'Content-Type': 'application/json'
+};
+
+if (sessionStorage.token) {
+    headers['Auth-Token'] = sessionStorage.token;
 }
 
 var service = {
 
+    validate(data) {
+        let errors = '';
+
+        if (! data.name) {
+            errors += ' Informe o nome.';
+        }
+
+        if (! data.email) {
+            errors += ' Informe o e-mail.';
+        }
+
+        if (! data.phone) {
+            errors += ' Informe o telefone.';
+        }
+
+        if (! data.password) {
+            errors += ' Informe a senha.';
+        }
+
+        return errors;
+    },
+
+    login: async auth => {
+        const response = await fetch(`${config.API_URL}/cms/login`, {
+            headers,
+            method: 'POST',
+            body: JSON.stringify(auth)
+        });        
+        const json = await response.json();
+        if (! json.token) {
+            return null;
+        }
+        sessionStorage.user = JSON.stringify(json);
+        sessionStorage.token = json.token;
+        
+        return json;
+    },
+
     retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`);
+        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`, {headers});
         let json = await response.json();
         return json;
     },
@@ -383,11 +342,12 @@ var service = {
     update: async (id, user) => {
         const params = {id};
         for (let i in user) {
-            params[`user_${i}`] = user[i];
+            params[`${i}`] = user[i];
         }
-        const response = await fetch(config.API_URL, {
+        const response = await fetch(`${config.API_URL}/cms/user/${id}`, {
             method: 'PUT',
-            body: JSON.stringify(params)
+            body: JSON.stringify(params),
+            headers
         });
 
         let newUser = await response.json();
@@ -403,14 +363,115 @@ var service = {
 
 }
 
+var msg = (txt, type) => {
+    const alert = createEls('div', `alert alert-${type} fade show`, document.body, [], txt);
+    alert.style.position = 'fixed';
+    alert.style.zIndex = '99999';
+    alert.style.right = '13px';
+    alert.style.bottom = '13px';
+    setTimeout(() => document.body.removeChild(alert), 5e3);
+}
+
+var error = txt => msg(txt, 'danger')
+
+var login = el => createEls('div', 'app-wrp container', el, [
+    {tag: 'div', className: 'login-wrp', children: [
+        {tag: 'div', className: 'row', children: [
+            {tag: 'div', className: 'col-md-4'},
+            {tag: 'div', className: 'col-md-4 text-md-center', children: [
+                card({
+                    title: 'Login',
+                    body: [
+                        form({
+                            fieldCol: 12,
+                            fields: [
+                                {type: 'email', name: 'email', placeholder: 'E-mail', required: true},
+                                {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
+                                {type: 'submit', name: 'submit', label: 'Entrar'}
+                            ],
+                            onSubmit(auth) {                                
+                                service.login(auth).then(user => {
+                                    if (! user.token) {
+                                        return error('Usuário ou senha inválidos');
+                                    }
+                                    window.location.reload();
+                                });
+                            }
+                        })
+                    ]
+                })
+            ]},            
+            {tag: 'div', className: 'col-md-4'}
+        ]}
+    ], bootstrap(el) {
+        if (window.innerHeight > 500) {
+            el.style.paddingTop = '13%';
+        }
+    }}
+]);
+
+var login$1 = {
+    route: '#/login',
+    render(el) {
+        login(el);
+    }
+}
+
+var topnav = menus => ({
+    tag: 'ul',
+    className: 'nav nav-tabs bg-primary',
+    children: menus.map(menu => ({
+        tag: 'li',
+        className: 'nav-item',
+        children: [
+            {tag: 'a', className: `nav-link ${menu.active ? 'active' : ''}`, 
+                textContent: menu.name,
+                attrs: {href: 'javascript:;'}, on: ['click', menu.onclick], title: menu.tooltip}
+        ]
+    }))
+})
+
+const menus = [
+    {id: 'users', name: 'Usuários', tooltip: 'Cadastro de usuários', onclick() {
+        window.location = '#/';
+    }}
+];
+
+var menuService = {
+
+    getMainMenu() {
+        return menus;
+    }
+
+}
+
+var template = (child, currentMenuId = '') => {
+    const menus = menuService.getMainMenu();
+    const currentMenu = menus.find(m => m.id === currentMenuId);
+    
+    if (currentMenu) {
+        currentMenu.active = true;
+    }
+
+    return createEls('div', 'app-wrp', document.body, [    
+        topnav(menus),    
+        {tag: 'div', className: 'container', children: [
+            {tag: 'div', className: 'p-3', bootstrap(el) {
+                el.appendChild(child);
+            }}
+        ]}    
+    ])
+}
+
 var grid = async ({columns, loadData, onEdit, onDelete}) => {
     const table = document.createElement('table');
     table.className = 'table table-bordered table-stripped';
 
     table.innerHTML = `
-        <thead>
+        <thead class="thead-dark">
             <tr>
                 ${columns.map(col => `<th>${col.label}</th>`).join('')}
+                <th></th>
             </tr>
         </thead>
         <tbody>            
@@ -433,6 +494,8 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
 
         if (onEdit) {
             const editLink = document.createElement('a');
+            editLink.href = 'javascript:;';
+            editLink.style.marginRight = '13px';
             editLink.textContent = 'Editar';
             editLink.addEventListener('click', e => {
                 e.preventDefault();
@@ -443,6 +506,8 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
 
         if (onDelete) {
             const deleteLink = document.createElement('a');
+            deleteLink.href = 'javascript:;';
+            deleteLink.style.marginRight = '13px';
             deleteLink.textContent = 'Deletar';
             deleteLink.addEventListener('click', e => {
                 e.preventDefault();
@@ -471,11 +536,23 @@ const dataToForm = (data, form) => {
         }
     }
 
+    // ACLs
+    const checkboxes = Array.from(form.querySelectorAll('input[type=checkbox]')).filter(input => {
+        return input.name.indexOf('acl_') === 0;
+    });
+    if (checkboxes.length) {
+        checkboxes.forEach(chk => chk.checked = false);
+        const acls = (data.acl || '').split(';');
+        acls.forEach(acl => {
+            const checkbox = checkboxes.find(chk => chk.name === `acl_${acl}`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
 };
 
-const render = el => {
-    template(el);
-
+const render = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -489,27 +566,38 @@ const render = el => {
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
+            const errors = service.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
             if (e.target.dataset.id) {
-                // TODO
+                service.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Usuário atualizado com sucesso'
+                    });
+                    window.location.reload();
+                });
             } else {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Usuário salvo com sucesso'
                     });
-                    window.location.reload();                    
+                    window.location.reload();
                 });
             }
         }
     });
         
-    const mainEl = createEls('div', '', el, [
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
         {tag: 'h2', textContent: 'Cadastro de usuários'},
         formObj,
-        {tag: 'div', className: 'p-4'},
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4', children: [
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
                 {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
                     bootstrap: el => searchInput = el}
             ]}
@@ -517,8 +605,7 @@ const render = el => {
     ]);
 
     formEl = mainEl.querySelector('form');
-
-    const loadData = () => service.retrieve(searchInput.value);
+    const loadData = () => service.retrieve(searchInput.value);    
 
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
@@ -533,19 +620,12 @@ const render = el => {
             ],
 
             loadData() {
-                return loadData() 
+                return loadData();
             },
     
             onEdit(user) {
                 dataToForm(user, formEl);
-                user.acl.split(';').forEach(resource => {
-                    const el = getEls(formEl, 'input[type="checkbox"]').find(input => {
-                        return input.dataset.acl && input.name === resource;
-                    });
-                    if (el) {
-                        el.checked = true;
-                    }
-                });
+                formEl.dataset.id = user.id;
             },
     
             onDelete(user) {
@@ -561,7 +641,13 @@ const render = el => {
         mainEl.appendChild(gridEl);
     };
 
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
+
     renderGrid();
+    appEl.appendChild(template(wrpEl, 'users'));
 };
 
 var users = {
@@ -571,20 +657,41 @@ var users = {
     }
 }
 
+var home = {
+    home: true,
+    route: '#/home',
+    render(el) {
+       
+    }
+}
+
 var routes = [
     login$1,
-    users
+    users,
+    home
 ]
 
-var index$1 = (el, routeChange) => {
+function routeChange (el, routeChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
-    // if (! currentUser) {
-    //     route = '#/login';
-    // }
+    if (! currentUser) {
+        route = '#/login';
+    }
 
-    const render = (routes.find(r => r.route === route) || {}).render;
+    const render = el => {
+        const routeFn = routes.find(r => r.route === route);
+        if (! routeFn) {
+            return window.location = '#/home';
+        }
+        routeFn.render(el);
+        if (sessionStorage.flash) {            
+            const msgData = JSON.parse(sessionStorage.flash);
+            msg(msgData.msg, msgData.type);
+            sessionStorage.flash = '';
+        }
+    };
+
     if (! render) {
         return console.error('Route not found');
     }
@@ -596,6 +703,6 @@ var index$1 = (el, routeChange) => {
     }
 }
 
-return index$1;
+return routeChange;
 
 }());
