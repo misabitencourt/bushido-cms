@@ -7,6 +7,10 @@ const menus = [
 
     {id: 'menu', name: 'Menus', tooltip: 'Cadastro de menus', onclick() {
         window.location = '#/menus';
+    }},
+
+    {id: 'article', name: 'Artigos', tooltip: 'Cadastro de artigos', onclick() {
+        window.location = '#/articles';
     }}
 ];
 

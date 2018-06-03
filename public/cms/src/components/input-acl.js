@@ -1,6 +1,7 @@
 const screens = [
     {name: 'user', label: 'Usuários'},
-    {name: 'menu', label: 'Menus'}
+    {name: 'menu', label: 'Menus'},
+    {name: 'article', label: 'Artigos'}
 ]
 
 export default meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {

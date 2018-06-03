@@ -200,7 +200,8 @@ var card = ({title, body}) => ({tag: 'div', className: 'card', children: [
 
 const screens = [
     {name: 'user', label: 'Usuários'},
-    {name: 'menu', label: 'Menus'}
+    {name: 'menu', label: 'Menus'},
+    {name: 'article', label: 'Artigos'}
 ];
 
 var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
@@ -449,6 +450,10 @@ const menus = [
 
     {id: 'menu', name: 'Menus', tooltip: 'Cadastro de menus', onclick() {
         window.location = '#/menus';
+    }},
+
+    {id: 'article', name: 'Artigos', tooltip: 'Cadastro de artigos', onclick() {
+        window.location = '#/articles';
     }}
 ];
 
@@ -845,6 +850,174 @@ var menus$1 = {
     }
 }
 
+var service$2 = {
+
+    validate(data) {
+        let errors = '';
+
+        if (! data.title) {
+            errors += ' Informe o título.';
+        }
+
+        if (! data.description) {
+            errors += ' Informe a descrição.';
+        }
+
+        if (! data.text) {
+            errors += ' Digite um texto.';
+        }
+
+        return errors;
+    },
+
+    retrieve: async search => {
+        let response = await fetch(`${config.API_URL}/cms/article/${encodeURIComponent(search)}`, {headers});
+        let json = await response.json();
+        return json;
+    },
+
+
+    create: async user => {
+        const response = await fetch(`${config.API_URL}/cms/article/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(user)
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    update: async (id, user) => {
+        const params = {id};
+        for (let i in user) {
+            params[`${i}`] = user[i];
+        }
+        const response = await fetch(`${config.API_URL}/cms/article/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    destroy: async id => fetch(`${config.API_URL}/cms/article/${id}`, {
+        headers,
+        method: 'DELETE'
+    })
+
+}
+
+const render$2 = appEl => {
+    let formEl, searchInput;
+
+    const formObj = form({
+        fieldCol: 3,
+        fields: [
+            {type: 'text', label: 'Nome', name: 'name'},
+            {type: 'text', label: 'Descrição', name: 'description'},
+            {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
+            {type: 'text-editor', label: 'Texto', name: 'text'},
+            {type: 'submit', label: 'Salvar'}
+        ],
+        onSubmit(data, e) {
+            const errors = service$2.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
+            if (e.target.dataset.id) {
+                service$2.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Artigo atualizado com sucesso'
+                    });
+                    window.location.reload();
+                });
+            } else {
+                service$2.create(data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Artigo salvo com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        }
+    });
+        
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
+        {tag: 'h2', textContent: 'Cadastro de Artigos'},
+        formObj,
+        {tag: 'div', className: 'row', children: [
+            {tag: 'div', className: 'col-md-8'},
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
+                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
+                    bootstrap: el => searchInput = el}
+            ]}
+        ]}
+    ]);
+
+    formEl = mainEl.querySelector('form');
+    const loadData = () => service$2.retrieve(searchInput.value);    
+
+    const renderGrid = async () => {
+        const oldGrid = mainEl.querySelector('table');
+        if (oldGrid) {
+            mainEl.removeChild(oldGrid);
+        }
+        const gridEl = await grid({
+            columns: [
+                {label: 'Nome', prop: article => article.name },
+                {label: 'Descrição', prop: article => article.description },
+                {label: 'Menu', prop: article => (article.menu || {}).name || '' }
+            ],
+
+            loadData() {
+                return loadData();
+            },
+    
+            onEdit(article) {
+                dataToForm(article, formEl);
+                formEl.dataset.id = article.id;
+            },
+    
+            onDelete(article) {
+                service$2.destroy(article.id).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'article excluído com sucesso'
+                    });
+                    window.location.reload();    
+                });
+            }
+        });
+        mainEl.appendChild(gridEl);
+    };
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
+
+    renderGrid();
+    appEl.appendChild(template(wrpEl, 'article'));
+};
+
+var articles = {
+    route: '#/articles',
+    render(el) {
+        render$2(el);
+    }
+}
+
 var homePage = appEl => {
     const wrpEl = document.createElement('div');
 
@@ -869,6 +1042,7 @@ var routes = [
     login$1,
     users,
     menus$1,
+    articles,
     home
 ]
 
