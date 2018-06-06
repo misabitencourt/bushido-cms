@@ -1,6 +1,6 @@
-import '../../../node_modules/npm-dom-helper/index'
-import routes from './routes/index'
-import msg from './dialogs/msg'
+import '../../../node_modules/npm-dom-helper/index';
+import routes from './routes/index';
+import msg from './dialogs/msg';
 
 function routeChange (el, hasRouteChange) {
     let route = window.location.hash;

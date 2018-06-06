@@ -213,14 +213,99 @@ var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map
     ]}
 })})
 
+const emitter = mitt();
+
+const addEvent = (evt, fn) =>  {
+    emitter.on(evt, fn);
+};
+
+const emitEvent = (evt, data) => {
+    emitter.emit(evt, data);
+};
+
+const defaults = {
+    // onChange: html => console.log(html),
+    defaultParagraphSeparator: 'div',
+    styleWithCSS: false,
+    actions: [
+        'bold',
+        'underline',
+        'italic',
+        'olist',
+        'ulist',
+        'line',
+        'link',
+        'heading1',
+        'heading2'
+    ],
+
+    classes: {
+        actionbar: 'pell-actionbar',
+        button: 'pell-button',
+        content: 'pell-content',
+        selected: 'pell-button-selected'
+    }
+};
+
+function addImageAction(data, element) {
+    data.actions.push({
+        name: 'image',
+        icon: 'Imagem',
+        title: 'Adicionar imagem',
+        result: () => {
+            selectImage({
+                btnOkText: 'OK', 
+                btnCancelText: 'Cancel',
+                forceFile: true,
+                selectDeviceText: 'Select device'
+            }).then(image => {
+                var img = new Image();
+                img.src = image;
+                const contentElement = element.querySelector('.pell-content');
+                contentElement.appendChild(img);
+            });
+        }
+    });
+}
+
+var wysiwyg = (el, name, options) => {
+    const data = Object.assign({}, defaults);
+
+    if (options) {
+        Object.assign(data, options);
+    }
+
+    addImageAction(data, el);
+    data.element = el;
+    pell.init(data);
+    addEvent('form:edit', data => {
+        if (el && el.parentElement && (! data[name])) {
+            return;
+        }
+        el.innerHTML = data[name];
+    });
+}
+
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
-            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', 
+                            value: meta.label, placeholder: meta.placeholder || ''}};
         case 'cancel':
-            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', placeholder: meta.placeholder || ''}, textContent: meta.label};
+            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', 
+                            placeholder: meta.placeholder || ''}, textContent: meta.label};
         case 'password':
-            return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'form-control', attrs: {type: 'password', 
+                            name: meta.name, placeholder: meta.placeholder || ''}};
+        case 'wysiwyg':
+            return {tag: 'div', className: 'input-wysiwyg border', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                wysiwyg(el, meta.name);
+            }};
+        case 'single-entity':
+            return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+            }};
         case 'acl':
             return inputAcl(meta);
         default:
@@ -239,7 +324,7 @@ var form = ({fields, fieldCol, onSubmit}) => ({
             ]};
         }
 
-        return {tag: 'div', className: `form-group col-md-${fieldCol || 4}`, children: [
+        return {tag: 'div', className: `form-group col-md-${f.fieldCol || fieldCol || 4}`, children: [
             {tag: 'label', className: f.label ? '' : 'invisible', textContent: f.label },
             createField(f)
         ]};
@@ -580,6 +665,8 @@ const dataToForm = (data, form) => {
             }
         });
     }
+    
+    emitEvent(`form:edit`, data);
 };
 
 const render = appEl => {
@@ -923,7 +1010,7 @@ const render$2 = appEl => {
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'description'},
             {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
-            {type: 'text-editor', label: 'Texto', name: 'text'},
+            {type: 'wysiwyg', name: 'text', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {

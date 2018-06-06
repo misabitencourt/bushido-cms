@@ -1,3 +1,5 @@
+import {emitEvent} from '../common/event';
+
 export const dataToForm = (data, form) => {
     for (let i in data) {
         let input = form.querySelector(`[name="${i}"]`)
@@ -25,4 +27,6 @@ export const dataToForm = (data, form) => {
             }
         });
     }
+    
+    emitEvent(`form:edit`, data);
 }

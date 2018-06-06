@@ -1,13 +1,28 @@
 import inputAcl from './input-acl';
+import wysiwyg from './wysiwyg';
+import singleEntity from './single-entity';
 
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
-            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', value: meta.label, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', 
+                            value: meta.label, placeholder: meta.placeholder || ''}};
         case 'cancel':
-            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', placeholder: meta.placeholder || ''}, textContent: meta.label};
+            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', 
+                            placeholder: meta.placeholder || ''}, textContent: meta.label};
         case 'password':
-            return {tag: 'input', className: 'form-control', attrs: {type: 'password', name: meta.name, placeholder: meta.placeholder || ''}};
+            return {tag: 'input', className: 'form-control', attrs: {type: 'password', 
+                            name: meta.name, placeholder: meta.placeholder || ''}};
+        case 'wysiwyg':
+            return {tag: 'div', className: 'input-wysiwyg border', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                wysiwyg(el, meta.name);
+            }};
+        case 'single-entity':
+            return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                singleEntity(el);
+            }};
         case 'acl':
             return inputAcl(meta);
         default:
@@ -26,7 +41,7 @@ export default ({fields, fieldCol, onSubmit}) => ({
             ]};
         }
 
-        return {tag: 'div', className: `form-group col-md-${fieldCol || 4}`, children: [
+        return {tag: 'div', className: `form-group col-md-${f.fieldCol || fieldCol || 4}`, children: [
             {tag: 'label', className: f.label ? '' : 'invisible', textContent: f.label },
             createField(f)
         ]};
