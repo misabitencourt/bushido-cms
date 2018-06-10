@@ -18,13 +18,16 @@ function createField(meta) {
                 el.dataset.skipbind = '1';
                 wysiwyg(el, meta.name);
             }};
+
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
                 singleEntity(el);
             }};
+
         case 'acl':
             return inputAcl(meta);
+            
         default:
             return {tag: 'input', className: 'form-control', attrs: {type: 'text', name: meta.name, placeholder: meta.placeholder || ''}};
     }

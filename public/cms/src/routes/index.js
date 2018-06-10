@@ -3,11 +3,13 @@ import users from './users';
 import menus from './menus';
 import articles from './articles';
 import home from './home';
+import products from './products';
 
 export default [
     login,
     users,
     menus,
     articles,
+    products,
     home
 ]

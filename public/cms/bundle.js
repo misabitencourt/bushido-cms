@@ -201,7 +201,8 @@ var card = ({title, body}) => ({tag: 'div', className: 'card', children: [
 const screens = [
     {name: 'user', label: 'Usuários'},
     {name: 'menu', label: 'Menus'},
-    {name: 'article', label: 'Artigos'}
+    {name: 'article', label: 'Artigos'},
+    {name: 'product', label: 'Produtos'}
 ];
 
 var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
@@ -302,12 +303,15 @@ function createField(meta) {
                 el.dataset.skipbind = '1';
                 wysiwyg(el, meta.name);
             }};
+
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
             }};
+
         case 'acl':
             return inputAcl(meta);
+            
         default:
             return {tag: 'input', className: 'form-control', attrs: {type: 'text', name: meta.name, placeholder: meta.placeholder || ''}};
     }
@@ -539,6 +543,10 @@ const menus = [
 
     {id: 'article', name: 'Artigos', tooltip: 'Cadastro de artigos', onclick() {
         window.location = '#/articles';
+    }},
+
+    {id: 'product', name: 'Produtos', tooltip: 'Cadastro de produtos', onclick() {
+        window.location = '#/products';
     }}
 ];
 
@@ -1125,11 +1133,185 @@ var home = {
     }
 }
 
+var service$3 = {
+
+    validate(data) {
+        let errors = '';
+
+        if (! data.name) {
+            errors += ' Informe o nome.';
+        }
+
+        if (! data.short_description) {
+            errors += ' Informe a descrição curta.';
+        }
+
+        if (! (data.photos && data.photos.length)) {
+            errors += ' Selecione uma foto.';
+        }
+
+        return errors;
+    },
+
+    retrieve: async search => {
+        let response = await fetch(`${config.API_URL}/cms/product/${encodeURIComponent(search)}`, {headers});
+        let json = await response.json();
+        return json;
+    },
+
+
+    create: async user => {
+        const response = await fetch(`${config.API_URL}/cms/product/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(user)
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    update: async (id, user) => {
+        const params = {id};
+        for (let i in user) {
+            params[`${i}`] = user[i];
+        }
+        const response = await fetch(`${config.API_URL}/cms/product/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newUser = await response.json();
+
+        return newUser;
+    },
+
+
+    destroy: async id => fetch(`${config.API_URL}/cms/product/${id}`, {
+        headers,
+        method: 'DELETE'
+    }),
+
+    destroyImage: async id => fetch(`${config.API_URL}/cms/product/image/${id}`, {
+        headers,
+        method: 'DELETE'
+    })
+
+}
+
+const render$3 = appEl => {
+    let formEl, searchInput;
+
+    const formObj = form({
+        fieldCol: 3,
+        fields: [
+            {type: 'text', label: 'Nome', name: 'name'},
+            {type: 'text', label: 'Descrição', name: 'description'},
+            {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
+            {type: 'wysiwyg', name: 'text', fieldCol: 12},
+            {type: 'submit', label: 'Salvar'}
+        ],
+        onSubmit(data, e) {
+            const errors = service$3.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
+            if (e.target.dataset.id) {
+                service$3.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Produto atualizado com sucesso'
+                    });
+                    window.location.reload();
+                });
+            } else {
+                service$3.create(data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Produto salvo com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        }
+    });
+        
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [
+        {tag: 'h2', textContent: 'Cadastro de Produtos'},
+        formObj,
+        {tag: 'div', className: 'row', children: [
+            {tag: 'div', className: 'col-md-8'},
+            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
+                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
+                    bootstrap: el => searchInput = el}
+            ]}
+        ]}
+    ]);
+
+    formEl = mainEl.querySelector('form');
+    const loadData = () => service$3.retrieve(searchInput.value);    
+
+    const renderGrid = async () => {
+        const oldGrid = mainEl.querySelector('table');
+        if (oldGrid) {
+            mainEl.removeChild(oldGrid);
+        }
+        const gridEl = await grid({
+            columns: [
+                {label: 'Nome', prop: product => product.name },
+                {label: 'Descrição', prop: product => product.description },
+                {label: 'Menu', prop: product => (product.menu || {}).name || '' }
+            ],
+
+            loadData() {
+                return loadData();
+            },
+    
+            onEdit(product) {
+                dataToForm(product, formEl);
+                formEl.dataset.id = product.id;
+            },
+    
+            onDelete(product) {
+                service$3.destroy(product.id).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'product excluído com sucesso'
+                    });
+                    window.location.reload();    
+                });
+            }
+        });
+        mainEl.appendChild(gridEl);
+    };
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
+
+    renderGrid();
+    appEl.appendChild(template(wrpEl, 'product'));
+};
+
+var products = {
+    route: '#/products',
+    render(el) {
+        render$3(el);
+    }
+}
+
 var routes = [
     login$1,
     users,
     menus$1,
     articles,
+    products,
     home
 ]
 
