@@ -8,7 +8,7 @@ module.exports.list = ({modelName}) => {
     return query.orderBy('id', 'desc').limit(15);
 }
 
-module.exports.retrieve = ({modelName, filters, params, select, from, limit=100}) => {
+module.exports.retrieve = ({modelName, filters, params, select, from, leftJoins, limit=100}) => {
     let whereSql = filters || '';
 
     let query = db(modelName);
@@ -16,7 +16,12 @@ module.exports.retrieve = ({modelName, filters, params, select, from, limit=100}
         query = query.select(select);
     }
     if (from) {
-        query = query.from(from)
+        query = query.from(from);
+    }
+    if (leftJoins) {
+        leftJoins.forEach(lj => {
+            query = query.leftJoin(lj.table, lj.localField, lj.foreignField);
+        });
     }
 
     if (whereSql) {

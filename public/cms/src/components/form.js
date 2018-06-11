@@ -1,6 +1,7 @@
 import inputAcl from './input-acl';
 import wysiwyg from './wysiwyg';
 import singleEntity from './single-entity';
+import imageList from './image-list';
 
 function createField(meta) {
     switch(meta.type) {
@@ -17,14 +18,23 @@ function createField(meta) {
             return {tag: 'div', className: 'input-wysiwyg border', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
                 wysiwyg(el, meta.name);
-            }};            
+            }};
+
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
                 createEls('div', 'single-entity-container', el, [singleEntity(field)]);
             }};
+
+        case 'image-list':
+            return {tag: 'div', className: 'image-list', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                imageList(el);
+            }};
+
         case 'acl':
             return inputAcl(meta);
+            
         default:
             return {tag: 'input', className: 'form-control', attrs: {type: 'text', name: meta.name, placeholder: meta.placeholder || ''}};
     }
