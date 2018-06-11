@@ -287,6 +287,42 @@ var wysiwyg = (el, name, options) => {
     });
 }
 
+var imageList = el => {
+    let imageContainer;
+
+    const mainWrp = createEls('div', 'row', el, [
+        {tag: 'div', className: 'col-md-10'},
+        {tag: 'div', className: 'col-md-2', children: [
+            {tag: 'span', textContent: 'Add', on: ['click', () => {
+                selectImage({
+                    btnOkText: 'OK', 
+                    btnCancelText: 'Cancel',
+                    forceFile: true,
+                    selectDeviceText: 'Select device'
+                }).then(image => {
+                    const imageWrp = createEls('div', '', imageContainer, [
+                        {tag: 'img', attrs: {src: image}, bootstrap(el) {
+                            el.style.height = `180px`;
+                        }}
+                    ]);
+                    
+                    imageWrp.style.overflowX = `hidden`;
+                    imageWrp.style.width = `100%`;
+                    imageWrp.style.maxWidth = `180px`;
+                    imageWrp.style.display = `inline-block`;
+                    imageWrp.style.marginRight = `1rem`;
+                });
+            }]}
+        ]},
+
+        {tag: 'div', className: 'col-md-12 p-1'},
+
+        {tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el}
+    ]);
+
+    el.appendChild(mainWrp);
+}
+
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
@@ -307,6 +343,12 @@ function createField(meta) {
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
+            }};
+
+        case 'image-list':
+            return {tag: 'div', className: 'image-list', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                imageList(el);
             }};
 
         case 'acl':
@@ -1209,9 +1251,9 @@ const render$3 = appEl => {
         fieldCol: 3,
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
-            {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
-            {type: 'wysiwyg', name: 'text', fieldCol: 12},
+            {type: 'text', label: 'Descrição', name: 'short_description'},
+            {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
+            {type: 'image-list', name: 'long_description', label: 'Fotos', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -1264,8 +1306,7 @@ const render$3 = appEl => {
         const gridEl = await grid({
             columns: [
                 {label: 'Nome', prop: product => product.name },
-                {label: 'Descrição', prop: product => product.description },
-                {label: 'Menu', prop: product => (product.menu || {}).name || '' }
+                {label: 'Descrição curta', prop: product => product.description }
             ],
 
             loadData() {

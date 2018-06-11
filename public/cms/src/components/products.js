@@ -12,9 +12,9 @@ const render = appEl => {
         fieldCol: 3,
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
-            {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
-            {type: 'wysiwyg', name: 'text', fieldCol: 12},
+            {type: 'text', label: 'Descrição', name: 'short_description'},
+            {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
+            {type: 'image-list', name: 'long_description', label: 'Fotos', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -67,8 +67,7 @@ const render = appEl => {
         const gridEl = await grid({
             columns: [
                 {label: 'Nome', prop: product => product.name },
-                {label: 'Descrição', prop: product => product.description },
-                {label: 'Menu', prop: product => (product.menu || {}).name || '' }
+                {label: 'Descrição curta', prop: product => product.description }
             ],
 
             loadData() {
