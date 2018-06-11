@@ -17,11 +17,11 @@ function createField(meta) {
             return {tag: 'div', className: 'input-wysiwyg border', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
                 wysiwyg(el, meta.name);
-            }};
+            }};            
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
-                singleEntity(el);
+                createEls('div', 'single-entity-container', el, [singleEntity(field)]);
             }};
         case 'acl':
             return inputAcl(meta);

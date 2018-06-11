@@ -286,6 +286,54 @@ var wysiwyg = (el, name, options) => {
     });
 }
 
+var icon = (name, width, height) => ({
+    tag: 'img',
+    attrs: {
+        src: `img/${name}.svg`,
+        width: width || 16,
+        height: height || 16
+    }
+});
+
+var singleEntity = field => {
+    if (! field.service) {
+        console.error(field, 'You forgot the service');
+        return {tag: 'div'};
+    }
+
+    if (! field.descriptionField) {
+        console.error(field, 'You forgot the descriptionField');
+        return {tag: 'div'};
+    }
+
+    const elements = {};
+    
+    return {
+        tag: 'div', 
+        className: 'row',
+        children: [
+            {tag: 'div', className: 'col-md-10', children: [
+                {tag: 'input', className: 'form-control', bootstrap(el) {
+                    elements.input = el;
+                }}
+            ]},
+            {tag: 'div', className: 'col-md-2 hidden', 
+                children: [icon('remove', 32, 32)], bootstrap(el) {
+                elements.remove = el;
+            }}
+        ],
+        bootstrap() {
+            elements.input.addEventListener('keyup', () => {
+                window.inputSearchDebounce && window.clearTimeout(window.inputSearchDebounce);
+                window.inputSearchDebounce = setTimeout(async () => {
+                    let list = await field.service.retrieve(elements.input.value);
+
+                }, 600);
+            });
+        }
+    };
+}
+
 function createField(meta) {
     switch(meta.type) {
         case 'submit':
@@ -301,10 +349,11 @@ function createField(meta) {
             return {tag: 'div', className: 'input-wysiwyg border', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
                 wysiwyg(el, meta.name);
-            }};
+            }};            
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
+                createEls('div', 'single-entity-container', el, [singleEntity(field)]);
             }};
         case 'acl':
             return inputAcl(meta);
