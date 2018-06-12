@@ -27,6 +27,14 @@ export const dataToForm = (data, form) => {
             }
         });
     }
+
+    // Multiple images
+    Array.from(form.querySelectorAll('.image-list')).forEach(imageWrp => {
+        Array.from(imageWrp.querySelectorAll('img[data-field-name]')).forEach(img => {
+            data[img.dataset.fieldName] = data[img.dataset.fieldName] || [];
+            data[img.dataset.fieldName].push(img.src);
+        });
+    });
     
     emitEvent(`form:edit`, data);
 }

@@ -1,6 +1,7 @@
+import icon from './icon';
+import {emitEvent} from '../common/event';
 
-
-export default el => {
+export default (el, field) => {
     let imageContainer;
 
     const mainWrp = createEls('div', 'row', el, [
@@ -14,7 +15,22 @@ export default el => {
                     selectDeviceText: 'Select device'
                 }).then(image => {
                     const imageWrp = createEls('div', '', imageContainer, [
+                        {tag: 'div', bootstrap(el) {
+                            el.style.position = 'absolute';
+                        }, children: [
+                            {tag: 'span', bootstrap(el) {
+                                el.style.background = 'rgba(255, 255, 255, 0.6)';
+                                el.style.padding = '1rem';
+                                el.style.cursor = 'pointer';
+                            }, children: [
+                                icon('delete', 16, 16)
+                            ], on: ['click', () => {
+                                emitEvent('form:multiple-images-delete', field);
+                                killEl(imageWrp);
+                            }]}
+                        ]},
                         {tag: 'img', attrs: {src: image}, bootstrap(el) {
+                            el.dataset.fieldName = field.name;
                             el.style.height = `180px`;
                         }}
                     ]);

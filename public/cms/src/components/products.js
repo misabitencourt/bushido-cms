@@ -14,7 +14,7 @@ const render = appEl => {
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'short_description'},
             {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
-            {type: 'image-list', name: 'long_description', label: 'Fotos', fieldCol: 12},
+            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {

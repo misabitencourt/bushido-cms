@@ -29,7 +29,7 @@ function createField(meta) {
         case 'image-list':
             return {tag: 'div', className: 'image-list', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
-                imageList(el);
+                imageList(el, meta);
             }};
 
         case 'acl':

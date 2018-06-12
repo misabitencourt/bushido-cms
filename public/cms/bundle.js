@@ -287,7 +287,56 @@ var wysiwyg = (el, name, options) => {
     });
 }
 
-var imageList = el => {
+var icon = (name, width, height, events) => ({
+    tag: 'img',
+    attrs: {
+        src: `img/${name}.svg`,
+        width: width || 16,
+        height: height || 16
+    },
+    on: events
+});
+
+var singleEntity = field => {
+    if (! field.service) {
+        console.error(field, 'You forgot the service');
+        return {tag: 'div'};
+    }
+
+    if (! field.descriptionField) {
+        console.error(field, 'You forgot the descriptionField');
+        return {tag: 'div'};
+    }
+
+    const elements = {};
+    
+    return {
+        tag: 'div', 
+        className: 'row',
+        children: [
+            {tag: 'div', className: 'col-md-10', children: [
+                {tag: 'input', className: 'form-control', bootstrap(el) {
+                    elements.input = el;
+                }}
+            ]},
+            {tag: 'div', className: 'col-md-2 hidden', 
+                children: [icon('remove', 32, 32)], bootstrap(el) {
+                elements.remove = el;
+            }}
+        ],
+        bootstrap() {
+            elements.input.addEventListener('keyup', () => {
+                window.inputSearchDebounce && window.clearTimeout(window.inputSearchDebounce);
+                window.inputSearchDebounce = setTimeout(async () => {
+                    let list = await field.service.retrieve(elements.input.value);
+
+                }, 600);
+            });
+        }
+    };
+}
+
+var imageList = (el, field) => {
     let imageContainer;
 
     const mainWrp = createEls('div', 'row', el, [
@@ -301,7 +350,22 @@ var imageList = el => {
                     selectDeviceText: 'Select device'
                 }).then(image => {
                     const imageWrp = createEls('div', '', imageContainer, [
+                        {tag: 'div', bootstrap(el) {
+                            el.style.position = 'absolute';
+                        }, children: [
+                            {tag: 'span', bootstrap(el) {
+                                el.style.background = 'rgba(255, 255, 255, 0.6)';
+                                el.style.padding = '1rem';
+                                el.style.cursor = 'pointer';
+                            }, children: [
+                                icon('delete', 16, 16)
+                            ], on: ['click', () => {
+                                emitEvent('form:multiple-images-delete', field);
+                                killEl(imageWrp);
+                            }]}
+                        ]},
                         {tag: 'img', attrs: {src: image}, bootstrap(el) {
+                            el.dataset.fieldName = field.name;
                             el.style.height = `180px`;
                         }}
                     ]);
@@ -349,7 +413,7 @@ function createField(meta) {
         case 'image-list':
             return {tag: 'div', className: 'image-list', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
-                imageList(el);
+                imageList(el, meta);
             }};
 
         case 'acl':
@@ -716,6 +780,14 @@ const dataToForm = (data, form) => {
             }
         });
     }
+
+    // Multiple images
+    Array.from(form.querySelectorAll('.image-list')).forEach(imageWrp => {
+        Array.from(imageWrp.querySelectorAll('img[data-field-name]')).forEach(img => {
+            data[img.dataset.fieldName] = data[img.dataset.fieldName] || [];
+            data[img.dataset.fieldName].push(img.src);
+        });
+    });
     
     emitEvent(`form:edit`, data);
 };
@@ -1254,7 +1326,7 @@ const render$3 = appEl => {
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'short_description'},
             {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
-            {type: 'image-list', name: 'long_description', label: 'Fotos', fieldCol: 12},
+            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
