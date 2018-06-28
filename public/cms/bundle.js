@@ -1,4 +1,4 @@
-var cms = (function (crypto) {
+var cms = (function () {
 'use strict';
 
 window.getEl = (el, ref) => {
@@ -241,7 +241,25 @@ const defaults = {
         'line',
         'link',
         'heading1',
-        'heading2'
+        'heading2',
+        {
+            name: 'image',
+            icon: 'Imagem',
+            title: 'Adicionar imagem',
+            result: () => {
+                selectImage({
+                    btnOkText: 'OK', 
+                    btnCancelText: 'Cancel',
+                    forceFile: true,
+                    selectDeviceText: 'Select device'
+                }).then(image => {
+                    var img = new Image();
+                    img.src = image;
+                    const contentElement = element.querySelector('.pell-content');
+                    contentElement.appendChild(img);
+                });
+            }
+        }
     ],
 
     classes: {
@@ -252,27 +270,6 @@ const defaults = {
     }
 };
 
-function addImageAction(data, element) {
-    data.actions.push({
-        name: 'image',
-        icon: 'Imagem',
-        title: 'Adicionar imagem',
-        result: () => {
-            selectImage({
-                btnOkText: 'OK', 
-                btnCancelText: 'Cancel',
-                forceFile: true,
-                selectDeviceText: 'Select device'
-            }).then(image => {
-                var img = new Image();
-                img.src = image;
-                const contentElement = element.querySelector('.pell-content');
-                contentElement.appendChild(img);
-            });
-        }
-    });
-}
-
 var wysiwyg = (el, name, options) => {
     const data = Object.assign({}, defaults);
 
@@ -280,7 +277,6 @@ var wysiwyg = (el, name, options) => {
         Object.assign(data, options);
     }
 
-    addImageAction(data, el);
     data.element = el;
     pell.init(data);
     addEvent('form:edit', data => {
@@ -315,6 +311,14 @@ var singleEntity = field => {
     }
 
     const elements = {};
+
+    function cleanInput() {
+        elements.input.value = '';
+        elements.input.disabled = false;
+        elements.mainEl.dataset.value = '';
+        addClass(elements.remove, 'hidden');
+        elements.input.focus();
+    }
     
     return {
         tag: 'div', 
@@ -328,13 +332,8 @@ var singleEntity = field => {
             {tag: 'div', className: 'col-md-2 hidden', 
                 children: [icon('delete', 16, 16)], bootstrap(el) {
                 elements.remove = el;
-                el.addEventListener('click', () => {
-                    elements.input.value = '';
-                    elements.input.disabled = false;
-                    elements.mainEl.dataset.value = '';
-                    addClass(el, 'hidden');
-                    elements.input.focus();
-                });
+                el.addEventListener('click', () => cleanInput());
+                addEvent('form:reset', () => cleanInput());
             }}
         ],
         bootstrap(el) {
@@ -342,12 +341,20 @@ var singleEntity = field => {
             el.dataset.name = field.name;
 
             function addItem(item) {
+                const textContent = item[field.descriptionField];
                 killEl(ddMenu);
                 el.dataset.value = item.id;
                 elements.input.disabled = true;
                 elements.input.value = textContent;
                 removeClass(elements.remove, 'hidden');
             }
+
+            addEvent('form:edit', data => {
+                const obj = data[field.name];
+                if (obj && obj.id) {
+                    addItem(obj);
+                }
+            });
 
             elements.input.addEventListener('keyup', () => {
                 window.inputSearchDebounce && window.clearTimeout(window.inputSearchDebounce);
@@ -488,6 +495,7 @@ var form = ({fields, fieldCol, onSubmit}) => ({
     }), 
 
     bootstrap: el => {
+        el.addEventListener('reset', () => emitEvent('form:reset'));
         el.addEventListener('submit', e => {
             e.preventDefault();
             let data = {};        
@@ -1512,4 +1520,4 @@ function routeChange (el, hasRouteChange) {
 
 return routeChange;
 
-}(crypto));
+}());

@@ -1,5 +1,5 @@
 import icon from './icon'
-import { createCredentials } from 'crypto';
+import {addEvent} from '../common/event'
 
 export default field => {
     let ddMenu;
@@ -15,6 +15,14 @@ export default field => {
     }
 
     const elements = {};
+
+    function cleanInput() {
+        elements.input.value = '';
+        elements.input.disabled = false;
+        elements.mainEl.dataset.value = '';
+        addClass(elements.remove, 'hidden');
+        elements.input.focus();
+    }
     
     return {
         tag: 'div', 
@@ -28,13 +36,8 @@ export default field => {
             {tag: 'div', className: 'col-md-2 hidden', 
                 children: [icon('delete', 16, 16)], bootstrap(el) {
                 elements.remove = el;
-                el.addEventListener('click', () => {
-                    elements.input.value = '';
-                    elements.input.disabled = false;
-                    elements.mainEl.dataset.value = '';
-                    addClass(el, 'hidden');
-                    elements.input.focus();
-                });
+                el.addEventListener('click', () => cleanInput());
+                addEvent('form:reset', () => cleanInput());
             }}
         ],
         bootstrap(el) {
@@ -42,12 +45,20 @@ export default field => {
             el.dataset.name = field.name;
 
             function addItem(item) {
+                const textContent = item[field.descriptionField];
                 killEl(ddMenu);
                 el.dataset.value = item.id;
                 elements.input.disabled = true;
                 elements.input.value = textContent;
                 removeClass(elements.remove, 'hidden');
             }
+
+            addEvent('form:edit', data => {
+                const obj = data[field.name];
+                if (obj && obj.id) {
+                    addItem(obj);
+                }
+            });
 
             elements.input.addEventListener('keyup', () => {
                 window.inputSearchDebounce && window.clearTimeout(window.inputSearchDebounce);

@@ -2,6 +2,7 @@ import inputAcl from './input-acl';
 import wysiwyg from './wysiwyg';
 import singleEntity from './single-entity';
 import imageList from './image-list';
+import {emitEvent} from '../common/event';
 
 function createField(meta) {
     switch(meta.type) {
@@ -58,6 +59,7 @@ export default ({fields, fieldCol, onSubmit}) => ({
     }), 
 
     bootstrap: el => {
+        el.addEventListener('reset', () => emitEvent('form:reset'));
         el.addEventListener('submit', e => {
             e.preventDefault();
             let data = {};        

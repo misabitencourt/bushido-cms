@@ -13,7 +13,25 @@ const defaults = {
         'line',
         'link',
         'heading1',
-        'heading2'
+        'heading2',
+        {
+            name: 'image',
+            icon: 'Imagem',
+            title: 'Adicionar imagem',
+            result: () => {
+                selectImage({
+                    btnOkText: 'OK', 
+                    btnCancelText: 'Cancel',
+                    forceFile: true,
+                    selectDeviceText: 'Select device'
+                }).then(image => {
+                    var img = new Image();
+                    img.src = image;
+                    const contentElement = element.querySelector('.pell-content');
+                    contentElement.appendChild(img);
+                });
+            }
+        }
     ],
 
     classes: {
@@ -24,27 +42,6 @@ const defaults = {
     }
 };
 
-function addImageAction(data, element) {
-    data.actions.push({
-        name: 'image',
-        icon: 'Imagem',
-        title: 'Adicionar imagem',
-        result: () => {
-            selectImage({
-                btnOkText: 'OK', 
-                btnCancelText: 'Cancel',
-                forceFile: true,
-                selectDeviceText: 'Select device'
-            }).then(image => {
-                var img = new Image();
-                img.src = image;
-                const contentElement = element.querySelector('.pell-content');
-                contentElement.appendChild(img);
-            });
-        }
-    });
-}
-
 export default (el, name, options) => {
     const data = Object.assign({}, defaults);
 
@@ -52,7 +49,6 @@ export default (el, name, options) => {
         Object.assign(data, options);
     }
 
-    addImageAction(data, el);
     data.element = el;
     pell.init(data);
     addEvent('form:edit', data => {
