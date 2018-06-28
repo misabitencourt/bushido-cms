@@ -1,4 +1,4 @@
-var cms = (function () {
+var cms = (function (crypto) {
 'use strict';
 
 window.getEl = (el, ref) => {
@@ -224,6 +224,10 @@ const emitEvent = (evt, data) => {
     emitter.emit(evt, data);
 };
 
+document.body.addEventListener('click', () => {
+    getEls(document.body, '.dismissable').forEach(el => killEl(el));
+});
+
 const defaults = {
     // onChange: html => console.log(html),
     defaultParagraphSeparator: 'div',
@@ -298,6 +302,8 @@ var icon = (name, width, height, events) => ({
 });
 
 var singleEntity = field => {
+    let ddMenu;
+
     if (! field.service) {
         console.error(field, 'You forgot the service');
         return {tag: 'div'};
@@ -320,16 +326,56 @@ var singleEntity = field => {
                 }}
             ]},
             {tag: 'div', className: 'col-md-2 hidden', 
-                children: [icon('remove', 32, 32)], bootstrap(el) {
+                children: [icon('delete', 16, 16)], bootstrap(el) {
                 elements.remove = el;
+                el.addEventListener('click', () => {
+                    elements.input.value = '';
+                    elements.input.disabled = false;
+                    elements.mainEl.dataset.value = '';
+                    addClass(el, 'hidden');
+                    elements.input.focus();
+                });
             }}
         ],
-        bootstrap() {
+        bootstrap(el) {
+            elements.mainEl = el;
+            el.dataset.name = field.name;
+
+            function addItem(item) {
+                killEl(ddMenu);
+                el.dataset.value = item.id;
+                elements.input.disabled = true;
+                elements.input.value = textContent;
+                removeClass(elements.remove, 'hidden');
+            }
+
             elements.input.addEventListener('keyup', () => {
                 window.inputSearchDebounce && window.clearTimeout(window.inputSearchDebounce);
                 window.inputSearchDebounce = setTimeout(async () => {
-                    let list = await field.service.retrieve(elements.input.value);
+                    if (ddMenu) {
+                        killEl(ddMenu);
+                    }
 
+                    if (! elements.input.value) {
+                        return;
+                    }
+
+                    let list = await field.service.retrieve(elements.input.value);  
+                    
+                    if (! list.length) {
+                        return;
+                    }
+
+                    ddMenu = createEls('div', 'dropdown-menu show dismissable', el, list.map(item => {
+                        const textContent = item[field.descriptionField];
+                        return {
+                            tag: 'a', 
+                            className: 'dropdown-item', 
+                            attrs: {href: 'javascript:;'}, 
+                            textContent,
+                            on: ['click', () => addItem(item)]
+                        }
+                    }));
                 }, 600);
             });
         }
@@ -407,7 +453,7 @@ function createField(meta) {
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
-                createEls('div', 'single-entity-container', el, [singleEntity(field)]);
+                createEls('div', 'single-entity-container', el, [singleEntity(meta)]);
             }};
 
         case 'image-list':
@@ -897,7 +943,7 @@ var users = {
     }
 }
 
-var service$1 = {
+var menuSrv = {
 
     validate(data) {
         let errors = '';
@@ -969,13 +1015,13 @@ const render$1 = appEl => {
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
-            const errors = service$1.validate(data);
+            const errors = menuSrv.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$1.update(e.target.dataset.id, data).then(() => {
+                menuSrv.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Menu atualizado com sucesso'
@@ -983,7 +1029,7 @@ const render$1 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$1.create(data).then(() => {
+                menuSrv.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Menu salvo com sucesso'
@@ -1008,7 +1054,7 @@ const render$1 = appEl => {
     ]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$1.retrieve(searchInput.value);    
+    const loadData = () => menuSrv.retrieve(searchInput.value);    
 
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
@@ -1032,7 +1078,7 @@ const render$1 = appEl => {
             },
     
             onDelete(menu) {
-                service$1.destroy(menu.id).then(() => {
+                menuSrv.destroy(menu.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Menu excluído com sucesso'
@@ -1060,7 +1106,7 @@ var menus$1 = {
     }
 }
 
-var service$2 = {
+var service$1 = {
 
     validate(data) {
         let errors = '';
@@ -1132,18 +1178,18 @@ const render$2 = appEl => {
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
+            {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
             {type: 'wysiwyg', name: 'text', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
-            const errors = service$2.validate(data);
+            const errors = service$1.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$2.update(e.target.dataset.id, data).then(() => {
+                service$1.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Artigo atualizado com sucesso'
@@ -1151,7 +1197,7 @@ const render$2 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$2.create(data).then(() => {
+                service$1.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Artigo salvo com sucesso'
@@ -1176,7 +1222,7 @@ const render$2 = appEl => {
     ]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$2.retrieve(searchInput.value);    
+    const loadData = () => service$1.retrieve(searchInput.value);    
 
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
@@ -1200,7 +1246,7 @@ const render$2 = appEl => {
             },
     
             onDelete(article) {
-                service$2.destroy(article.id).then(() => {
+                service$1.destroy(article.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'article excluído com sucesso'
@@ -1248,7 +1294,7 @@ var home = {
     }
 }
 
-var service$3 = {
+var service$2 = {
 
     validate(data) {
         let errors = '';
@@ -1330,13 +1376,13 @@ const render$3 = appEl => {
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
-            const errors = service$3.validate(data);
+            const errors = service$2.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$3.update(e.target.dataset.id, data).then(() => {
+                service$2.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Produto atualizado com sucesso'
@@ -1344,7 +1390,7 @@ const render$3 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$3.create(data).then(() => {
+                service$2.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Produto salvo com sucesso'
@@ -1369,7 +1415,7 @@ const render$3 = appEl => {
     ]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$3.retrieve(searchInput.value);    
+    const loadData = () => service$2.retrieve(searchInput.value);    
 
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
@@ -1392,7 +1438,7 @@ const render$3 = appEl => {
             },
     
             onDelete(product) {
-                service$3.destroy(product.id).then(() => {
+                service$2.destroy(product.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'product excluído com sucesso'
@@ -1466,4 +1512,4 @@ function routeChange (el, hasRouteChange) {
 
 return routeChange;
 
-}());
+}(crypto));

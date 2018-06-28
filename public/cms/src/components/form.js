@@ -23,7 +23,7 @@ function createField(meta) {
         case 'single-entity':
             return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
-                createEls('div', 'single-entity-container', el, [singleEntity(field)]);
+                createEls('div', 'single-entity-container', el, [singleEntity(meta)]);
             }};
 
         case 'image-list':

@@ -1,6 +1,7 @@
 import template from './template';
 import form from '../components/form';
 import service from '../service/articles';
+import menuSrv from '../service/menus';
 import grid from '../components/grid';
 import {dataToForm} from '../common/form-bind';
 import error from '../dialogs/error';
@@ -13,7 +14,7 @@ const render = appEl => {
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'select-entity', label: 'Menu', name: 'menu', etity: 'menu'},
+            {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
             {type: 'wysiwyg', name: 'text', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
