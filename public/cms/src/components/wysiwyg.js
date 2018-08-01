@@ -13,25 +13,7 @@ const defaults = {
         'line',
         'link',
         'heading1',
-        'heading2',
-        {
-            name: 'image',
-            icon: 'Imagem',
-            title: 'Adicionar imagem',
-            result: () => {
-                selectImage({
-                    btnOkText: 'OK', 
-                    btnCancelText: 'Cancel',
-                    forceFile: true,
-                    selectDeviceText: 'Select device'
-                }).then(image => {
-                    var img = new Image();
-                    img.src = image;
-                    const contentElement = element.querySelector('.pell-content');
-                    contentElement.appendChild(img);
-                });
-            }
-        }
+        'heading2'
     ],
 
     classes: {
@@ -45,6 +27,27 @@ const defaults = {
 export default (el, name, options) => {
     const data = Object.assign({}, defaults);
 
+    data.actions = data.actions.slice()
+    data.actions.push({
+        name: 'image',
+        icon: 'Imagem',
+        title: 'Adicionar imagem',
+        result: () => {
+            selectImage({
+                btnOkText: 'OK', 
+                btnCancelText: 'Cancel',
+                forceFile: true,
+                selectDeviceText: 'Select device'
+            }).then(image => {
+                var img = new Image();
+                img.src = image;
+                img.style.maxWidth = '100%';
+                const contentElement = el.querySelector('.pell-content');
+                contentElement.appendChild(img);
+            });
+        }
+    })
+
     if (options) {
         Object.assign(data, options);
     }
@@ -55,6 +58,8 @@ export default (el, name, options) => {
         if (el && el.parentElement && (! data[name])) {
             return;
         }
-        el.innerHTML = data[name];
+        getEl(el, '[contenteditable]').innerHTML = data[name];
     });
+
+    addEvent('form:reset', data => getEl(el, '[contenteditable]').innerHTML = '');
 }

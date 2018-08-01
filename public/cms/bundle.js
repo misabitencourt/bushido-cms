@@ -241,25 +241,7 @@ const defaults = {
         'line',
         'link',
         'heading1',
-        'heading2',
-        {
-            name: 'image',
-            icon: 'Imagem',
-            title: 'Adicionar imagem',
-            result: () => {
-                selectImage({
-                    btnOkText: 'OK', 
-                    btnCancelText: 'Cancel',
-                    forceFile: true,
-                    selectDeviceText: 'Select device'
-                }).then(image => {
-                    var img = new Image();
-                    img.src = image;
-                    const contentElement = element.querySelector('.pell-content');
-                    contentElement.appendChild(img);
-                });
-            }
-        }
+        'heading2'
     ],
 
     classes: {
@@ -273,6 +255,27 @@ const defaults = {
 var wysiwyg = (el, name, options) => {
     const data = Object.assign({}, defaults);
 
+    data.actions = data.actions.slice();
+    data.actions.push({
+        name: 'image',
+        icon: 'Imagem',
+        title: 'Adicionar imagem',
+        result: () => {
+            selectImage({
+                btnOkText: 'OK', 
+                btnCancelText: 'Cancel',
+                forceFile: true,
+                selectDeviceText: 'Select device'
+            }).then(image => {
+                var img = new Image();
+                img.src = image;
+                img.style.maxWidth = '100%';
+                const contentElement = el.querySelector('.pell-content');
+                contentElement.appendChild(img);
+            });
+        }
+    });
+
     if (options) {
         Object.assign(data, options);
     }
@@ -283,8 +286,10 @@ var wysiwyg = (el, name, options) => {
         if (el && el.parentElement && (! data[name])) {
             return;
         }
-        el.innerHTML = data[name];
+        getEl(el, '[contenteditable]').innerHTML = data[name];
     });
+
+    addEvent('form:reset', data => getEl(el, '[contenteditable]').innerHTML = '');
 }
 
 var icon = (name, width, height, events) => ({
@@ -512,6 +517,14 @@ var form = ({fields, fieldCol, onSubmit}) => ({
             if (acl) {
                 data.acl = acl;
             }
+
+            getEls(el, '[data-value]').forEach(el => data[el.dataset.name] = el.dataset.value);
+            getEls(el, '.input-wysiwyg').forEach(el => {
+                const contentEditable = getEl(el, '[contenteditable]');
+                if (contentEditable) {
+                    data[el.dataset.attr] = contentEditable.innerHTML;
+                }
+            });
 
             onSubmit(data, e);
         });
@@ -1141,23 +1154,23 @@ var service$1 = {
     },
 
 
-    create: async user => {
+    create: async article => {
         const response = await fetch(`${config.API_URL}/cms/article/`, {
             method: 'POST',
             headers,
-            body: JSON.stringify(user)
+            body: JSON.stringify(article)
         });
 
-        let newUser = await response.json();
+        let newArticle = await response.json();
 
-        return newUser;
+        return newArticle;
     },
 
 
-    update: async (id, user) => {
+    update: async (id, article) => {
         const params = {id};
-        for (let i in user) {
-            params[`${i}`] = user[i];
+        for (let i in article) {
+            params[`${i}`] = article[i];
         }
         const response = await fetch(`${config.API_URL}/cms/article/${id}`, {
             method: 'PUT',
@@ -1165,9 +1178,9 @@ var service$1 = {
             headers
         });
 
-        let newUser = await response.json();
+        let newArticle = await response.json();
 
-        return newUser;
+        return newArticle;
     },
 
 
@@ -1184,7 +1197,7 @@ const render$2 = appEl => {
     const formObj = form({
         fieldCol: 3,
         fields: [
-            {type: 'text', label: 'Nome', name: 'name'},
+            {type: 'text', label: 'Título', name: 'title'},
             {type: 'text', label: 'Descrição', name: 'description'},
             {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
             {type: 'wysiwyg', name: 'text', fieldCol: 12},
@@ -1239,7 +1252,7 @@ const render$2 = appEl => {
         }
         const gridEl = await grid({
             columns: [
-                {label: 'Nome', prop: article => article.name },
+                {label: 'Título', prop: article => article.title },
                 {label: 'Descrição', prop: article => article.description },
                 {label: 'Menu', prop: article => (article.menu || {}).name || '' }
             ],

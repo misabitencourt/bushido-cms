@@ -28,23 +28,23 @@ export default {
     },
 
 
-    create: async user => {
+    create: async article => {
         const response = await fetch(`${config.API_URL}/cms/article/`, {
             method: 'POST',
             headers,
-            body: JSON.stringify(user)
+            body: JSON.stringify(article)
         });
 
-        let newUser = await response.json();
+        let newArticle = await response.json();
 
-        return newUser;
+        return newArticle;
     },
 
 
-    update: async (id, user) => {
+    update: async (id, article) => {
         const params = {id};
-        for (let i in user) {
-            params[`${i}`] = user[i];
+        for (let i in article) {
+            params[`${i}`] = article[i];
         }
         const response = await fetch(`${config.API_URL}/cms/article/${id}`, {
             method: 'PUT',
@@ -52,9 +52,9 @@ export default {
             headers
         });
 
-        let newUser = await response.json();
+        let newArticle = await response.json();
 
-        return newUser;
+        return newArticle;
     },
 
 

@@ -77,6 +77,14 @@ export default ({fields, fieldCol, onSubmit}) => ({
                 data.acl = acl;
             }
 
+            getEls(el, '[data-value]').forEach(el => data[el.dataset.name] = el.dataset.value);
+            getEls(el, '.input-wysiwyg').forEach(el => {
+                const contentEditable = getEl(el, '[contenteditable]');
+                if (contentEditable) {
+                    data[el.dataset.attr] = contentEditable.innerHTML;
+                }
+            });
+
             onSubmit(data, e);
         })
     }

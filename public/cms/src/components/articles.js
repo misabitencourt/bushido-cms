@@ -12,7 +12,7 @@ const render = appEl => {
     const formObj = form({
         fieldCol: 3,
         fields: [
-            {type: 'text', label: 'Nome', name: 'name'},
+            {type: 'text', label: 'Título', name: 'title'},
             {type: 'text', label: 'Descrição', name: 'description'},
             {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
             {type: 'wysiwyg', name: 'text', fieldCol: 12},
@@ -67,7 +67,7 @@ const render = appEl => {
         }
         const gridEl = await grid({
             columns: [
-                {label: 'Nome', prop: article => article.name },
+                {label: 'Título', prop: article => article.title },
                 {label: 'Descrição', prop: article => article.description },
                 {label: 'Menu', prop: article => (article.menu || {}).name || '' }
             ],
