@@ -83,7 +83,7 @@ const render = appEl => {
                 service.destroy(product.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'product excluído com sucesso'
+                        msg: 'Produto excluído com sucesso'
                     });
                     window.location.reload();    
                 });

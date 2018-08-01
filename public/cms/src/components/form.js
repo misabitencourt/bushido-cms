@@ -41,14 +41,14 @@ function createField(meta) {
     }
 }
 
-export default ({fields, fieldCol, onSubmit}) => ({
+export default ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
     tag: 'form', 
     className: 'row p-2', 
     children: fields.map(f => {
         if (f.type === 'submit') {
             return {tag: 'div', className: 'col-md-12', children: [
                 createField(f),
-                createField({type: 'cancel', label: 'Cancelar'})
+                hideCancel ? {tag: 'span'} : createField({type: 'cancel', label: 'Cancelar'})
             ]};
         }
 

@@ -18,6 +18,7 @@ export default el => createEls('div', 'app-wrp container', el, [
                                 {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
                                 {type: 'submit', name: 'submit', label: 'Entrar'}
                             ],
+                            hideCancel: true,
                             onSubmit(auth) {                                
                                 service.login(auth).then(user => {
                                     if (! user.token) {

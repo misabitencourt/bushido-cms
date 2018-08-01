@@ -8,6 +8,7 @@ export default (el, field) => {
         const imageWrp = createEls('div', '', imageContainer, [
             {tag: 'div', bootstrap(el) {
                 el.style.position = 'absolute';
+                el.style.marginTop = '1rem';
             }, children: [
                 {tag: 'span', bootstrap(el) {
                     el.style.background = 'rgba(255, 255, 255, 0.6)';
