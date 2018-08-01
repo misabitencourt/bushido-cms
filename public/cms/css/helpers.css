@@ -1,3 +1,7 @@
+h1, h2, h3, h4, h5, p, label, td, th, li, a {
+    font-family: 'Dosis', sans-serif;
+}
+
 .hidden {
     display: none;
 }

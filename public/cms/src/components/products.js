@@ -67,7 +67,7 @@ const render = appEl => {
         const gridEl = await grid({
             columns: [
                 {label: 'Nome', prop: product => product.name },
-                {label: 'Descrição curta', prop: product => product.description }
+                {label: 'Descrição curta', prop: product => product.short_description }
             ],
 
             loadData() {
