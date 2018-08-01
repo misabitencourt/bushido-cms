@@ -3,15 +3,11 @@ const articleSrv = require('../services/articles');
 module.exports = app => {
     app.get('/cms/article', (req, res) => {
         articleSrv.retrieve('').then(articles => {
-            console.log(articles);
             return res.json(articles.map(article => ({
                 id: article.id,
                 title: article.title,
                 description: article.description,
-                menu: {
-                    id: article.menu,
-                    name: article.menuName
-                },
+                menu: article.menu,
                 text: article.text
             })));
         });
@@ -24,10 +20,7 @@ module.exports = app => {
                 id: article.id,
                 title: article.title,
                 description: article.description,
-                menu: {
-                    id: article.menu,
-                    name: article.menuName
-                },
+                menu: article.menu,
                 text: article.text
             })));
         });

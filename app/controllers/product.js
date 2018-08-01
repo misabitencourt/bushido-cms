@@ -5,9 +5,9 @@ module.exports = app => {
         productSrv.retrieve('').then(products => {
             return res.json(products.map(product => ({
                 id: product.id,
-                title: product.name,
-                description: product.short_description,
-                menu: product.long_description,
+                name: product.name,
+                short_description: product.short_description,
+                long_description: product.long_description,
                 photos: product.photos
             })));
         });
@@ -18,9 +18,9 @@ module.exports = app => {
         productSrv.retrieve(search).then(products => {
             return res.json(products.map(product => ({
                 id: product.id,
-                title: product.name,
-                description: product.short_description,
-                menu: product.long_description,
+                name: product.name,
+                short_description: product.short_description,
+                long_description: product.long_description,
                 protos: product.photos
             })));
         });
@@ -28,9 +28,9 @@ module.exports = app => {
 
     app.post('/cms/product/', (req, res) => {        
         productSrv.create({
-            title: req.body.name,
-            description: req.body.short_description,
-            menu: req.body.long_description,
+            name: req.body.name,
+            short_description: req.body.short_description,
+            long_description: req.body.long_description,
             photos: req.body.photos || []
         }).then(product => {
             return res.json(product);
@@ -52,8 +52,8 @@ module.exports = app => {
         productSrv.update({
             id: req.body.id,
             title: req.body.name,
-            description: req.body.short_description,
-            menu: req.body.long_description
+            short_description: req.body.short_description,
+            melong_descriptionnu: req.body.long_description
         }).then(product => {
             return res.json(product);
         });

@@ -1,6 +1,6 @@
 const cmsDb = require('../repos/db').cms;
 
-module.exports = () => cmsDb.schema.createTable('product_images', table => {
+module.exports = () => cmsDb.schema.createTable('product_photos', table => {
     table.increments();
     table.string('description');
     table.integer('product_id');

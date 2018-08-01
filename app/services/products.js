@@ -1,15 +1,34 @@
 const cms = require('../repos/cms');
 
+
+function retrievePictures(products) {
+    return Promise.all(products.map(product => {
+        return cms.retrieve({
+            modelName: 'product_photos',
+            filters: 'product_id = :product_id',
+            params: {product_id: product.id}
+        }).then(photos => {
+            product.photos = photos;
+            return product;
+        });
+    }));
+}
+
 module.exports.create = product => cms.create({
     modelName: 'products',
-    newRegister: product
-}).then(product => {
+    newRegister: {
+        name: product.name,
+        short_description: product.short_description,
+        long_description: product.long_description
+    }
+}).then(created => {
     return Promise.all(product.photos.map(photo => {
         return cms.create({
             modelName: 'product_photos',
             newRegister: {
-                description: photo.description,
-                data: photo.base64
+                description: '',
+                data: photo,
+                product_id: created.slice().pop()
             }
         });
     })).then(() => product);
@@ -20,12 +39,11 @@ module.exports.retrieve = search => {
         return cms.retrieve({
             modelName: 'products',
             filters: 'title LIKE :search OR description LIKE :search',
-            params: {search: `%${search || ''}%`},
-            leftJoins: [{table: 'product_images', localField: 'id', foreignField: 'products_id'}]
-        })
+            params: {search: `%${search || ''}%`}
+        }).then(products => retrievePictures(products))
     }
 
-    return cms.list({modelName: 'products'})
+    return cms.list({modelName: 'products'}).then(products => retrievePictures(products))
 };
 
 module.exports.update = product => cms.update({

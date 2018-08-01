@@ -1,13 +1,14 @@
 import icon from './icon';
-import {emitEvent} from '../common/event';
+import {emitEvent, addEvent} from '../common/event';
 
 export default (el, field) => {
     let imageContainer;
 
     const mainWrp = createEls('div', 'row', el, [
-        {tag: 'div', className: 'col-md-10'},
-        {tag: 'div', className: 'col-md-2', children: [
-            {tag: 'span', textContent: 'Add', on: ['click', () => {
+        {tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el},
+
+        {tag: 'div', className: 'col-md-12 mt-2 mb-5', children: [
+            {tag: 'a', attrs: {href: 'javascript:;'}, on: ['click', () => {
                 selectImage({
                     btnOkText: 'OK', 
                     btnCancelText: 'Cancel',
@@ -41,13 +42,13 @@ export default (el, field) => {
                     imageWrp.style.display = `inline-block`;
                     imageWrp.style.marginRight = `1rem`;
                 });
-            }]}
-        ]},
-
-        {tag: 'div', className: 'col-md-12 p-1'},
-
-        {tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el}
+            }], children: [
+                icon('add', 32, 32)
+            ]}
+        ]}
     ]);
 
     el.appendChild(mainWrp);
+
+    addEvent('form:reset', () => imageContainer.innerHTML = '');
 }

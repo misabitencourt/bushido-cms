@@ -1,37 +1,37 @@
 const cms = require('../repos/cms');
 
+function retrieveMenus(articles) {
+    return Promise.all(articles.map(article => {
+        return cms.retrieve({
+            modelName: 'menus',
+            filters: 'id = :id',
+            params: {id: article.menu}
+        }).then(menus => {
+            article.menu = menus[0];
+            return article;
+        });
+    }));
+}
+
 module.exports.create = article => cms.create({
     modelName: 'articles',
     newRegister: article
 });
 
 module.exports.retrieve = search => {
-    const leftJoins = [
-        {table: 'menus', localField: 'articles.id', foreignField: 'menus.id'}
-    ];
-
-    const select = ['articles.id', 
-                    'articles.title', 
-                    'articles.description', 
-                    'articles.text', 
-                    'articles.menu', 
-                    'menus.name as menuName'];
+    let list;
 
     if (search.trim()) {
-        return cms.retrieve({
-            select,
+        list = cms.retrieve({
             modelName: 'articles',
             filters: 'title LIKE :search OR description LIKE :search',
-            params: {search: `%${search || ''}%`},
-            leftJoins
+            params: {search: `%${search || ''}%`}
         })
+    } else {
+        list = cms.list({modelName: 'articles'})
     }
 
-    return cms.list({
-        select,
-        modelName: 'articles', 
-        leftJoins
-    })
+    return list.then(articles => retrieveMenus(articles))    
 };
 
 module.exports.update = article => cms.update({

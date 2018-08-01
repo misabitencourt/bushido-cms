@@ -84,6 +84,10 @@ export default ({fields, fieldCol, onSubmit}) => ({
                     data[el.dataset.attr] = contentEditable.innerHTML;
                 }
             });
+            getEls(el, '.image-list img').filter(el => el.dataset.fieldName).forEach(el => {
+                data[el.dataset.fieldName] = data[el.dataset.fieldName] || [];
+                data[el.dataset.fieldName].push(el.src);
+            })
 
             onSubmit(data, e);
         })

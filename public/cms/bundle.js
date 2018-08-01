@@ -205,14 +205,12 @@ const screens = [
     {name: 'product', label: 'Produtos'}
 ];
 
-var inputAcl = meta => ({tag: 'div', className: 'acl-wrp', children: screens.map(screen => {
-    return {tag: 'div', className: 'col-md-3', children: [
-        {tag: 'label', children: [
-            {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, skipbind: 1, acl: 1}},
-            {tag: 'span', textContent: screen.label}
-        ]}
-    ]}
-})})
+var inputAcl = meta => ({tag: 'div', className: 'col-md-12', children: screens.map(screen => {
+    return {tag: 'label', className: 'mr-5', children: [
+        {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, skipbind: 1, acl: 1}, className: 'mr-1'},
+        {tag: 'span', textContent: screen.label}
+    ]};
+})});
 
 const emitter = mitt();
 
@@ -398,9 +396,10 @@ var imageList = (el, field) => {
     let imageContainer;
 
     const mainWrp = createEls('div', 'row', el, [
-        {tag: 'div', className: 'col-md-10'},
-        {tag: 'div', className: 'col-md-2', children: [
-            {tag: 'span', textContent: 'Add', on: ['click', () => {
+        {tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el},
+
+        {tag: 'div', className: 'col-md-12 mt-2 mb-5', children: [
+            {tag: 'a', attrs: {href: 'javascript:;'}, on: ['click', () => {
                 selectImage({
                     btnOkText: 'OK', 
                     btnCancelText: 'Cancel',
@@ -434,15 +433,15 @@ var imageList = (el, field) => {
                     imageWrp.style.display = `inline-block`;
                     imageWrp.style.marginRight = `1rem`;
                 });
-            }]}
-        ]},
-
-        {tag: 'div', className: 'col-md-12 p-1'},
-
-        {tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el}
+            }], children: [
+                icon('add', 32, 32)
+            ]}
+        ]}
     ]);
 
     el.appendChild(mainWrp);
+
+    addEvent('form:reset', () => imageContainer.innerHTML = '');
 }
 
 function createField(meta) {
@@ -524,6 +523,10 @@ var form = ({fields, fieldCol, onSubmit}) => ({
                 if (contentEditable) {
                     data[el.dataset.attr] = contentEditable.innerHTML;
                 }
+            });
+            getEls(el, '.image-list img').filter(el => el.dataset.fieldName).forEach(el => {
+                data[el.dataset.fieldName] = data[el.dataset.fieldName] || [];
+                data[el.dataset.fieldName].push(el.src);
             });
 
             onSubmit(data, e);
@@ -869,7 +872,7 @@ const render = appEl => {
             {type: 'text', label: 'E-mail', name: 'email'},
             {type: 'text', label: 'Telefone', name: 'phone'},
             {type: 'text', label: 'Senha', name: 'password'},
-            {type: 'acl', label: 'Acesso', name: 'acl'},
+            {type: 'acl', label: 'Acesso', name: 'acl', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {

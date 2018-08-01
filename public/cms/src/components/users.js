@@ -15,7 +15,7 @@ const render = appEl => {
             {type: 'text', label: 'E-mail', name: 'email'},
             {type: 'text', label: 'Telefone', name: 'phone'},
             {type: 'text', label: 'Senha', name: 'password'},
-            {type: 'acl', label: 'Acesso', name: 'acl'},
+            {type: 'acl', label: 'Acesso', name: 'acl', fieldCol: 12},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
