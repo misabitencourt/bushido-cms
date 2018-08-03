@@ -4,6 +4,7 @@ import menus from './menus';
 import articles from './articles';
 import home from './home';
 import products from './products';
+import macros from './macros';
 
 export default [
     login,
@@ -11,5 +12,6 @@ export default [
     menus,
     articles,
     products,
-    home
+    home,
+    macros
 ]

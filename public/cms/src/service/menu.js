@@ -15,6 +15,10 @@ const menus = [
 
     {id: 'product', name: 'Produtos', tooltip: 'Cadastro de produtos', onclick() {
         window.location = '#/products';
+    }},
+
+    {id: 'macros', name: 'Macros', tooltip: 'Textos gerais', onclick() {
+        window.location = '#/macros';
     }}
 ];
 
