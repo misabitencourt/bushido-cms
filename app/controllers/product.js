@@ -1,6 +1,11 @@
 const productSrv = require('../services/products');
 
 module.exports = app => {
+    app.get('/cms/product/id/:id', (req, res) => {
+        const id = req.originalUrl.split('/').pop()*1;
+        productSrv.findById(id).then(product => res.json(product));
+    });
+
     app.get('/cms/product', (req, res) => {
         productSrv.retrieve('').then(products => {
             return res.json(products.map(product => ({
@@ -8,7 +13,6 @@ module.exports = app => {
                 name: product.name,
                 short_description: product.short_description,
                 long_description: product.long_description,
-                photos: product.photos,
                 price: product.price
             })));
         });
@@ -22,7 +26,6 @@ module.exports = app => {
                 name: product.name,
                 short_description: product.short_description,
                 long_description: product.long_description,
-                protos: product.photos,
                 price: product.price
             })));
         });

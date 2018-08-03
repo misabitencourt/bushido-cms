@@ -78,8 +78,10 @@ const render = appEl => {
             },
     
             onEdit(product) {
-                dataToForm(product, formEl);
-                formEl.dataset.id = product.id;
+                service.findById(product.id).then(product => {
+                    dataToForm(product, formEl);
+                    formEl.dataset.id = product.id;
+                });
             },
     
             onDelete(product) {

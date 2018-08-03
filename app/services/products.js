@@ -47,6 +47,28 @@ module.exports.retrieve = search => {
     return cms.list({modelName: 'products'}).then(products => retrievePictures(products))
 };
 
+module.exports.findById = id => {
+    return cms.list({
+        modelName: 'products',
+        filters: 'id = :id',
+        params: {id}
+    }).then(products => {
+        const product = products.pop()
+        if (! product) {
+            return null;
+        }
+
+        return cms.retrieve({
+            modelName: 'product_photos',
+            filters: 'product_id = :product_id',
+            params: {product_id: product.id}
+        }).then(photos => {
+            product.photos = photos;
+            return product;
+        });
+    });
+}
+
 module.exports.update = product => cms.update({
     modelName: 'products',
     id: product.id,

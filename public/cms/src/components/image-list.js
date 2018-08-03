@@ -1,5 +1,6 @@
 import icon from './icon';
 import {emitEvent, addEvent} from '../common/event';
+import imageResize from '../common/image-resize';
 
 export default (el, field) => {
     let imageContainer;
@@ -54,7 +55,11 @@ export default (el, field) => {
                     btnCancelText: 'Cancel',
                     forceFile: true,
                     selectDeviceText: 'Select device'
-                }).then(image => createImage(image));
+                }).then(image => {
+                    imageResize(image, {width: 800, height: 400}, 1).then(image => {
+                        createImage(image);
+                    });
+                });
             }], children: [
                 icon('add', 32, 32)
             ]}

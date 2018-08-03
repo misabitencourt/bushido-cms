@@ -3,6 +3,12 @@ import headers from './headers'
 
 export default {
 
+    async findById(id) {
+        let response = await fetch(`${config.API_URL}/cms/product/id/${id}`, {headers});
+        let json = await response.json();
+        return json;
+    },
+
     validate(data) {
         let errors = '';
 
