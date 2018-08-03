@@ -5,6 +5,7 @@ const createTableArticle = require('./create-table-article');
 const createProducts = require('./create-table-product');
 const createProductPhoto = require('./create-table-product-photo');
 const addPriceToProduct = require('./add-price-to-product');
+const createTableMacros = require('./create-table-macros');
 
 module.exports = [
     {id: 1, exec: createTableUsers},
@@ -13,5 +14,6 @@ module.exports = [
     {id: 4, exec: createTableArticle},
     {id: 5, exec: createProducts},
     {id: 6, exec: createProductPhoto},
-    {id: 7, exec: addPriceToProduct}
+    {id: 7, exec: addPriceToProduct},
+    {id: 8, exec: createTableMacros}
 ];
