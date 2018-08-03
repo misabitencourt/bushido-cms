@@ -8,7 +8,8 @@ module.exports = app => {
                 name: product.name,
                 short_description: product.short_description,
                 long_description: product.long_description,
-                photos: product.photos
+                photos: product.photos,
+                price: product.price
             })));
         });
     });
@@ -21,7 +22,8 @@ module.exports = app => {
                 name: product.name,
                 short_description: product.short_description,
                 long_description: product.long_description,
-                protos: product.photos
+                protos: product.photos,
+                price: product.price
             })));
         });
     });
@@ -31,9 +33,16 @@ module.exports = app => {
             name: req.body.name,
             short_description: req.body.short_description,
             long_description: req.body.long_description,
-            photos: req.body.photos || []
+            photos: req.body.photos || [],
+            price: req.body.price
         }).then(product => {
             return res.json(product);
+        });
+    });
+
+    app.post('/cms/product/image', (req, res) => {        
+        productSrv.createImage(req.body.id, req.body.image).then(created => {
+            return res.json(created);
         });
     });
 
@@ -50,10 +59,10 @@ module.exports = app => {
     app.put('/cms/product/:id', (req, res) => {
         const id = req.originalUrl.split('/').pop()*1;
         productSrv.update({
-            id: req.body.id,
-            title: req.body.name,
+            id,
             short_description: req.body.short_description,
-            melong_descriptionnu: req.body.long_description
+            long_description: req.body.long_description,
+            price: req.body.price
         }).then(product => {
             return res.json(product);
         });

@@ -19,7 +19,8 @@ module.exports.create = product => cms.create({
     newRegister: {
         name: product.name,
         short_description: product.short_description,
-        long_description: product.long_description
+        long_description: product.long_description,
+        price: product.price
     }
 }).then(created => {
     return Promise.all(product.photos.map(photo => {
@@ -58,8 +59,16 @@ module.exports.destroy = id => cms.destroy({
 });
 
 module.exports.destroyImage = id => cms.destroy({
-    modelName: 'product_images',
+    modelName: 'product_photos',
     id
 });
 
+module.exports.createImage = (id, image) => cms.create({
+    modelName: 'product_photos',
+    newRegister: {
+        description: '',
+        data: image,
+        product_id: id
+    }
+});
 

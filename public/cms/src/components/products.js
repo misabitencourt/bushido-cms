@@ -4,6 +4,7 @@ import service from '../service/products';
 import grid from '../components/grid';
 import {dataToForm} from '../common/form-bind';
 import error from '../dialogs/error';
+import { priceFormat } from '../common/number';
 
 const render = appEl => {
     let formEl, searchInput;
@@ -13,8 +14,9 @@ const render = appEl => {
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'short_description'},
+            {type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0},
             {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
-            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12},
+            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -67,7 +69,8 @@ const render = appEl => {
         const gridEl = await grid({
             columns: [
                 {label: 'Nome', prop: product => product.name },
-                {label: 'Descrição curta', prop: product => product.short_description }
+                {label: 'Descrição curta', prop: product => product.short_description },
+                {label: 'Valor', prop: product => priceFormat(product.price) }
             ],
 
             loadData() {

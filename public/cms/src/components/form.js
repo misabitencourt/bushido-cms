@@ -6,6 +6,10 @@ import {emitEvent} from '../common/event';
 
 function createField(meta) {
     switch(meta.type) {
+        case 'number':
+            return {tag: 'input', className: 'form-control', attrs: {type: 'number', 
+                        value: meta.label, placeholder: meta.placeholder || '', 
+                        min: meta.min, max: meta.max, step: meta.step, name: meta.name}};
         case 'submit':
             return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', 
                             value: meta.label, placeholder: meta.placeholder || ''}};

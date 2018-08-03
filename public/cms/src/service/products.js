@@ -63,6 +63,12 @@ export default {
         method: 'DELETE'
     }),
 
+    createImage: async (id, image) => fetch(`${config.API_URL}/cms/product/image`, {
+        body: JSON.stringify({id, image}),
+        headers,
+        method: 'POST'
+    }).then(res => res.json()),
+
     destroyImage: async id => fetch(`${config.API_URL}/cms/product/image/${id}`, {
         headers,
         method: 'DELETE'

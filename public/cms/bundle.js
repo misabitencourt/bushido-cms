@@ -394,11 +394,19 @@ var singleEntity = field => {
 
 var imageList = (el, field) => {
     let imageContainer;
+    let inEdition;
 
-    const createImage = image => {
+    const createImage = (image, id=null) => {
+        if ((! id) && inEdition && field.service && field.service.createImage) {
+            field.service.createImage(inEdition, image).then(created => {
+                id = created.slice().pop();
+            });
+        }
+
         const imageWrp = createEls('div', '', imageContainer, [
             {tag: 'div', bootstrap(el) {
                 el.style.position = 'absolute';
+                el.style.marginTop = '1rem';
             }, children: [
                 {tag: 'span', bootstrap(el) {
                     el.style.background = 'rgba(255, 255, 255, 0.6)';
@@ -409,6 +417,9 @@ var imageList = (el, field) => {
                 ], on: ['click', () => {
                     emitEvent('form:multiple-images-delete', field);
                     killEl(imageWrp);
+                    if (id && field.service && field.service.createImage) {
+                        field.service.destroyImage(id);
+                    }
                 }]}
             ]},
             {tag: 'img', attrs: {src: image}, bootstrap(el) {
@@ -445,14 +456,22 @@ var imageList = (el, field) => {
 
     addEvent('form:reset', () => imageContainer.innerHTML = '');
     addEvent('form:edit', data => {
+        inEdition = null;
+        if (data.id) {
+            inEdition = data.id;
+        }
         imageContainer.innerHTML = '';
         const list = data[field.name] || [];
-        list.filter(image => image.data).forEach(image => createImage(image.data));
+        list.filter(image => image.data).forEach(image => createImage(image.data, image.id));
     });
 }
 
 function createField(meta) {
     switch(meta.type) {
+        case 'number':
+            return {tag: 'input', className: 'form-control', attrs: {type: 'number', 
+                        value: meta.label, placeholder: meta.placeholder || '', 
+                        min: meta.min, max: meta.max, step: meta.step, name: meta.name}};
         case 'submit':
             return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', 
                             value: meta.label, placeholder: meta.placeholder || ''}};
@@ -488,14 +507,14 @@ function createField(meta) {
     }
 }
 
-var form = ({fields, fieldCol, onSubmit}) => ({
+var form = ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
     tag: 'form', 
     className: 'row p-2', 
     children: fields.map(f => {
         if (f.type === 'submit') {
             return {tag: 'div', className: 'col-md-12', children: [
                 createField(f),
-                createField({type: 'cancel', label: 'Cancelar'})
+                hideCancel ? {tag: 'span'} : createField({type: 'cancel', label: 'Cancelar'})
             ]};
         }
 
@@ -664,6 +683,7 @@ var login = el => createEls('div', 'app-wrp container', el, [
                                 {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
                                 {type: 'submit', name: 'submit', label: 'Entrar'}
                             ],
+                            hideCancel: true,
                             onSubmit(auth) {                                
                                 service.login(auth).then(user => {
                                     if (! user.token) {
@@ -1387,12 +1407,27 @@ var service$2 = {
         method: 'DELETE'
     }),
 
+    createImage: async (id, image) => fetch(`${config.API_URL}/cms/product/image`, {
+        body: JSON.stringify({id, image}),
+        headers,
+        method: 'POST'
+    }).then(res => res.json()),
+
     destroyImage: async id => fetch(`${config.API_URL}/cms/product/image/${id}`, {
         headers,
         method: 'DELETE'
     })
 
 }
+
+const priceFormat = str => {
+    str = str || '';
+    if (isNaN(str)) {
+        return '';
+    }
+
+    return `R$${parseFloat(str).toFixed(2)}`.split('.').join(',');
+};
 
 const render$3 = appEl => {
     let formEl, searchInput;
@@ -1402,8 +1437,9 @@ const render$3 = appEl => {
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'short_description'},
+            {type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0},
             {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
-            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12},
+            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$2},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -1456,7 +1492,8 @@ const render$3 = appEl => {
         const gridEl = await grid({
             columns: [
                 {label: 'Nome', prop: product => product.name },
-                {label: 'Descrição curta', prop: product => product.short_description }
+                {label: 'Descrição curta', prop: product => product.short_description },
+                {label: 'Valor', prop: product => priceFormat(product.price) }
             ],
 
             loadData() {
@@ -1472,7 +1509,7 @@ const render$3 = appEl => {
                 service$2.destroy(product.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'product excluído com sucesso'
+                        msg: 'Produto excluído com sucesso'
                     });
                     window.location.reload();    
                 });

@@ -3,8 +3,15 @@ import {emitEvent, addEvent} from '../common/event';
 
 export default (el, field) => {
     let imageContainer;
+    let inEdition;
 
-    const createImage = image => {
+    const createImage = (image, id=null) => {
+        if ((! id) && inEdition && field.service && field.service.createImage) {
+            field.service.createImage(inEdition, image).then(created => {
+                id = created.slice().pop();
+            });
+        }
+
         const imageWrp = createEls('div', '', imageContainer, [
             {tag: 'div', bootstrap(el) {
                 el.style.position = 'absolute';
@@ -19,6 +26,9 @@ export default (el, field) => {
                 ], on: ['click', () => {
                     emitEvent('form:multiple-images-delete', field);
                     killEl(imageWrp);
+                    if (id && field.service && field.service.createImage) {
+                        field.service.destroyImage(id)
+                    }
                 }]}
             ]},
             {tag: 'img', attrs: {src: image}, bootstrap(el) {
@@ -55,8 +65,12 @@ export default (el, field) => {
 
     addEvent('form:reset', () => imageContainer.innerHTML = '');
     addEvent('form:edit', data => {
-        imageContainer.innerHTML = ''
+        inEdition = null;
+        if (data.id) {
+            inEdition = data.id;
+        }
+        imageContainer.innerHTML = '';
         const list = data[field.name] || [];
-        list.filter(image => image.data).forEach(image => createImage(image.data));
+        list.filter(image => image.data).forEach(image => createImage(image.data, image.id));
     });
 }
