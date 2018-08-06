@@ -1,8 +1,19 @@
+import babel from 'rollup-plugin-babel';
+import { uglify } from 'rollup-plugin-uglify';
+import async from 'rollup-plugin-async';
+
 export default {
-    entry: 'public/cms/src/index.js',
+    input: 'public/cms/src/index.js',
     output: {
-        file: 'public/cms/bundle.js',
+        file: 'public/assets/bundle.js',
         format: 'iife',
-        name: 'cms'        
-    }    
+        name: 'app'        
+    },
+    plugins: [
+        async(),
+        babel({
+            exclude: 'node_modules/**'
+        }),
+        // uglify()
+    ]
 }
