@@ -5,21 +5,31 @@ function getMacroInput(macro={}) {
     switch(macro.type) {
         case '3':
             return {tag: 'div', className: 'form-group', children: [
-                {tag: 'input', className: 'form-control', attrs: {type: 'text', name: macro.name, placeholder}, on: ['change', e => {
-                    macro.strval = e.target.value
-                }]}
+                
+                macro.textval ? 
+                    {tag: 'img', attrs: {src: macro.textval, alt: 'Imagem selecionada'}}
+                        : {tag: 'span'},
+
+                {tag: 'button', className: 'btn btn-primary', textContent: 'Abrir imagem', on: ['click', e => {
+                        // TODO add img
+                    }]
+                }
             ]};
         case '2':
             return {tag: 'div', className: 'form-group', children: [
-                {tag: 'textarea', className: 'form-control', attrs: {name: macro.name, placeholder}, on: ['change', e => {
-                    macro.strval = e.target.value
-                }]}
+                {tag: 'textarea', className: 'form-control', 
+                    attrs: {name: macro.name, placeholder, rows: 10}, on: ['change', e => {
+                        macro.textval = e.target.value
+                    }]
+                }
             ]};
         default:
             return {tag: 'div', className: 'form-group', children: [
-                {tag: 'input', className: 'form-control', attrs: {type: 'text', name: macro.name, placeholder}, on: ['change', e => {
-                    macro.strval = e.target.value
-                }]}
+                {tag: 'input', className: 'form-control', 
+                    attrs: {type: 'text', name: macro.name, placeholder}, on: ['change', e => {
+                        macro.strval = e.target.value
+                    }]
+                }
             ]}
     }
 }
