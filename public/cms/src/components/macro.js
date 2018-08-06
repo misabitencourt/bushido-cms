@@ -1,6 +1,8 @@
+import { emitEvent } from '../common/event';
+import imageResize from '../common/image-resize';
 
-function getMacroInput(macro={}) {
-    const placeholder = 'Conteúdo'
+function getMacroInput(list, macro={}) {
+    const placeholder = 'Conteúdo';
 
     switch(macro.type) {
         case '3':
@@ -11,7 +13,14 @@ function getMacroInput(macro={}) {
                         : {tag: 'span'},
 
                 {tag: 'button', className: 'btn btn-primary', textContent: 'Abrir imagem', on: ['click', e => {
-                        // TODO add img
+                        selectImage({
+                            forceFile: true
+                        }).then(image => {
+                            imageResize(image, {width: 800, height: 400}, 1).then(image => {
+                                macro.textval = image;
+                                emitEvent('macros:refresh', macro);
+                            });
+                        });
                     }]
                 }
             ]};
@@ -53,7 +62,7 @@ export default list => ({
                     ]}
                 ]}
             ]},
-            getMacroInput(macroData)
+            getMacroInput(list, macroData)
         ]}))
     ) : (
         [
