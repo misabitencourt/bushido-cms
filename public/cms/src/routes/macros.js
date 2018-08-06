@@ -1,4 +1,4 @@
-import macros from '../components/menus';
+import macros from '../components/macros';
 
 export default {
     route: '#/macros',

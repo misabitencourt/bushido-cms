@@ -202,12 +202,14 @@ const screens = [
     {name: 'user', label: 'Usuários'},
     {name: 'menu', label: 'Menus'},
     {name: 'article', label: 'Artigos'},
-    {name: 'product', label: 'Produtos'}
+    {name: 'product', label: 'Produtos'},
+    {name: 'macros', label: 'Macros'}
 ];
 
 var inputAcl = meta => ({tag: 'div', className: 'col-md-12', children: screens.map(screen => {
     return {tag: 'label', className: 'mr-5', children: [
-        {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, skipbind: 1, acl: 1}, className: 'mr-1'},
+        {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, 
+            skipbind: 1, acl: 1}, className: 'mr-1'},
         {tag: 'span', textContent: screen.label}
     ]};
 })});
@@ -798,6 +800,10 @@ const menus = [
 
     {id: 'product', name: 'Produtos', tooltip: 'Cadastro de produtos', onclick() {
         window.location = '#/products';
+    }},
+
+    {id: 'macros', name: 'Macros', tooltip: 'Textos gerais', onclick() {
+        window.location = '#/macros';
     }}
 ];
 
@@ -1589,13 +1595,93 @@ var products = {
     }
 }
 
+function getMacroInput(macro={}) {
+    switch(macro.type) {
+        case '3':
+            return {tag: 'div', className: 'form-group', children: [
+                {tag: 'input', className: 'form-control', attr: {type: 'text', name: meta.name}}
+            ]};
+        case '2':
+            return {tag: 'div', className: 'form-group', children: [
+                {tag: 'textarea', className: 'form-control', attr: {name: meta.name}}
+            ]};
+        default:
+            return {tag: 'div', className: 'form-group', children: [
+                {tag: 'input', className: 'form-control', attr: {type: 'text', name: meta.name}}
+            ]}
+    }
+}
+
+var macro = list => ({
+    tag: 'div',
+    className: 'macro card',
+    children: list.length ? (
+        list.map(macroData => ({tag: 'div', className: 'card-body', children: [
+            {tag: 'div', className: 'row', children: [
+                {tag: 'div', className: 'col-md-6', children: [
+                    {tag: 'h3', textContent: macroData.name}
+                ]},
+                {tag: 'div', className: 'col-md-6 text-md-right pt-3', children: [
+                    {tag: 'select', className: 'form-control', children: [
+                        {tag: 'option', attrs: {value: '1'}, textContent: 'Texto pequeno'},
+                        {tag: 'option', attrs: {value: '2'}, textContent: 'Texto extenso'},
+                        {tag: 'option', attrs: {value: '3'}, textContent: 'Imagem'}
+                    ]}
+                ]}
+            ]},
+            getMacroInput(macroData)
+        ]}))
+    ) : (
+        [
+            {tag: 'div', className: 'card-body', children: [
+                {tag: 'h3', className: 'text-warning', textContent: 'Nenhum conteúdo inserido'}
+            ]}
+        ]
+    )
+})
+
+const render$4 = appEl => {
+    const wrpEl = document.createElement('div');
+    const render = (macros=[]) => {
+        wrpEl.innerHTML = '';
+        createEls('div', '', wrpEl, [
+            {tag: 'div', className: 'row', children: [
+                {tag: 'div', className: 'col-md-9', children: [
+                    {tag: 'h2', textContent: 'Cadastro de textos gerais', className: 'mb-3'}
+                ]},
+                {tag: 'div', className: 'col-md-3 pt-2 text-md-right', children: [
+                    {tag: 'a', attrs: {href: 'javascript:;'}, children: [
+                        icon('add', 32, 32, ['click', () => {
+                            macros.push({});
+                            render();
+                        }])
+                    ]}
+                ]}
+            ]},
+            macro(macros)
+        ]);
+        addEvent('macros:refresh', macros => render(macros));
+    };
+        
+    appEl.appendChild(template(wrpEl, 'macros'));
+    render();
+};
+
+var macros = {
+    route: '#/macros',
+    render(el) {
+        render$4(el);
+    }
+}
+
 var routes = [
     login$1,
     users,
     menus$1,
     articles,
     products,
-    home
+    home,
+    macros
 ]
 
 function routeChange (el, hasRouteChange) {
