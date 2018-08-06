@@ -5,9 +5,9 @@ import async from 'rollup-plugin-async';
 export default {
     input: 'public/cms/src/index.js',
     output: {
-        file: 'public/assets/bundle.js',
+        file: 'public/cms/bundle.js',
         format: 'iife',
-        name: 'app'        
+        name: 'cms'        
     },
     plugins: [
         async(),

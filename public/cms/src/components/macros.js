@@ -14,12 +14,12 @@ const render = appEl => {
                 ]},
                 {tag: 'div', className: 'col-md-3 pt-2 text-md-right', children: [
                     {tag: 'a', attrs: {href: 'javascript:;'}, children: [
-                        icon('add', 32, 32, ['click', () => {
-                            macros.push({});
-                            render();
-                        }])
+                        icon('add', 32, 32)                        
                     ]}
-                ]}
+                ], on: ['click', () => {
+                    macros.push({});
+                    render(macros);
+                }]}
             ]},
             macro(macros)
         ]);

@@ -191,32 +191,18 @@ window.elRemoveEvt = (el) => {
     return clone
 };
 
-var card = ({title, body}) => ({tag: 'div', className: 'card', children: [
-    {tag: 'div', className: 'card-body', children: [
-        {tag: 'h5', className: 'card-title', textContent: title},
-        {tag: 'div', className: 'card-body', children: body}
-    ]}
-]})
+var card = (({ title, body }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }] }] }));
 
-const screens = [
-    {name: 'user', label: 'Usuários'},
-    {name: 'menu', label: 'Menus'},
-    {name: 'article', label: 'Artigos'},
-    {name: 'product', label: 'Produtos'},
-    {name: 'macros', label: 'Macros'}
-];
+const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }];
 
-var inputAcl = meta => ({tag: 'div', className: 'col-md-12', children: screens.map(screen => {
-    return {tag: 'label', className: 'mr-5', children: [
-        {tag: 'input', attrs: {type: 'checkbox', name: `acl_${screen.name}`, 
-            skipbind: 1, acl: 1}, className: 'mr-1'},
-        {tag: 'span', textContent: screen.label}
-    ]};
-})});
+var inputAcl = (meta => ({ tag: 'div', className: 'col-md-12', children: screens.map(screen => {
+        return { tag: 'label', className: 'mr-5', children: [{ tag: 'input', attrs: { type: 'checkbox', name: `acl_${screen.name}`,
+                    skipbind: 1, acl: 1 }, className: 'mr-1' }, { tag: 'span', textContent: screen.label }] };
+    }) }));
 
 const emitter = mitt();
 
-const addEvent = (evt, fn) =>  {
+const addEvent = (evt, fn) => {
     emitter.on(evt, fn);
 };
 
@@ -232,17 +218,7 @@ const defaults = {
     // onChange: html => console.log(html),
     defaultParagraphSeparator: 'div',
     styleWithCSS: false,
-    actions: [
-        'bold',
-        'underline',
-        'italic',
-        'olist',
-        'ulist',
-        'line',
-        'link',
-        'heading1',
-        'heading2'
-    ],
+    actions: ['bold', 'underline', 'italic', 'olist', 'ulist', 'line', 'link', 'heading1', 'heading2'],
 
     classes: {
         actionbar: 'pell-actionbar',
@@ -252,7 +228,7 @@ const defaults = {
     }
 };
 
-var wysiwyg = (el, name, options) => {
+var wysiwyg = ((el, name, options) => {
     const data = Object.assign({}, defaults);
 
     data.actions = data.actions.slice();
@@ -262,7 +238,7 @@ var wysiwyg = (el, name, options) => {
         title: 'Adicionar imagem',
         result: () => {
             selectImage({
-                btnOkText: 'OK', 
+                btnOkText: 'OK',
                 btnCancelText: 'Cancel',
                 forceFile: true,
                 selectDeviceText: 'Select device'
@@ -283,16 +259,30 @@ var wysiwyg = (el, name, options) => {
     data.element = el;
     pell.init(data);
     addEvent('form:edit', data => {
-        if (el && el.parentElement && (! data[name])) {
+        if (el && el.parentElement && !data[name]) {
             return;
         }
         getEl(el, '[contenteditable]').innerHTML = data[name];
     });
 
     addEvent('form:reset', data => getEl(el, '[contenteditable]').innerHTML = '');
+});
+
+function __async(g) {
+  return new Promise(function (s, j) {
+    function c(a, x) {
+      try {
+        var r = g[x ? "throw" : "next"](a);
+      } catch (e) {
+        j(e);return;
+      }r.done ? s(r.value) : Promise.resolve(r.value).then(c, d);
+    }function d(e) {
+      c(e, 1);
+    }c();
+  });
 }
 
-var icon = (name, width, height, events) => ({
+var icon = ((name, width, height, events) => ({
     tag: 'img',
     attrs: {
         src: `img/${name}.svg`,
@@ -300,19 +290,19 @@ var icon = (name, width, height, events) => ({
         height: height || 16
     },
     on: events
-});
+}));
 
-var singleEntity = field => {
+var singleEntity = (field => {
     let ddMenu;
 
-    if (! field.service) {
+    if (!field.service) {
         console.error(field, 'You forgot the service');
-        return {tag: 'div'};
+        return { tag: 'div' };
     }
 
-    if (! field.descriptionField) {
+    if (!field.descriptionField) {
         console.error(field, 'You forgot the descriptionField');
-        return {tag: 'div'};
+        return { tag: 'div' };
     }
 
     const elements = {};
@@ -324,23 +314,18 @@ var singleEntity = field => {
         addClass(elements.remove, 'hidden');
         elements.input.focus();
     }
-    
+
     return {
-        tag: 'div', 
+        tag: 'div',
         className: 'row',
-        children: [
-            {tag: 'div', className: 'col-md-10', children: [
-                {tag: 'input', className: 'form-control', bootstrap(el) {
+        children: [{ tag: 'div', className: 'col-md-10', children: [{ tag: 'input', className: 'form-control', bootstrap(el) {
                     elements.input = el;
-                }}
-            ]},
-            {tag: 'div', className: 'col-md-2 hidden', 
-                children: [icon('delete', 16, 16)], bootstrap(el) {
+                } }] }, { tag: 'div', className: 'col-md-2 hidden',
+            children: [icon('delete', 16, 16)], bootstrap(el) {
                 elements.remove = el;
                 el.addEventListener('click', () => cleanInput());
                 addEvent('form:reset', () => cleanInput());
-            }}
-        ],
+            } }],
         bootstrap(el) {
             elements.mainEl = el;
             el.dataset.name = field.name;
@@ -363,36 +348,36 @@ var singleEntity = field => {
 
             elements.input.addEventListener('keyup', () => {
                 window.inputSearchDebounce && window.clearTimeout(window.inputSearchDebounce);
-                window.inputSearchDebounce = setTimeout(async () => {
+                window.inputSearchDebounce = setTimeout(() => __async(function* () {
                     if (ddMenu) {
                         killEl(ddMenu);
                     }
 
-                    if (! elements.input.value) {
+                    if (!elements.input.value) {
                         return;
                     }
 
-                    let list = await field.service.retrieve(elements.input.value);  
-                    
-                    if (! list.length) {
+                    let list = yield field.service.retrieve(elements.input.value);
+
+                    if (!list.length) {
                         return;
                     }
 
                     ddMenu = createEls('div', 'dropdown-menu show dismissable', el, list.map(item => {
                         const textContent = item[field.descriptionField];
                         return {
-                            tag: 'a', 
-                            className: 'dropdown-item', 
-                            attrs: {href: 'javascript:;'}, 
+                            tag: 'a',
+                            className: 'dropdown-item',
+                            attrs: { href: 'javascript:;' },
                             textContent,
                             on: ['click', () => addItem(item)]
-                        }
+                        };
                     }));
-                }, 600);
+                }()), 600);
             });
         }
     };
-}
+});
 
 function createCanvas(dimension) {
     var canvas = document.createElement('canvas');
@@ -403,12 +388,12 @@ function createCanvas(dimension) {
 
     return canvas;
 }
-var imageResize = (src, dimension, compress) => new Promise((callback, error) => {
+var imageResize = ((src, dimension, compress) => new Promise((callback, error) => {
     const image = new Image();
-    
+
     image.onerror = () => error();
 
-    image.onload = function() {
+    image.onload = function () {
         let canvas,
             ctx,
             ratio,
@@ -419,11 +404,11 @@ var imageResize = (src, dimension, compress) => new Promise((callback, error) =>
         dimension = dimension || {};
         if (dimension.width > dimension.height) {
             image.width = dimension.width || 800;
-            ratio = (image.width * 100) / realWidth;
+            ratio = image.width * 100 / realWidth;
             image.height = realHeight * (ratio / 100);
         } else {
             image.height = dimension.height || 600;
-            ratio = (image.height * 100) / realHeight;
+            ratio = image.height * 100 / realHeight;
             image.width = realWidth * (ratio / 100);
         }
         canvas = createCanvas({ width: image.width, height: image.height });
@@ -435,44 +420,37 @@ var imageResize = (src, dimension, compress) => new Promise((callback, error) =>
     };
 
     image.src = src;
-});
+}));
 
-var imageList = (el, field) => {
+var imageList = ((el, field) => {
     let imageContainer;
     let inEdition;
 
-    const createImage = (image, id=null) => {
-        if ((! id) && inEdition && field.service && field.service.createImage) {
+    const createImage = (image, id = null) => {
+        if (!id && inEdition && field.service && field.service.createImage) {
             field.service.createImage(inEdition, image).then(created => {
                 id = created.slice().pop();
             });
         }
 
-        const imageWrp = createEls('div', '', imageContainer, [
-            {tag: 'div', bootstrap(el) {
+        const imageWrp = createEls('div', '', imageContainer, [{ tag: 'div', bootstrap(el) {
                 el.style.position = 'absolute';
                 el.style.marginTop = '1rem';
-            }, children: [
-                {tag: 'span', bootstrap(el) {
+            }, children: [{ tag: 'span', bootstrap(el) {
                     el.style.background = 'rgba(255, 255, 255, 0.6)';
                     el.style.padding = '1rem';
                     el.style.cursor = 'pointer';
-                }, children: [
-                    icon('delete', 16, 16)
-                ], on: ['click', () => {
+                }, children: [icon('delete', 16, 16)], on: ['click', () => {
                     emitEvent('form:multiple-images-delete', field);
                     killEl(imageWrp);
                     if (id && field.service && field.service.createImage) {
                         field.service.destroyImage(id);
                     }
-                }]}
-            ]},
-            {tag: 'img', attrs: {src: image}, bootstrap(el) {
+                }] }] }, { tag: 'img', attrs: { src: image }, bootstrap(el) {
                 el.dataset.fieldName = field.name;
                 el.style.height = `180px`;
-            }}
-        ]);
-        
+            } }]);
+
         imageWrp.style.overflowX = `hidden`;
         imageWrp.style.width = `100%`;
         imageWrp.style.maxWidth = `180px`;
@@ -480,26 +458,18 @@ var imageList = (el, field) => {
         imageWrp.style.marginRight = `1rem`;
     };
 
-    const mainWrp = createEls('div', 'row', el, [
-        {tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el},
-
-        {tag: 'div', className: 'col-md-12 mt-2 mb-5', children: [
-            {tag: 'a', attrs: {href: 'javascript:;'}, on: ['click', () => {
+    const mainWrp = createEls('div', 'row', el, [{ tag: 'div', className: 'col-md-12', bootstrap: el => imageContainer = el }, { tag: 'div', className: 'col-md-12 mt-2 mb-5', children: [{ tag: 'a', attrs: { href: 'javascript:;' }, on: ['click', () => {
                 selectImage({
-                    btnOkText: 'OK', 
+                    btnOkText: 'OK',
                     btnCancelText: 'Cancel',
                     forceFile: true,
                     selectDeviceText: 'Select device'
                 }).then(image => {
-                    imageResize(image, {width: 800, height: 400}, 1).then(image => {
+                    imageResize(image, { width: 800, height: 400 }, 1).then(image => {
                         createImage(image);
                     });
                 });
-            }], children: [
-                icon('add', 32, 32)
-            ]}
-        ]}
-    ]);
+            }], children: [icon('add', 32, 32)] }] }]);
 
     el.appendChild(mainWrp);
 
@@ -513,71 +483,65 @@ var imageList = (el, field) => {
         const list = data[field.name] || [];
         list.filter(image => image.data).forEach(image => createImage(image.data, image.id));
     });
-}
+});
 
 function createField(meta) {
-    switch(meta.type) {
+    switch (meta.type) {
         case 'number':
-            return {tag: 'input', className: 'form-control', attrs: {type: 'number', 
-                        value: meta.label, placeholder: meta.placeholder || '', 
-                        min: meta.min, max: meta.max, step: meta.step, name: meta.name}};
+            return { tag: 'input', className: 'form-control', attrs: { type: 'number',
+                    value: meta.label, placeholder: meta.placeholder || '',
+                    min: meta.min, max: meta.max, step: meta.step, name: meta.name } };
         case 'submit':
-            return {tag: 'input', className: 'btn btn-outline-success mr-2', attrs: {type: 'submit', 
-                            value: meta.label, placeholder: meta.placeholder || ''}};
+            return { tag: 'input', className: 'btn btn-outline-success mr-2', attrs: { type: 'submit',
+                    value: meta.label, placeholder: meta.placeholder || '' } };
         case 'cancel':
-            return {tag: 'button', className: 'btn btn-outline-secondary', attrs: {type: 'reset', 
-                            placeholder: meta.placeholder || ''}, textContent: meta.label};
+            return { tag: 'button', className: 'btn btn-outline-secondary', attrs: { type: 'reset',
+                    placeholder: meta.placeholder || '' }, textContent: meta.label };
         case 'password':
-            return {tag: 'input', className: 'form-control', attrs: {type: 'password', 
-                            name: meta.name, placeholder: meta.placeholder || ''}};
+            return { tag: 'input', className: 'form-control', attrs: { type: 'password',
+                    name: meta.name, placeholder: meta.placeholder || '' } };
         case 'wysiwyg':
-            return {tag: 'div', className: 'input-wysiwyg border', attrs: {'data-attr': meta.name}, bootstrap(el) {
-                el.dataset.skipbind = '1';
-                wysiwyg(el, meta.name);
-            }};
+            return { tag: 'div', className: 'input-wysiwyg border', attrs: { 'data-attr': meta.name }, bootstrap(el) {
+                    el.dataset.skipbind = '1';
+                    wysiwyg(el, meta.name);
+                } };
 
         case 'single-entity':
-            return {tag: 'div', className: 'single-entity', attrs: {'data-attr': meta.name}, bootstrap(el) {
-                el.dataset.skipbind = '1';
-                createEls('div', 'single-entity-container', el, [singleEntity(meta)]);
-            }};
+            return { tag: 'div', className: 'single-entity', attrs: { 'data-attr': meta.name }, bootstrap(el) {
+                    el.dataset.skipbind = '1';
+                    createEls('div', 'single-entity-container', el, [singleEntity(meta)]);
+                } };
 
         case 'image-list':
-            return {tag: 'div', className: 'image-list', attrs: {'data-attr': meta.name}, bootstrap(el) {
-                el.dataset.skipbind = '1';
-                imageList(el, meta);
-            }};
+            return { tag: 'div', className: 'image-list', attrs: { 'data-attr': meta.name }, bootstrap(el) {
+                    el.dataset.skipbind = '1';
+                    imageList(el, meta);
+                } };
 
         case 'acl':
             return inputAcl(meta);
-            
+
         default:
-            return {tag: 'input', className: 'form-control', attrs: {type: 'text', name: meta.name, placeholder: meta.placeholder || ''}};
+            return { tag: 'input', className: 'form-control', attrs: { type: 'text', name: meta.name, placeholder: meta.placeholder || '' } };
     }
 }
 
-var form = ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
-    tag: 'form', 
-    className: 'row p-2', 
+var form = (({ fields, fieldCol, onSubmit, hideCancel = false }) => ({
+    tag: 'form',
+    className: 'row p-2',
     children: fields.map(f => {
         if (f.type === 'submit') {
-            return {tag: 'div', className: 'col-md-12', children: [
-                createField(f),
-                hideCancel ? {tag: 'span'} : createField({type: 'cancel', label: 'Cancelar'})
-            ]};
+            return { tag: 'div', className: 'col-md-12', children: [createField(f), hideCancel ? { tag: 'span' } : createField({ type: 'cancel', label: 'Cancelar' })] };
         }
 
-        return {tag: 'div', className: `form-group col-md-${f.fieldCol || fieldCol || 4}`, children: [
-            {tag: 'label', className: f.label ? '' : 'invisible', textContent: f.label },
-            createField(f)
-        ]};
-    }), 
+        return { tag: 'div', className: `form-group col-md-${f.fieldCol || fieldCol || 4}`, children: [{ tag: 'label', className: f.label ? '' : 'invisible', textContent: f.label }, createField(f)] };
+    }),
 
     bootstrap: el => {
         el.addEventListener('reset', () => emitEvent('form:reset'));
         el.addEventListener('submit', e => {
             e.preventDefault();
-            let data = {};        
+            let data = {};
             const fields = getEls(el, 'input, select, textarea').filter(el => el.type !== 'submit');
 
             fields.filter(input => !input.dataset.skipbind).forEach(input => {
@@ -607,11 +571,11 @@ var form = ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
             onSubmit(data, e);
         });
     }
-})
+}));
 
 var config = {
     API_URL: 'http://localhost:3000'
-}
+};
 
 const headers = {
     'Accept': 'application/json, text/plain, */*',
@@ -627,190 +591,161 @@ var service = {
     validate(data) {
         let errors = '';
 
-        if (! data.name) {
+        if (!data.name) {
             errors += ' Informe o nome.';
         }
 
-        if (! data.email) {
+        if (!data.email) {
             errors += ' Informe o e-mail.';
         }
 
-        if (! data.phone) {
+        if (!data.phone) {
             errors += ' Informe o telefone.';
         }
 
-        if (! data.password) {
+        if (!data.password) {
             errors += ' Informe a senha.';
         }
 
         return errors;
     },
 
-    login: async auth => {
-        const response = await fetch(`${config.API_URL}/cms/login`, {
+    login: auth => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/login`, {
             headers,
             method: 'POST',
             body: JSON.stringify(auth)
-        });        
-        const json = await response.json();
-        if (! json.token) {
+        });
+        const json = yield response.json();
+        if (!json.token) {
             return null;
         }
         sessionStorage.user = JSON.stringify(json);
         sessionStorage.token = json.token;
-        
+
         return json;
-    },
+    }()),
 
-    retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`, {headers});
-        let json = await response.json();
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/user/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
         return json;
-    },
+    }()),
 
-
-    create: async user => {
-        const response = await fetch(`${config.API_URL}/cms/user/`, {
+    create: user => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/user/`, {
             method: 'POST',
             headers,
             body: JSON.stringify(user)
         });
 
-        let newUser = await response.json();
+        let newUser = yield response.json();
 
         return newUser;
-    },
+    }()),
 
-
-    update: async (id, user) => {
-        const params = {id};
+    update: (id, user) => __async(function* () {
+        const params = { id };
         for (let i in user) {
             params[`${i}`] = user[i];
         }
-        const response = await fetch(`${config.API_URL}/cms/user/${id}`, {
+        const response = yield fetch(`${config.API_URL}/cms/user/${id}`, {
             method: 'PUT',
             body: JSON.stringify(params),
             headers
         });
 
-        let newUser = await response.json();
+        let newUser = yield response.json();
 
         return newUser;
-    },
+    }()),
 
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/user/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
 
-    destroy: async id => fetch(`${config.API_URL}/cms/user/${id}`, {
-        headers,
-        method: 'DELETE'
-    })
+};
 
-}
-
-var msg = (txt, type) => {
+var msg = ((txt, type) => {
     const alert = createEls('div', `alert alert-${type} fade show`, document.body, [], txt);
     alert.style.position = 'fixed';
     alert.style.zIndex = '99999';
     alert.style.right = '13px';
     alert.style.bottom = '13px';
     setTimeout(() => document.body.removeChild(alert), 5e3);
-}
+});
 
-var error = txt => msg(txt, 'danger')
+var error = (txt => msg(txt, 'danger'));
 
-var login = el => createEls('div', 'app-wrp container', el, [
-    {tag: 'div', className: 'login-wrp', children: [
-        {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-4'},
-            {tag: 'div', className: 'col-md-4 text-md-center', children: [
-                card({
-                    title: 'Login',
-                    body: [
-                        form({
-                            fieldCol: 12,
-                            fields: [
-                                {type: 'email', name: 'email', placeholder: 'E-mail', required: true},
-                                {type: 'password', name: 'passwd', placeholder: 'Senha', required: true},
-                                {type: 'submit', name: 'submit', label: 'Entrar'}
-                            ],
-                            hideCancel: true,
-                            onSubmit(auth) {                                
-                                service.login(auth).then(user => {
-                                    if (! user.token) {
-                                        return error('Usuário ou senha inválidos');
-                                    }
-                                    window.location.reload();
-                                });
+var login = (el => createEls('div', 'app-wrp container', el, [{ tag: 'div', className: 'login-wrp', children: [{ tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-4' }, { tag: 'div', className: 'col-md-4 text-md-center', children: [card({
+                title: 'Login',
+                body: [form({
+                    fieldCol: 12,
+                    fields: [{ type: 'email', name: 'email', placeholder: 'E-mail', required: true }, { type: 'password', name: 'passwd', placeholder: 'Senha', required: true }, { type: 'submit', name: 'submit', label: 'Entrar' }],
+                    hideCancel: true,
+                    onSubmit(auth) {
+                        service.login(auth).then(user => {
+                            if (!user.token) {
+                                return error('Usuário ou senha inválidos');
                             }
-                        })
-                    ]
-                })
-            ]},            
-            {tag: 'div', className: 'col-md-4'}
-        ]}
-    ], bootstrap(el) {
+                            window.location.reload();
+                        });
+                    }
+                })]
+            })] }, { tag: 'div', className: 'col-md-4' }] }], bootstrap(el) {
         if (window.innerHeight > 500) {
             el.style.paddingTop = '13%';
         }
-    }}
-]);
+    } }]));
 
 var login$1 = {
     route: '#/login',
     render(el) {
         login(el);
     }
-}
+};
 
-var topnav = menus => ({
+var topnav = (menus => ({
     tag: 'ul',
     className: 'nav nav-tabs bg-primary',
     children: menus.map(menu => ({
         tag: 'li',
         className: 'nav-item',
-        children: [
-            {tag: 'a', className: `nav-link ${menu.active ? 'active' : ''}`, 
-                textContent: menu.name,
-                attrs: {href: 'javascript:;'}, on: ['click', menu.onclick], title: menu.tooltip}
-        ]
+        children: [{ tag: 'a', className: `nav-link ${menu.active ? 'active' : ''}`,
+            textContent: menu.name,
+            attrs: { href: 'javascript:;' }, on: ['click', menu.onclick], title: menu.tooltip }]
     }))
-})
+}));
 
 let currentUser;
 
 function getCurrentUser() {
-    if (! currentUser) {
+    if (!currentUser) {
         currentUser = JSON.parse(sessionStorage.user);
     }
 
     return currentUser;
 }
 
-const menus = [
-    {id: 'user', name: 'Usuários', tooltip: 'Cadastro de usuários', onclick() {
+const menus = [{ id: 'user', name: 'Usuários', tooltip: 'Cadastro de usuários', onclick() {
         window.location = '#/users';
-    }},
-
-    {id: 'menu', name: 'Menus', tooltip: 'Cadastro de menus', onclick() {
+    } }, { id: 'menu', name: 'Menus', tooltip: 'Cadastro de menus', onclick() {
         window.location = '#/menus';
-    }},
-
-    {id: 'article', name: 'Artigos', tooltip: 'Cadastro de artigos', onclick() {
+    } }, { id: 'article', name: 'Artigos', tooltip: 'Cadastro de artigos', onclick() {
         window.location = '#/articles';
-    }},
-
-    {id: 'product', name: 'Produtos', tooltip: 'Cadastro de produtos', onclick() {
+    } }, { id: 'product', name: 'Produtos', tooltip: 'Cadastro de produtos', onclick() {
         window.location = '#/products';
-    }},
-
-    {id: 'macros', name: 'Macros', tooltip: 'Textos gerais', onclick() {
+    } }, { id: 'macros', name: 'Macros', tooltip: 'Textos gerais', onclick() {
         window.location = '#/macros';
-    }}
-];
+    } }];
 
 var menuService = {
 
     getAcl() {
-        if (! this.acl) {
+        if (!this.acl) {
             this.acl = getCurrentUser().acl.split(';').filter(acl => !!acl);
         }
 
@@ -822,28 +757,23 @@ var menuService = {
         return menus.filter(menu => acl.indexOf(menu.id) !== -1);
     }
 
-}
+};
 
-var template = (child, currentMenuId = '') => {
+var template = ((child, currentMenuId = '') => {
     const menus = menuService.getMainMenu();
     menus.forEach(m => m.active = false);
     const currentMenu = menus.find(m => m.id === currentMenuId);
-    
+
     if (currentMenu) {
         currentMenu.active = true;
     }
 
-    return createEls('div', 'app-wrp', document.body, [    
-        topnav(menus),    
-        {tag: 'div', className: 'container', children: [
-            {tag: 'div', className: 'p-3', bootstrap(el) {
+    return createEls('div', 'app-wrp', document.body, [topnav(menus), { tag: 'div', className: 'container', children: [{ tag: 'div', className: 'p-3', bootstrap(el) {
                 el.appendChild(child);
-            }}
-        ]}    
-    ])
-}
+            } }] }]);
+});
 
-var grid = async ({columns, loadData, onEdit, onDelete}) => {
+var grid = (({ columns, loadData, onEdit, onDelete }) => __async(function* () {
     const table = document.createElement('table');
     table.className = 'table table-bordered table-stripped';
 
@@ -860,7 +790,7 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
 
     const tbody = table.querySelector('tbody');
 
-    let data = await loadData();
+    let data = yield loadData();
 
     data.forEach(item => {
         const row = document.createElement('tr');
@@ -901,12 +831,12 @@ var grid = async ({columns, loadData, onEdit, onDelete}) => {
     });
 
     return table;
-}
+}()));
 
 const dataToForm = (data, form) => {
     for (let i in data) {
         let input = form.querySelector(`[name="${i}"]`);
-        if (! input) {
+        if (!input) {
             continue;
         }
         if (input.tagName === 'TEXTAREA') {
@@ -938,7 +868,7 @@ const dataToForm = (data, form) => {
             data[img.dataset.fieldName].push(img.src);
         });
     });
-    
+
     emitEvent(`form:edit`, data);
 };
 
@@ -947,14 +877,7 @@ const render = appEl => {
 
     const formObj = form({
         fieldCol: 3,
-        fields: [
-            {type: 'text', label: 'Nome', name: 'name'},
-            {type: 'text', label: 'E-mail', name: 'email'},
-            {type: 'text', label: 'Telefone', name: 'phone'},
-            {type: 'text', label: 'Senha', name: 'password'},
-            {type: 'acl', label: 'Acesso', name: 'acl', fieldCol: 12},
-            {type: 'submit', label: 'Salvar'}
-        ],
+        fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'E-mail', name: 'email' }, { type: 'text', label: 'Telefone', name: 'phone' }, { type: 'text', label: 'Senha', name: 'password' }, { type: 'acl', label: 'Acesso', name: 'acl', fieldCol: 12 }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
             const errors = service.validate(data);
             if (errors) {
@@ -980,56 +903,43 @@ const render = appEl => {
             }
         }
     });
-        
+
     const wrpEl = document.createElement('div');
-    const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de usuários'},
-        formObj,
-        {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
-                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
-                    bootstrap: el => searchInput = el}
-            ]}
-        ]}
-    ]);
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de usuários' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service.retrieve(searchInput.value);    
+    const loadData = () => service.retrieve(searchInput.value);
 
-    const renderGrid = async () => {
+    const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
             mainEl.removeChild(oldGrid);
         }
-        const gridEl = await grid({
-            columns: [
-                {label: 'Nome', prop: user => user.name },
-                {label: 'E-mail', prop: user => user.email },
-                {label: 'Telefone', prop: user => user.phone }
-            ],
+        const gridEl = yield grid({
+            columns: [{ label: 'Nome', prop: user => user.name }, { label: 'E-mail', prop: user => user.email }, { label: 'Telefone', prop: user => user.phone }],
 
             loadData() {
                 return loadData();
             },
-    
+
             onEdit(user) {
                 dataToForm(user, formEl);
                 formEl.dataset.id = user.id;
             },
-    
+
             onDelete(user) {
                 service.destroy(user.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Usuário excluído com sucesso'
                     });
-                    window.location.reload();    
+                    window.location.reload();
                 });
             }
         });
         mainEl.appendChild(gridEl);
-    };
+    }());
 
     searchInput.addEventListener('keyup', () => {
         window.searchTimeout && window.clearTimeout(window.searchTimeout);
@@ -1045,79 +955,73 @@ var users = {
     render(el) {
         render(el);
     }
-}
+};
 
 var menuSrv = {
 
     validate(data) {
         let errors = '';
 
-        if (! data.name) {
+        if (!data.name) {
             errors += ' Informe o nome.';
         }
 
-        if (! data.description) {
+        if (!data.description) {
             errors += ' Informe a descrição.';
         }
 
         return errors;
     },
 
-    retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/menu/${encodeURIComponent(search)}`, {headers});
-        let json = await response.json();
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/menu/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
         return json;
-    },
+    }()),
 
-
-    create: async user => {
-        const response = await fetch(`${config.API_URL}/cms/menu/`, {
+    create: user => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/menu/`, {
             method: 'POST',
             headers,
             body: JSON.stringify(user)
         });
 
-        let newUser = await response.json();
+        let newUser = yield response.json();
 
         return newUser;
-    },
+    }()),
 
-
-    update: async (id, user) => {
-        const params = {id};
+    update: (id, user) => __async(function* () {
+        const params = { id };
         for (let i in user) {
             params[`${i}`] = user[i];
         }
-        const response = await fetch(`${config.API_URL}/cms/menu/${id}`, {
+        const response = yield fetch(`${config.API_URL}/cms/menu/${id}`, {
             method: 'PUT',
             body: JSON.stringify(params),
             headers
         });
 
-        let newUser = await response.json();
+        let newUser = yield response.json();
 
         return newUser;
-    },
+    }()),
 
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/menu/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
 
-    destroy: async id => fetch(`${config.API_URL}/cms/menu/${id}`, {
-        headers,
-        method: 'DELETE'
-    })
-
-}
+};
 
 const render$1 = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
         fieldCol: 3,
-        fields: [
-            {type: 'text', label: 'Nome', name: 'name'},
-            {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'number', label: 'Ordem', name: 'order'},
-            {type: 'submit', label: 'Salvar'}
-        ],
+        fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'number', label: 'Ordem', name: 'order' }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
             const errors = menuSrv.validate(data);
             if (errors) {
@@ -1143,56 +1047,43 @@ const render$1 = appEl => {
             }
         }
     });
-        
+
     const wrpEl = document.createElement('div');
-    const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de menus do site'},
-        formObj,
-        {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
-                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
-                    bootstrap: el => searchInput = el}
-            ]}
-        ]}
-    ]);
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de menus do site' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => menuSrv.retrieve(searchInput.value);    
+    const loadData = () => menuSrv.retrieve(searchInput.value);
 
-    const renderGrid = async () => {
+    const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
             mainEl.removeChild(oldGrid);
         }
-        const gridEl = await grid({
-            columns: [
-                {label: 'Nome', prop: menu => menu.name },
-                {label: 'Descrição', prop: menu => menu.description },
-                {label: 'Ordem', prop: menu => menu.order }
-            ],
+        const gridEl = yield grid({
+            columns: [{ label: 'Nome', prop: menu => menu.name }, { label: 'Descrição', prop: menu => menu.description }, { label: 'Ordem', prop: menu => menu.order }],
 
             loadData() {
                 return loadData();
             },
-    
+
             onEdit(menu) {
                 dataToForm(menu, formEl);
                 formEl.dataset.id = menu.id;
             },
-    
+
             onDelete(menu) {
                 menuSrv.destroy(menu.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Menu excluído com sucesso'
                     });
-                    window.location.reload();    
+                    window.location.reload();
                 });
             }
         });
         mainEl.appendChild(gridEl);
-    };
+    }());
 
     searchInput.addEventListener('keyup', () => {
         window.searchTimeout && window.clearTimeout(window.searchTimeout);
@@ -1208,84 +1099,77 @@ var menus$1 = {
     render(el) {
         render$1(el);
     }
-}
+};
 
 var service$1 = {
 
     validate(data) {
         let errors = '';
 
-        if (! data.title) {
+        if (!data.title) {
             errors += ' Informe o título.';
         }
 
-        if (! data.description) {
+        if (!data.description) {
             errors += ' Informe a descrição.';
         }
 
-        if (! data.text) {
+        if (!data.text) {
             errors += ' Digite um texto.';
         }
 
         return errors;
     },
 
-    retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/article/${encodeURIComponent(search)}`, {headers});
-        let json = await response.json();
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/article/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
         return json;
-    },
+    }()),
 
-
-    create: async article => {
-        const response = await fetch(`${config.API_URL}/cms/article/`, {
+    create: article => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/article/`, {
             method: 'POST',
             headers,
             body: JSON.stringify(article)
         });
 
-        let newArticle = await response.json();
+        let newArticle = yield response.json();
 
         return newArticle;
-    },
+    }()),
 
-
-    update: async (id, article) => {
-        const params = {id};
+    update: (id, article) => __async(function* () {
+        const params = { id };
         for (let i in article) {
             params[`${i}`] = article[i];
         }
-        const response = await fetch(`${config.API_URL}/cms/article/${id}`, {
+        const response = yield fetch(`${config.API_URL}/cms/article/${id}`, {
             method: 'PUT',
             body: JSON.stringify(params),
             headers
         });
 
-        let newArticle = await response.json();
+        let newArticle = yield response.json();
 
         return newArticle;
-    },
+    }()),
 
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/article/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
 
-    destroy: async id => fetch(`${config.API_URL}/cms/article/${id}`, {
-        headers,
-        method: 'DELETE'
-    })
-
-}
+};
 
 const render$2 = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
         fieldCol: 3,
-        fields: [
-            {type: 'text', label: 'Título', name: 'title'},
-            {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
-            {type: 'wysiwyg', name: 'text', fieldCol: 12},
-            {type: 'submit', label: 'Salvar'}
-        ],
+        fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name' }, { type: 'wysiwyg', name: 'text', fieldCol: 12 }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
             const errors = service$1.validate(data);
             if (errors) {
@@ -1311,56 +1195,43 @@ const render$2 = appEl => {
             }
         }
     });
-        
+
     const wrpEl = document.createElement('div');
-    const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de Artigos'},
-        formObj,
-        {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
-                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
-                    bootstrap: el => searchInput = el}
-            ]}
-        ]}
-    ]);
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Artigos' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$1.retrieve(searchInput.value);    
+    const loadData = () => service$1.retrieve(searchInput.value);
 
-    const renderGrid = async () => {
+    const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
             mainEl.removeChild(oldGrid);
         }
-        const gridEl = await grid({
-            columns: [
-                {label: 'Título', prop: article => article.title },
-                {label: 'Descrição', prop: article => article.description },
-                {label: 'Menu', prop: article => (article.menu || {}).name || '' }
-            ],
+        const gridEl = yield grid({
+            columns: [{ label: 'Título', prop: article => article.title }, { label: 'Descrição', prop: article => article.description }, { label: 'Menu', prop: article => (article.menu || {}).name || '' }],
 
             loadData() {
                 return loadData();
             },
-    
+
             onEdit(article) {
                 dataToForm(article, formEl);
                 formEl.dataset.id = article.id;
             },
-    
+
             onDelete(article) {
                 service$1.destroy(article.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'article excluído com sucesso'
                     });
-                    window.location.reload();    
+                    window.location.reload();
                 });
             }
         });
         mainEl.appendChild(gridEl);
-    };
+    }());
 
     searchInput.addEventListener('keyup', () => {
         window.searchTimeout && window.clearTimeout(window.searchTimeout);
@@ -1376,108 +1247,109 @@ var articles = {
     render(el) {
         render$2(el);
     }
-}
+};
 
-var homePage = appEl => {
+var homePage = (appEl => {
     const wrpEl = document.createElement('div');
 
-    createEls('div', 'home-page', wrpEl, [
-        {tag: 'h1', textContent: 'Bem vindo'},
-        {tag: 'p', textContent: 'Através deste sistema você poderá modificar as informações que serão exibidas no website.'},
-        {tag: 'p', textContent: 'Utilize a ferramenta com prudência.'}
-    ]);
+    createEls('div', 'home-page', wrpEl, [{ tag: 'h1', textContent: 'Bem vindo' }, { tag: 'p', textContent: 'Através deste sistema você poderá modificar as informações que serão exibidas no website.' }, { tag: 'p', textContent: 'Utilize a ferramenta com prudência.' }]);
 
     appEl.appendChild(template(wrpEl, 'home'));
-}
+});
 
 var home = {
     home: true,
     route: '#/home',
     render(el) {
-       homePage(el);
+        homePage(el);
     }
-}
+};
 
 var service$2 = {
 
-    async findById(id) {
-        let response = await fetch(`${config.API_URL}/cms/product/id/${id}`, {headers});
-        let json = await response.json();
-        return json;
+    findById(id) {
+        return __async(function* () {
+            let response = yield fetch(`${config.API_URL}/cms/product/id/${id}`, { headers });
+            let json = yield response.json();
+            return json;
+        }());
     },
 
     validate(data) {
         let errors = '';
 
-        if (! data.name) {
+        if (!data.name) {
             errors += ' Informe o nome.';
         }
 
-        if (! data.short_description) {
+        if (!data.short_description) {
             errors += ' Informe a descrição curta.';
         }
 
-        if (! (data.photos && data.photos.length)) {
+        if (!(data.photos && data.photos.length)) {
             errors += ' Selecione uma foto.';
         }
 
         return errors;
     },
 
-    retrieve: async search => {
-        let response = await fetch(`${config.API_URL}/cms/product/${encodeURIComponent(search)}`, {headers});
-        let json = await response.json();
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/product/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
         return json;
-    },
+    }()),
 
-
-    create: async user => {
-        const response = await fetch(`${config.API_URL}/cms/product/`, {
+    create: user => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/product/`, {
             method: 'POST',
             headers,
             body: JSON.stringify(user)
         });
 
-        let newUser = await response.json();
+        let newUser = yield response.json();
 
         return newUser;
-    },
+    }()),
 
-
-    update: async (id, user) => {
-        const params = {id};
+    update: (id, user) => __async(function* () {
+        const params = { id };
         for (let i in user) {
             params[`${i}`] = user[i];
         }
-        const response = await fetch(`${config.API_URL}/cms/product/${id}`, {
+        const response = yield fetch(`${config.API_URL}/cms/product/${id}`, {
             method: 'PUT',
             body: JSON.stringify(params),
             headers
         });
 
-        let newUser = await response.json();
+        let newUser = yield response.json();
 
         return newUser;
-    },
+    }()),
 
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/product/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }()),
 
-    destroy: async id => fetch(`${config.API_URL}/cms/product/${id}`, {
-        headers,
-        method: 'DELETE'
-    }),
+    createImage: (id, image) => __async(function* () {
+        return fetch(`${config.API_URL}/cms/product/image`, {
+            body: JSON.stringify({ id, image }),
+            headers,
+            method: 'POST'
+        }).then(res => res.json());
+    }()),
 
-    createImage: async (id, image) => fetch(`${config.API_URL}/cms/product/image`, {
-        body: JSON.stringify({id, image}),
-        headers,
-        method: 'POST'
-    }).then(res => res.json()),
+    destroyImage: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/product/image/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
 
-    destroyImage: async id => fetch(`${config.API_URL}/cms/product/image/${id}`, {
-        headers,
-        method: 'DELETE'
-    })
-
-}
+};
 
 const priceFormat = str => {
     str = str || '';
@@ -1493,14 +1365,7 @@ const render$3 = appEl => {
 
     const formObj = form({
         fieldCol: 3,
-        fields: [
-            {type: 'text', label: 'Nome', name: 'name'},
-            {type: 'text', label: 'Descrição', name: 'short_description'},
-            {type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0},
-            {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
-            {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$2},
-            {type: 'submit', label: 'Salvar'}
-        ],
+        fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'short_description' }, { type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0 }, { type: 'wysiwyg', name: 'long_description', fieldCol: 12 }, { type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$2 }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
             const errors = service$2.validate(data);
             if (errors) {
@@ -1526,58 +1391,45 @@ const render$3 = appEl => {
             }
         }
     });
-        
+
     const wrpEl = document.createElement('div');
-    const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de Produtos'},
-        formObj,
-        {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-8'},
-            {tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [
-                {tag: 'input', className: 'form-control', attrs: {placeholder: 'Pesquisar'},
-                    bootstrap: el => searchInput = el}
-            ]}
-        ]}
-    ]);
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Produtos' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$2.retrieve(searchInput.value);    
+    const loadData = () => service$2.retrieve(searchInput.value);
 
-    const renderGrid = async () => {
+    const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
             mainEl.removeChild(oldGrid);
         }
-        const gridEl = await grid({
-            columns: [
-                {label: 'Nome', prop: product => product.name },
-                {label: 'Descrição curta', prop: product => product.short_description },
-                {label: 'Valor', prop: product => priceFormat(product.price) }
-            ],
+        const gridEl = yield grid({
+            columns: [{ label: 'Nome', prop: product => product.name }, { label: 'Descrição curta', prop: product => product.short_description }, { label: 'Valor', prop: product => priceFormat(product.price) }],
 
             loadData() {
                 return loadData();
             },
-    
+
             onEdit(product) {
                 service$2.findById(product.id).then(product => {
                     dataToForm(product, formEl);
                     formEl.dataset.id = product.id;
                 });
             },
-    
+
             onDelete(product) {
                 service$2.destroy(product.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Produto excluído com sucesso'
                     });
-                    window.location.reload();    
+                    window.location.reload();
                 });
             }
         });
         mainEl.appendChild(gridEl);
-    };
+    }());
 
     searchInput.addEventListener('keyup', () => {
         window.searchTimeout && window.clearTimeout(window.searchTimeout);
@@ -1593,76 +1445,46 @@ var products = {
     render(el) {
         render$3(el);
     }
-}
+};
 
-function getMacroInput(macro={}) {
-    switch(macro.type) {
+function getMacroInput(macro = {}) {
+    const placeholder = 'Conteúdo';
+
+    switch (macro.type) {
         case '3':
-            return {tag: 'div', className: 'form-group', children: [
-                {tag: 'input', className: 'form-control', attr: {type: 'text', name: meta.name}}
-            ]};
+            return { tag: 'div', className: 'form-group', children: [{ tag: 'input', className: 'form-control', attrs: { type: 'text', name: macro.name, placeholder }, on: ['change', e => {
+                        macro.strval = e.target.value;
+                    }] }] };
         case '2':
-            return {tag: 'div', className: 'form-group', children: [
-                {tag: 'textarea', className: 'form-control', attr: {name: meta.name}}
-            ]};
+            return { tag: 'div', className: 'form-group', children: [{ tag: 'textarea', className: 'form-control', attrs: { name: macro.name, placeholder }, on: ['change', e => {
+                        macro.strval = e.target.value;
+                    }] }] };
         default:
-            return {tag: 'div', className: 'form-group', children: [
-                {tag: 'input', className: 'form-control', attr: {type: 'text', name: meta.name}}
-            ]}
+            return { tag: 'div', className: 'form-group', children: [{ tag: 'input', className: 'form-control', attrs: { type: 'text', name: macro.name, placeholder }, on: ['change', e => {
+                        macro.strval = e.target.value;
+                    }] }] };
     }
 }
 
-var macro = list => ({
+var macro$1 = (list => ({
     tag: 'div',
     className: 'macro card',
-    children: list.length ? (
-        list.map(macroData => ({tag: 'div', className: 'card-body', children: [
-            {tag: 'div', className: 'row', children: [
-                {tag: 'div', className: 'col-md-6', children: [
-                    {tag: 'h3', textContent: macroData.name}
-                ]},
-                {tag: 'div', className: 'col-md-6 text-md-right pt-3', children: [
-                    {tag: 'select', className: 'form-control', children: [
-                        {tag: 'option', attrs: {value: '1'}, textContent: 'Texto pequeno'},
-                        {tag: 'option', attrs: {value: '2'}, textContent: 'Texto extenso'},
-                        {tag: 'option', attrs: {value: '3'}, textContent: 'Imagem'}
-                    ]}
-                ]}
-            ]},
-            getMacroInput(macroData)
-        ]}))
-    ) : (
-        [
-            {tag: 'div', className: 'card-body', children: [
-                {tag: 'h3', className: 'text-warning', textContent: 'Nenhum conteúdo inserido'}
-            ]}
-        ]
-    )
-})
+    children: list.length ? list.map(macroData => ({ tag: 'div', className: 'card-body', children: [{ tag: 'div', className: 'row mb-2', children: [{ tag: 'div', className: 'col-md-6', children: [{ tag: 'input', className: 'form-control', attrs: { type: 'text', placeholder: 'Nome único' }, on: ['change', e => {
+                        macro.name = e.target.value;
+                    }] }] }, { tag: 'div', className: 'col-md-6 text-md-right', children: [{ tag: 'select', className: 'form-control', children: [{ tag: 'option', attrs: { value: '1' }, textContent: 'Texto pequeno' }, { tag: 'option', attrs: { value: '2' }, textContent: 'Texto extenso' }, { tag: 'option', attrs: { value: '3' }, textContent: 'Imagem' }] }] }] }, getMacroInput(macroData)] })) : [{ tag: 'div', className: 'card-body', children: [{ tag: 'h3', className: 'text-warning', textContent: 'Nenhum conteúdo inserido' }] }]
+}));
 
 const render$4 = appEl => {
     const wrpEl = document.createElement('div');
-    const render = (macros=[]) => {
+    const render = (macros = []) => {
         wrpEl.innerHTML = '';
-        createEls('div', '', wrpEl, [
-            {tag: 'div', className: 'row', children: [
-                {tag: 'div', className: 'col-md-9', children: [
-                    {tag: 'h2', textContent: 'Cadastro de textos gerais', className: 'mb-3'}
-                ]},
-                {tag: 'div', className: 'col-md-3 pt-2 text-md-right', children: [
-                    {tag: 'a', attrs: {href: 'javascript:;'}, children: [
-                        icon('add', 32, 32, ['click', () => {
-                            macros.push({});
-                            render();
-                        }])
-                    ]}
-                ]}
-            ]},
-            macro(macros)
-        ]);
+        createEls('div', '', wrpEl, [{ tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-9', children: [{ tag: 'h2', textContent: 'Cadastro de textos gerais', className: 'mb-3' }] }, { tag: 'div', className: 'col-md-3 pt-2 text-md-right', children: [{ tag: 'a', attrs: { href: 'javascript:;' }, children: [icon('add', 32, 32)] }], on: ['click', () => {
+                    macros.push({});
+                    render(macros);
+                }] }] }, macro$1(macros)]);
         addEvent('macros:refresh', macros => render(macros));
     };
-        
+
     appEl.appendChild(template(wrpEl, 'macros'));
     render();
 };
@@ -1672,46 +1494,38 @@ var macros = {
     render(el) {
         render$4(el);
     }
-}
+};
 
-var routes = [
-    login$1,
-    users,
-    menus$1,
-    articles,
-    products,
-    home,
-    macros
-]
+var routes = [login$1, users, menus$1, articles, products, home, macros];
 
-function routeChange (el, hasRouteChange) {
+function routeChange(el, hasRouteChange) {
     let route = window.location.hash;
     const currentUser = window.sessionStorage.user;
 
-    if (! currentUser) {
+    if (!currentUser) {
         route = '#/login';
     }
 
     const render = el => {
         const routeFn = routes.find(r => r.route === route);
-        if (! routeFn) {
+        if (!routeFn) {
             return window.location = '#/home';
         }
         routeFn.render(el);
-        if (sessionStorage.flash) {            
+        if (sessionStorage.flash) {
             const msgData = JSON.parse(sessionStorage.flash);
             msg(msgData.msg, msgData.type);
             sessionStorage.flash = '';
         }
     };
 
-    if (! render) {
+    if (!render) {
         return console.error('Route not found');
     }
 
     render(el);
 
-    if (! hasRouteChange) {
+    if (!hasRouteChange) {
         window.addEventListener('hashchange', e => {
             el.innerHTML = '';
             routeChange(el, true);
