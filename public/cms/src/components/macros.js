@@ -17,7 +17,7 @@ const render = appEl => {
                         icon('add', 32, 32)                        
                     ]}
                 ], on: ['click', () => {
-                    macros.push({});
+                    macros.push({__state: 'edition'});
                     render(macros);
                 }]}
             ]},

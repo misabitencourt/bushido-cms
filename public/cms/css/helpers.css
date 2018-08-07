@@ -9,3 +9,8 @@ h1, h2, h3, h4, h5, p, label, td, th, li, a {
 .login-wrp h5.card-title {
     font-size: 2rem;
 }
+
+input.form-control,
+select.form-control {
+    height: 41px;
+}
