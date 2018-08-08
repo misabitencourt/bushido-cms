@@ -1,5 +1,7 @@
 import { emitEvent } from '../common/event';
 import imageResize from '../common/image-resize';
+import macroSrv from '../service/macros';
+import msg from '../dialogs/msg';
 
 function getMacroInput(list, macro={}) {
     const placeholder = 'Conteúdo';
@@ -79,8 +81,18 @@ export default list => ({
                                 macroData.__state = '';
                                 emitEvent('macros:refresh', list);
                             }]},
-                            {tag: 'button', className: 'btn btn-success', textContent: 'Salvar', on: ['click', () => {
-                                console.log('TODO')
+                            {tag: 'button', className: 'btn btn-success', textContent: 'Salvar', on: ['click', async () => {
+                                try {
+                                    if (macroData.id) {
+                                        await macroSrv.update(macroData.id, macroData);
+                                    } else {
+                                        await macroSrv.create(macroData);
+                                    }
+                                } catch (e) {
+                                    return msg(e.msg || 'Erro ao salvar texto geral');
+                                }
+                                
+                                msg('Salvo com sucesso', 'success');                               
                             }]}
                         ]}
                     ) : (

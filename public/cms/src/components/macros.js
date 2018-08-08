@@ -2,8 +2,9 @@ import template from './template';
 import icon from './icon';
 import macro from './macro';
 import { addEvent } from '../common/event';
+import service from '../service/macros';
 
-const render = appEl => {
+const render = async appEl => {
     const wrpEl = document.createElement('div');
     const render = (macros=[]) => {
         wrpEl.innerHTML = '';
@@ -27,7 +28,8 @@ const render = appEl => {
     };
         
     appEl.appendChild(template(wrpEl, 'macros'));
-    render();
+    const macros = await service.retrieve('');
+    render(macros);
 };
 
 export default render;

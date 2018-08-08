@@ -2,7 +2,8 @@ const cms = require('../repos/cms');
 
 module.exports.create = macro => cms.create({
     modelName: 'macros',
-    newRegister: macro
+    newRegister: macro,
+    limit: 999
 });
 
 module.exports.retrieve = search => {
@@ -10,7 +11,8 @@ module.exports.retrieve = search => {
         return cms.retrieve({
             modelName: 'macros',
             filters: 'name LIKE :search OR description LIKE :search',
-            params: {search: `%${search || ''}%`}
+            params: {search: `%${search || ''}%`},
+            limit: 999
         })
     }
 

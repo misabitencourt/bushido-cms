@@ -1,61 +1,65 @@
-const menuSrv = require('../services/menus');
+const macroSrv = require('../services/macros');
 
 module.exports = app => {
-    app.get('/cms/macro', (req, res) => {
-        menuSrv.retrieve('').then(menus => {
-            return res.json(menus.map(macro => ({
+    app.get('/cms/macros', (req, res) => {
+        macroSrv.retrieve('').then(macros => {
+            return res.json(macros.map(macro => ({
                 id: macro.id,
                 name: macro.name,
                 description: macro.description,
                 strval: macro.strval,
-                textval: macro.textval
+                textval: macro.textval,
+                type: macro.type
             })));
         });
     });
 
-    app.get('/cms/macro/:search', (req, res) => {
+    app.get('/cms/macros/:search', (req, res) => {
         const search = req.originalUrl.split('/').pop();
-        menuSrv.retrieve(search).then(menus => {
-            return res.json(menus.map(macro => ({
+        macroSrv.retrieve(search).then(macros => {
+            return res.json(macros.map(macro => ({
                 id: macro.id,
                 name: macro.name,
                 description: macro.description,
                 strval: macro.strval,
-                textval: macro.textval
+                textval: macro.textval,
+                type: macro.type
             })));
         });
     });
 
-    app.post('/cms/macro/', (req, res) => {        
-        menuSrv.create({
-            name: req.body.name,
-            description: req.body.description,
-            strval: req.body.strval,
-            textval: req.body.textval
+    app.post('/cms/macros/', (req, res) => {        
+        macroSrv.create({
+            name: req.body.name || '',
+            description: req.body.description || '',
+            strval: req.body.strval || '',
+            textval: req.body.textval || '',
+            type: req.body.type || '1'
         }).then(macro => {
             return res.json(macro);
         });
     });
 
-    app.put('/cms/macro/:id', (req, res) => {        
+    app.put('/cms/macros/:id', (req, res) => {        
         const id = req.originalUrl.split('/').pop()*1;
-        menuSrv.update({
+        macroSrv.update({
             id: req.body.id,
-            name: req.body.name,
-            description: req.body.description,
-            strval: req.body.strval,
-            textval: req.body.textval
+            name: req.body.name || '',
+            description: req.body.description || '',
+            strval: req.body.strval || '',
+            textval: req.body.textval || '',
+            type: req.body.type || '1'
         }).then(macro => {
             return res.json(macro);
         });
     });
 
-    app.delete('/cms/macro/:id', (req, res) => {
+    app.delete('/cms/macros/:id', (req, res) => {
         const id = req.originalUrl.split('/').pop()*1;
         if (isNaN(id)) {
             return res.status(400);
         }
-        menuSrv.destroy(id).then(() => {
+        macroSrv.destroy(id).then(() => {
             return res.json({ok: true});
         });
     });

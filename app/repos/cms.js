@@ -2,7 +2,7 @@ const db = require('./db').cms;
 
 module.exports.create = ({modelName, newRegister}) => db(modelName).insert(newRegister);
 
-module.exports.list = ({select, modelName, leftJoins}) => {
+module.exports.list = ({select, modelName, leftJoins, limit=15}) => {
     let query = db(modelName);
     
     if (select) {
@@ -15,7 +15,7 @@ module.exports.list = ({select, modelName, leftJoins}) => {
         });
     }
     
-    return query.orderBy(`${modelName}.id`, 'desc').limit(15);
+    return query.orderBy(`${modelName}.id`, 'desc').limit(limit);
 }
 
 module.exports.retrieve = ({modelName, filters, params, select, from, leftJoins, limit=100}) => {

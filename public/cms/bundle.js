@@ -1447,6 +1447,65 @@ var products = {
     }
 };
 
+var macroSrv = {
+
+    validate(data) {
+        let errors = '';
+
+        if (!data.name) {
+            errors += ' Informe um nome único';
+        }
+
+        if (!(data.strval && data.textval)) {
+            errors += ' Informe a descrição.';
+        }
+
+        return errors;
+    },
+
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/macros/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
+        return json;
+    }()),
+
+    create: macro => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/macros/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(macro)
+        });
+
+        let newUser = yield response.json();
+
+        return newUser;
+    }()),
+
+    update: (id, macro) => __async(function* () {
+        const params = { id };
+        for (let i in macro) {
+            params[`${i}`] = macro[i];
+        }
+        const response = yield fetch(`${config.API_URL}/cms/macros/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newUser = yield response.json();
+
+        return newUser;
+    }()),
+
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/macros/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
+
+};
+
 function getMacroInput(list, macro = {}) {
     const placeholder = 'Conteúdo';
 
@@ -1491,15 +1550,25 @@ var macro = (list => ({
                             }
                             macroData.__state = '';
                             emitEvent('macros:refresh', list);
-                        }] }, { tag: 'button', className: 'btn btn-success', textContent: 'Salvar', on: ['click', () => {
-                            console.log('TODO');
-                        }] }] } : { tag: 'div', className: 'text-md-right', children: [{ tag: 'button', className: 'btn btn-primary', textContent: 'Editar', on: ['click', () => {
+                        }] }, { tag: 'button', className: 'btn btn-success', textContent: 'Salvar', on: ['click', () => __async(function* () {
+                            try {
+                                if (macroData.id) {
+                                    yield macroSrv.update(macroData.id, macroData);
+                                } else {
+                                    yield macroSrv.create(macroData);
+                                }
+                            } catch (e) {
+                                return msg(e.msg || 'Erro ao salvar texto geral');
+                            }
+
+                            msg('Salvo com sucesso', 'success');
+                        }())] }] } : { tag: 'div', className: 'text-md-right', children: [{ tag: 'button', className: 'btn btn-primary', textContent: 'Editar', on: ['click', () => {
                             macroData.__state = 'edition';
                             emitEvent('macros:refresh', list);
                         }] }] }] }] }] })) : [{ tag: 'div', className: 'card-body', children: [{ tag: 'h3', className: 'text-warning', textContent: 'Nenhum conteúdo inserido' }] }]
 }));
 
-const render$4 = appEl => {
+const render$4 = appEl => __async(function* () {
     const wrpEl = document.createElement('div');
     const render = (macros = []) => {
         wrpEl.innerHTML = '';
@@ -1511,8 +1580,9 @@ const render$4 = appEl => {
     };
 
     appEl.appendChild(template(wrpEl, 'macros'));
-    render();
-};
+    const macros = yield macroSrv.retrieve('');
+    render(macros);
+}());
 
 var macros = {
     route: '#/macros',
