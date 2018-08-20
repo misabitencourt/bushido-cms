@@ -1562,7 +1562,16 @@ var macro = (list => ({
                             }
 
                             msg('Salvo com sucesso', 'success');
-                        }())] }] } : { tag: 'div', className: 'text-md-right', children: [{ tag: 'button', className: 'btn btn-primary', textContent: 'Editar', on: ['click', () => {
+                        }())] }] } : { tag: 'div', className: 'text-md-right', children: [{ tag: 'button', className: 'btn btn-danger', textContent: 'Deletar', on: ['click', () => {
+                            const done = () => {
+                                list.splice(list.indexOf(macroData), 1);
+                                emitEvent('macros:refresh', list);
+                            };
+                            if (macroData.id) {
+                                return macroSrv.destroy(macroData.id).then(done);
+                            }
+                            done();
+                        }] }, { tag: 'button', className: 'btn btn-primary', textContent: 'Editar', on: ['click', () => {
                             macroData.__state = 'edition';
                             emitEvent('macros:refresh', list);
                         }] }] }] }] }] })) : [{ tag: 'div', className: 'card-body', children: [{ tag: 'h3', className: 'text-warning', textContent: 'Nenhum conteúdo inserido' }] }]
