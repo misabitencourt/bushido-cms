@@ -28,6 +28,11 @@ export const dataToForm = (data, form) => {
         });
     }
 
+    // Single images
+    Array.from(form.querySelectorAll('.single-image')).forEach(imageWrp => {
+        // TODO
+    });
+
     // Multiple images
     Array.from(form.querySelectorAll('.image-list')).forEach(imageWrp => {
         Array.from(imageWrp.querySelectorAll('img[data-field-name]')).forEach(img => {

@@ -193,7 +193,7 @@ window.elRemoveEvt = (el) => {
 
 var card = (({ title, body }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }] }] }));
 
-const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }];
+const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }];
 
 var inputAcl = (meta => ({ tag: 'div', className: 'col-md-12', children: screens.map(screen => {
         return { tag: 'label', className: 'mr-5', children: [{ tag: 'input', attrs: { type: 'checkbox', name: `acl_${screen.name}`,
@@ -485,8 +485,23 @@ var imageList = ((el, field) => {
     });
 });
 
+const render = (el, selected = null) => {
+    el.innerHTML = '';
+
+    return createEls('div', 'input-image-inner', el, [selected ? {} : { tag: 'span' }, { tag: 'div', className: 'pt-2 text-md-center', children: [{ tag: 'button', className: 'btn btn-sm btn-primary', on: ['click', () => {
+                // TODO
+            }], children: [icon('add', 24, 24)] }, { tag: 'button', className: 'btn btn-sm btn-primary', on: ['click', () => {
+                // TODO
+            }], children: [icon('remove', 24, 24)] }] }]);
+};
+
 function createField(meta) {
     switch (meta.type) {
+        case 'input-image':
+            return { tag: 'div', className: 'single-image', attrs: { 'data-attr': meta.name }, bootstrap(el) {
+                    el.dataset.skipbind = '1';
+                    render(el);
+                } };
         case 'number':
             return { tag: 'input', className: 'form-control', attrs: { type: 'number',
                     value: meta.label, placeholder: meta.placeholder || '',
@@ -740,6 +755,8 @@ const menus = [{ id: 'user', name: 'Usuários', tooltip: 'Cadastro de usuários'
         window.location = '#/products';
     } }, { id: 'macros', name: 'Macros', tooltip: 'Textos gerais', onclick() {
         window.location = '#/macros';
+    } }, { id: 'new', name: 'Notícias', tooltip: 'Notícias do portal', onclick() {
+        window.location = '#/news';
     } }];
 
 var menuService = {
@@ -861,6 +878,11 @@ const dataToForm = (data, form) => {
         });
     }
 
+    // Single images
+    Array.from(form.querySelectorAll('.single-image')).forEach(imageWrp => {
+        // TODO
+    });
+
     // Multiple images
     Array.from(form.querySelectorAll('.image-list')).forEach(imageWrp => {
         Array.from(imageWrp.querySelectorAll('img[data-field-name]')).forEach(img => {
@@ -872,7 +894,7 @@ const dataToForm = (data, form) => {
     emitEvent(`form:edit`, data);
 };
 
-const render = appEl => {
+const render$1 = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -953,7 +975,7 @@ const render = appEl => {
 var users = {
     route: '#/users',
     render(el) {
-        render(el);
+        render$1(el);
     }
 };
 
@@ -1016,7 +1038,7 @@ var menuSrv = {
 
 };
 
-const render$1 = appEl => {
+const render$2 = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -1097,7 +1119,7 @@ const render$1 = appEl => {
 var menus$1 = {
     route: '#/menus',
     render(el) {
-        render$1(el);
+        render$2(el);
     }
 };
 
@@ -1164,7 +1186,7 @@ var service$1 = {
 
 };
 
-const render$2 = appEl => {
+const render$3 = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -1245,7 +1267,7 @@ const render$2 = appEl => {
 var articles = {
     route: '#/articles',
     render(el) {
-        render$2(el);
+        render$3(el);
     }
 };
 
@@ -1360,7 +1382,7 @@ const priceFormat = str => {
     return `R$${parseFloat(str).toFixed(2)}`.split('.').join(',');
 };
 
-const render$3 = appEl => {
+const render$4 = appEl => {
     let formEl, searchInput;
 
     const formObj = form({
@@ -1443,7 +1465,7 @@ const render$3 = appEl => {
 var products = {
     route: '#/products',
     render(el) {
-        render$3(el);
+        render$4(el);
     }
 };
 
@@ -1577,7 +1599,7 @@ var macro = (list => ({
                         }] }] }] }] }] })) : [{ tag: 'div', className: 'card-body', children: [{ tag: 'h3', className: 'text-warning', textContent: 'Nenhum conteúdo inserido' }] }]
 }));
 
-const render$4 = appEl => __async(function* () {
+const render$5 = appEl => __async(function* () {
     const wrpEl = document.createElement('div');
     const render = (macros = []) => {
         wrpEl.innerHTML = '';
@@ -1596,11 +1618,169 @@ const render$4 = appEl => __async(function* () {
 var macros = {
     route: '#/macros',
     render(el) {
-        render$4(el);
+        render$5(el);
     }
 };
 
-var routes = [login$1, users, menus$1, articles, products, home, macros];
+var service$3 = {
+
+    validate(data) {
+        let errors = '';
+
+        if (!data.title) {
+            errors += ' Informe o título.';
+        }
+
+        if (!data.description) {
+            errors += ' Informe a descrição.';
+        }
+
+        if (!data.abstract) {
+            errors += ' Digite um resumo.';
+        }
+
+        if (!data.text) {
+            errors += ' Digite um texto.';
+        }
+
+        if (!data.cover) {
+            errors += ' Selecione uma foto de capa.';
+        }
+
+        return errors;
+    },
+
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/new/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
+        return json;
+    }()),
+
+    create: notice => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/new/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(notice)
+        });
+
+        let newNotice = yield response.json();
+
+        return newNotice;
+    }()),
+
+    update: (id, notice) => __async(function* () {
+        const params = { id };
+        for (let i in notice) {
+            params[`${i}`] = notice[i];
+        }
+        const response = yield fetch(`${config.API_URL}/cms/new/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newNotice = yield response.json();
+
+        return newNotice;
+    }()),
+
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/new/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
+
+};
+
+const render$6 = appEl => {
+    let formEl, searchInput;
+
+    const formObj = form({
+        fieldCol: 3,
+        fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Capa', name: 'single-image' }],
+        onSubmit(data, e) {
+            const errors = service$3.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
+            if (e.target.dataset.id) {
+                service$3.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Notícia atualizada com sucesso'
+                    });
+                    window.location.reload();
+                });
+            } else {
+                service$3.create(data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Notícia salva com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        }
+    });
+
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Notícias' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                bootstrap: el => searchInput = el }] }] }]);
+
+    formEl = mainEl.querySelector('form');
+    const loadData = () => service$3.retrieve(searchInput.value);
+
+    const renderGrid = () => __async(function* () {
+        const oldGrid = mainEl.querySelector('table');
+        if (oldGrid) {
+            mainEl.removeChild(oldGrid);
+        }
+        const gridEl = yield grid({
+            columns: [{ label: 'Data', prop: notice => notice.created_at }, { label: 'Nome', prop: notice => notice.name }],
+
+            loadData() {
+                return loadData();
+            },
+
+            onEdit(notice) {
+                service$3.findById(notice.id).then(notice => {
+                    dataToForm(notice, formEl);
+                    formEl.dataset.id = notice.id;
+                });
+            },
+
+            onDelete(notice) {
+                service$3.destroy(notice.id).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Produto excluído com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        });
+        mainEl.appendChild(gridEl);
+    }());
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
+
+    renderGrid();
+    appEl.appendChild(template(wrpEl, 'new'));
+};
+
+var news = {
+    route: '#/news',
+    render(el) {
+        render$6(el);
+    }
+};
+
+var routes = [login$1, users, menus$1, articles, products, home, macros, news];
 
 function routeChange(el, hasRouteChange) {
     let route = window.location.hash;

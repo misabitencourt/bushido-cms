@@ -19,6 +19,10 @@ const menus = [
 
     {id: 'macros', name: 'Macros', tooltip: 'Textos gerais', onclick() {
         window.location = '#/macros';
+    }},
+
+    {id: 'new', name: 'Notícias', tooltip: 'Notícias do portal', onclick() {
+        window.location = '#/news';
     }}
 ];
 

@@ -3,9 +3,15 @@ import wysiwyg from './wysiwyg';
 import singleEntity from './single-entity';
 import imageList from './image-list';
 import {emitEvent} from '../common/event';
+import singleImage from './single-image';
 
 function createField(meta) {
     switch(meta.type) {
+        case 'input-image':
+            return {tag: 'div', className: 'single-image', attrs: {'data-attr': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                singleImage(el);
+            }};
         case 'number':
             return {tag: 'input', className: 'form-control', attrs: {type: 'number', 
                         value: meta.label, placeholder: meta.placeholder || '', 

@@ -3,7 +3,8 @@ const screens = [
     {name: 'menu', label: 'Menus'},
     {name: 'article', label: 'Artigos'},
     {name: 'product', label: 'Produtos'},
-    {name: 'macros', label: 'Macros'}
+    {name: 'macros', label: 'Macros'},
+    {name: 'new', label: 'Notícias'}
 ];
 
 export default meta => ({tag: 'div', className: 'col-md-12', children: screens.map(screen => {
