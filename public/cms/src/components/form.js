@@ -4,10 +4,15 @@ import singleEntity from './single-entity';
 import imageList from './image-list';
 import {emitEvent} from '../common/event';
 import singleImage from './single-image';
+import inputDate from './input-date';
 
 function createField(meta) {
     switch(meta.type) {
-        case 'input-image':
+        case 'date':
+            return inputDate(meta);
+        case 'spacing':
+            return {tag: 'div'};
+        case 'single-image':
             return {tag: 'div', className: 'single-image', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
                 singleImage(el);

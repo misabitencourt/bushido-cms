@@ -191,7 +191,7 @@ window.elRemoveEvt = (el) => {
     return clone
 };
 
-var card = (({ title, body }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }] }] }));
+var card = (({ title, body, footer, img }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }, img ? { tag: 'img', attrs: { src: img }, className: 'card-img-top' } : { tag: 'span' }, footer ? { tag: 'div', className: 'card-footer', children: footer } : { tag: 'span' }] }] }));
 
 const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }];
 
@@ -488,16 +488,68 @@ var imageList = ((el, field) => {
 const render = (el, selected = null) => {
     el.innerHTML = '';
 
-    return createEls('div', 'input-image-inner', el, [selected ? {} : { tag: 'span' }, { tag: 'div', className: 'pt-2 text-md-center', children: [{ tag: 'button', className: 'btn btn-sm btn-primary', on: ['click', () => {
-                // TODO
-            }], children: [icon('add', 24, 24)] }, { tag: 'button', className: 'btn btn-sm btn-primary', on: ['click', () => {
-                // TODO
-            }], children: [icon('remove', 24, 24)] }] }]);
+    return createEls('div', 'input-image-inner', el, [card({
+        img: selected,
+        footer: [{ tag: 'div', className: 'pt-2 text-md-center', children: [{ tag: 'button', attrs: { type: 'button' }, className: 'btn btn-sm btn-primary', on: ['click', () => {
+                    selectImage({
+                        btnOkText: 'OK',
+                        btnCancelText: 'Cancel',
+                        forceFile: true,
+                        selectDeviceText: 'Select device'
+                    }).then(image => {
+                        imageResize(image, { width: 800, height: 400 }, 1).then(image => {
+                            render(el, image);
+                        });
+                    });
+                }], children: [icon('add', 24, 24)] }, { tag: 'button', attrs: { type: 'button' }, className: 'btn btn-sm btn-primary', on: ['click', () => {
+                    render(el);
+                }], children: [icon('delete', 24, 24)] }] }]
+    })]);
 };
+
+var inputDate = (meta => ({
+    tag: 'input',
+    className: 'form-control date',
+    attrs: {
+        type: 'text',
+        placeholder: 'DD/MM/YYYY',
+        name: meta.name,
+        'data-format': 'DD/MM/YYYY'
+    },
+    bootstrap(el) {
+        el.addEventListener('change', e => {
+            const dateStr = e.target.value;
+            const dateArr = dateStr.split('/');
+            if (dateArr.length !== 3) {
+                return e.target.value = '';
+            }
+            const date = new Date(dateArr[0] * 1, dateArr[1] * 1, dateArr[2] * 1);
+            if (isNaN(date.getTime())) {
+                return e.target.value = '';
+            }
+        });
+
+        el.addEventListener('keyup', e => {
+            if (!el.value) {
+                return;
+            }
+
+            if ([2, 5].indexOf(el.value.length) === -1) {
+                return;
+            }
+
+            el.value += '/';
+        });
+    }
+}));
 
 function createField(meta) {
     switch (meta.type) {
-        case 'input-image':
+        case 'date':
+            return inputDate(meta);
+        case 'spacing':
+            return { tag: 'div' };
+        case 'single-image':
             return { tag: 'div', className: 'single-image', attrs: { 'data-attr': meta.name }, bootstrap(el) {
                     el.dataset.skipbind = '1';
                     render(el);
@@ -1698,7 +1750,7 @@ const render$6 = appEl => {
 
     const formObj = form({
         fieldCol: 3,
-        fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Capa', name: 'single-image' }],
+        fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Autor', name: 'author' }, { type: 'date', label: 'Data de publicação', name: 'published_at' }, { type: 'spacing' }, { type: 'single-image', label: 'Capa', name: 'single-image' }, { type: 'spacing' }, { type: 'spacing' }],
         onSubmit(data, e) {
             const errors = service$3.validate(data);
             if (errors) {

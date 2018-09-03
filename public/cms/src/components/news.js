@@ -13,7 +13,12 @@ const render = appEl => {
         fields: [
             {type: 'text', label: 'Título', name: 'title'},
             {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'text', label: 'Capa', name: 'single-image'},
+            {type: 'text', label: 'Autor', name: 'author'},
+            {type: 'date', label: 'Data de publicação', name: 'published_at'},
+            {type: 'spacing'},
+            {type: 'single-image', label: 'Capa', name: 'single-image'},
+            {type: 'spacing'},
+            {type: 'spacing'}
         ],
         onSubmit(data, e) {
             const errors = service.validate(data);
