@@ -3,6 +3,12 @@ import headers from './headers'
 
 export default {
 
+    async findById(id) {
+        let response = await fetch(`${config.API_URL}/cms/new/id/${id}`, {headers});
+        let json = await response.json();
+        return json;
+    },
+
     validate(data) {
         let errors = '';
 
@@ -10,7 +16,7 @@ export default {
             errors += ' Informe o título.';
         }
 
-        if (! data.description) {
+        if (! data.description) {            
             errors += ' Informe a descrição.';
         }
 

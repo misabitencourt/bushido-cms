@@ -4,6 +4,8 @@ import service from '../service/news';
 import grid from '../components/grid';
 import {dataToForm} from '../common/form-bind';
 import error from '../dialogs/error';
+import menuSrv from '../service/menus';
+import { commonToPtBr } from '../common/date-format';
 
 const render = appEl => {
     let formEl, searchInput;
@@ -15,10 +17,13 @@ const render = appEl => {
             {type: 'text', label: 'Descrição', name: 'description'},
             {type: 'text', label: 'Autor', name: 'author'},
             {type: 'date', label: 'Data de publicação', name: 'published_at'},
+            {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
+            {type: 'wysiwyg', label: 'Resumo', name: 'abstract', fieldCol: '12'},
+            {type: 'wysiwyg', label: 'Texto', name: 'text', fieldCol: '12'},
+            {type: 'single-image', label: 'Capa', name: 'cover'},
             {type: 'spacing'},
-            {type: 'single-image', label: 'Capa', name: 'single-image'},
             {type: 'spacing'},
-            {type: 'spacing'}
+            {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
             const errors = service.validate(data);
@@ -57,7 +62,7 @@ const render = appEl => {
                     bootstrap: el => searchInput = el}
             ]}
         ]}
-    ])
+    ])    
 
     formEl = mainEl.querySelector('form')
     const loadData = () => service.retrieve(searchInput.value)    
@@ -69,8 +74,8 @@ const render = appEl => {
         }
         const gridEl = await grid({
             columns: [
-                {label: 'Data', prop: notice => notice.created_at },
-                {label: 'Nome', prop: notice => notice.name }                
+                {label: 'Data', prop: notice => commonToPtBr(notice.published_at) },
+                {label: 'Nome', prop: notice => notice.title }
             ],
 
             loadData() {

@@ -5,6 +5,7 @@ import imageList from './image-list';
 import {emitEvent} from '../common/event';
 import singleImage from './single-image';
 import inputDate from './input-date';
+import { ptBrToCommon } from '../common/date-format';
 
 function createField(meta) {
     switch(meta.type) {
@@ -103,6 +104,16 @@ export default ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
                 data[el.dataset.fieldName] = data[el.dataset.fieldName] || [];
                 data[el.dataset.fieldName].push(el.src);
             })
+            getEls(el, '.single-image').forEach(imageWrp => {                
+                const img = getEl(imageWrp, 'img');
+                if (! img) {
+                    return;
+                }
+                data[imageWrp.dataset.attr] = img.src;
+            });
+            getEls(el, 'input.date').forEach(inputDate => {
+                data[inputDate.name] = ptBrToCommon(inputDate.value);
+            });
 
             onSubmit(data, e);
         })

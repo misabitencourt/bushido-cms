@@ -13,6 +13,28 @@ function retrieveMenus(news) {
     }));
 }
 
+module.exports.findById = id => {
+    return cms.list({
+        modelName: 'news',
+        filters: 'id = :id',
+        params: {id}
+    }).then(news => {
+        const neww = news.pop()
+        if (! neww) {
+            return null;
+        }
+
+        return cms.list({
+            modelName: 'menus',
+            filters: 'id = :menu',
+            params: {menu: neww.menu}
+        }).then(menus => {
+            neww.menu = menus.pop();
+            return neww;
+        });
+    });
+}
+
 module.exports.create = neww => cms.create({
     modelName: 'news',
     newRegister: neww

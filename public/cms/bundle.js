@@ -543,6 +543,24 @@ var inputDate = (meta => ({
     }
 }));
 
+const ptBrToCommon = str => {
+    const split = str.split('/');
+    if (split.length !== 3) {
+        return null;
+    }
+
+    return `${split[2]}-${split[1]}-${split[0]}`;
+};
+
+const commonToPtBr = str => {
+    const split = str.split('-');
+    if (split.length !== 3) {
+        return null;
+    }
+
+    return `${split[2]}/${split[1]}/${split[0]}`;
+};
+
 function createField(meta) {
     switch (meta.type) {
         case 'date':
@@ -633,6 +651,16 @@ var form = (({ fields, fieldCol, onSubmit, hideCancel = false }) => ({
             getEls(el, '.image-list img').filter(el => el.dataset.fieldName).forEach(el => {
                 data[el.dataset.fieldName] = data[el.dataset.fieldName] || [];
                 data[el.dataset.fieldName].push(el.src);
+            });
+            getEls(el, '.single-image').forEach(imageWrp => {
+                const img = getEl(imageWrp, 'img');
+                if (!img) {
+                    return;
+                }
+                data[imageWrp.dataset.attr] = img.src;
+            });
+            getEls(el, 'input.date').forEach(inputDate$$1 => {
+                data[inputDate$$1.name] = ptBrToCommon(inputDate$$1.value);
             });
 
             onSubmit(data, e);
@@ -930,14 +958,9 @@ const dataToForm = (data, form) => {
         });
     }
 
-    // Single images
-    Array.from(form.querySelectorAll('.single-image')).forEach(imageWrp => {
-        // TODO
-    });
-
     // Multiple images
-    Array.from(form.querySelectorAll('.image-list')).forEach(imageWrp => {
-        Array.from(imageWrp.querySelectorAll('img[data-field-name]')).forEach(img => {
+    getEls(form, '.image-list').forEach(imageWrp => {
+        getEls(imageWrp, 'img[data-field-name]').forEach(img => {
             data[img.dataset.fieldName] = data[img.dataset.fieldName] || [];
             data[img.dataset.fieldName].push(img.src);
         });
@@ -1676,6 +1699,14 @@ var macros = {
 
 var service$3 = {
 
+    findById(id) {
+        return __async(function* () {
+            let response = yield fetch(`${config.API_URL}/cms/new/id/${id}`, { headers });
+            let json = yield response.json();
+            return json;
+        }());
+    },
+
     validate(data) {
         let errors = '';
 
@@ -1750,7 +1781,7 @@ const render$6 = appEl => {
 
     const formObj = form({
         fieldCol: 3,
-        fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Autor', name: 'author' }, { type: 'date', label: 'Data de publicação', name: 'published_at' }, { type: 'spacing' }, { type: 'single-image', label: 'Capa', name: 'single-image' }, { type: 'spacing' }, { type: 'spacing' }],
+        fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Autor', name: 'author' }, { type: 'date', label: 'Data de publicação', name: 'published_at' }, { type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name' }, { type: 'wysiwyg', label: 'Resumo', name: 'abstract', fieldCol: '12' }, { type: 'wysiwyg', label: 'Texto', name: 'text', fieldCol: '12' }, { type: 'single-image', label: 'Capa', name: 'cover' }, { type: 'spacing' }, { type: 'spacing' }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
             const errors = service$3.validate(data);
             if (errors) {
@@ -1790,7 +1821,7 @@ const render$6 = appEl => {
             mainEl.removeChild(oldGrid);
         }
         const gridEl = yield grid({
-            columns: [{ label: 'Data', prop: notice => notice.created_at }, { label: 'Nome', prop: notice => notice.name }],
+            columns: [{ label: 'Data', prop: notice => commonToPtBr(notice.published_at) }, { label: 'Nome', prop: notice => notice.title }],
 
             loadData() {
                 return loadData();

@@ -14,7 +14,9 @@ module.exports = app => {
                 description: neww.description,
                 abstract: neww.abstract,
                 text: neww.text,
-                menu: neww.menu
+                menu: neww.menu,
+                author: neww.author,
+                published_at: neww.published_at
             })));
         });
     });
@@ -28,20 +30,23 @@ module.exports = app => {
                 description: neww.description,
                 abstract: neww.abstract,
                 text: neww.text,
-                menu: neww.menu
+                menu: neww.menu,
+                author: neww.author,
+                published_at: neww.published_at
             })));
         });
     });
 
     app.post('/cms/new/', (req, res) => {        
         newSrv.create({
-            id: req.body.id,
             title: req.body.title,
             description: req.body.description,
             abstract: req.body.abstract,
+            author: req.body.author,
             text: req.body.text,
             cover: req.body.cover,
-            menu: req.body.menu
+            menu: req.body.menu,
+            published_at: req.body.published_at
         }).then(neww => {
             return res.json(neww);
         });
@@ -64,9 +69,11 @@ module.exports = app => {
             title: req.body.title,
             description: req.body.description,
             abstract: req.body.abstract,
+            author: req.body.author,
             text: req.body.text,
             cover: req.body.cover,
-            menu: req.body.menu
+            menu: req.body.menu,
+            published_at: req.body.published_at
         }).then(neww => {
             return res.json(neww);
         });
