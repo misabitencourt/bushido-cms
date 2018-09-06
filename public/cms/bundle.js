@@ -485,8 +485,15 @@ var imageList = ((el, field) => {
     });
 });
 
-const render = (el, selected = null) => {
+const render = (el, meta, selected = null) => {
     el.innerHTML = '';
+
+    addEvent('form:edit', data => {
+        const img = data[meta.name];
+        if (img) {
+            render(el, meta, img);
+        }
+    });
 
     return createEls('div', 'input-image-inner', el, [card({
         img: selected,
@@ -498,13 +505,31 @@ const render = (el, selected = null) => {
                         selectDeviceText: 'Select device'
                     }).then(image => {
                         imageResize(image, { width: 800, height: 400 }, 1).then(image => {
-                            render(el, image);
+                            render(el, meta, image);
                         });
                     });
                 }], children: [icon('add', 24, 24)] }, { tag: 'button', attrs: { type: 'button' }, className: 'btn btn-sm btn-primary', on: ['click', () => {
-                    render(el);
+                    render(el, meta);
                 }], children: [icon('delete', 24, 24)] }] }]
     })]);
+};
+
+const ptBrToCommon = str => {
+    const split = str.split('/');
+    if (split.length !== 3) {
+        return null;
+    }
+
+    return `${split[2]}-${split[1]}-${split[0]}`;
+};
+
+const commonToPtBr = str => {
+    const split = str.split('-');
+    if (split.length !== 3) {
+        return null;
+    }
+
+    return `${split[2]}/${split[1]}/${split[0]}`;
 };
 
 var inputDate = (meta => ({
@@ -517,6 +542,13 @@ var inputDate = (meta => ({
         'data-format': 'DD/MM/YYYY'
     },
     bootstrap(el) {
+        addEvent('form:edit', data => {
+            const value = data[meta.name];
+            if (value) {
+                el.value = commonToPtBr(value);
+            }
+        });
+
         el.addEventListener('change', e => {
             const dateStr = e.target.value;
             const dateArr = dateStr.split('/');
@@ -543,24 +575,6 @@ var inputDate = (meta => ({
     }
 }));
 
-const ptBrToCommon = str => {
-    const split = str.split('/');
-    if (split.length !== 3) {
-        return null;
-    }
-
-    return `${split[2]}-${split[1]}-${split[0]}`;
-};
-
-const commonToPtBr = str => {
-    const split = str.split('-');
-    if (split.length !== 3) {
-        return null;
-    }
-
-    return `${split[2]}/${split[1]}/${split[0]}`;
-};
-
 function createField(meta) {
     switch (meta.type) {
         case 'date':
@@ -570,7 +584,7 @@ function createField(meta) {
         case 'single-image':
             return { tag: 'div', className: 'single-image', attrs: { 'data-attr': meta.name }, bootstrap(el) {
                     el.dataset.skipbind = '1';
-                    render(el);
+                    render(el, meta);
                 } };
         case 'number':
             return { tag: 'input', className: 'form-control', attrs: { type: 'number',

@@ -1,4 +1,5 @@
-
+import { addEvent } from '../common/event';
+import { commonToPtBr } from '../common/date-format';
 
 export default meta => ({
     tag: 'input',
@@ -10,6 +11,13 @@ export default meta => ({
         'data-format': 'DD/MM/YYYY'
     },
     bootstrap(el) {
+        addEvent('form:edit', data => {
+            const value = data[meta.name];
+            if (value) {
+                el.value = commonToPtBr(value);
+            }
+        });
+
         el.addEventListener('change', e => {
             const dateStr = e.target.value;
             const dateArr = dateStr.split('/');

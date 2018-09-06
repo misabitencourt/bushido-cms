@@ -16,7 +16,7 @@ function createField(meta) {
         case 'single-image':
             return {tag: 'div', className: 'single-image', attrs: {'data-attr': meta.name}, bootstrap(el) {
                 el.dataset.skipbind = '1';
-                singleImage(el);
+                singleImage(el, meta);
             }};
         case 'number':
             return {tag: 'input', className: 'form-control', attrs: {type: 'number', 
