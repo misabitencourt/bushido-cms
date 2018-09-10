@@ -1,3 +1,4 @@
 /.history
 /node_modules
-/cms.db
+cms.db
+migrated.dat
