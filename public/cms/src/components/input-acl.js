@@ -4,7 +4,8 @@ const screens = [
     {name: 'article', label: 'Artigos'},
     {name: 'product', label: 'Produtos'},
     {name: 'macros', label: 'Macros'},
-    {name: 'new', label: 'Notícias'}
+    {name: 'new', label: 'Notícias'},
+    {name: 'cover', label: 'Capas'}
 ];
 
 export default meta => ({tag: 'div', className: 'col-md-12', children: screens.map(screen => {

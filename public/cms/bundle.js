@@ -193,7 +193,7 @@ window.elRemoveEvt = (el) => {
 
 var card = (({ title, body, footer, img }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }, img ? { tag: 'img', attrs: { src: img }, className: 'card-img-top' } : { tag: 'span' }, footer ? { tag: 'div', className: 'card-footer', children: footer } : { tag: 'span' }] }] }));
 
-const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }];
+const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }];
 
 var inputAcl = (meta => ({ tag: 'div', className: 'col-md-12', children: screens.map(screen => {
         return { tag: 'label', className: 'mr-5', children: [{ tag: 'input', attrs: { type: 'checkbox', name: `acl_${screen.name}`,
@@ -851,6 +851,8 @@ const menus = [{ id: 'user', name: 'Usuários', tooltip: 'Cadastro de usuários'
         window.location = '#/macros';
     } }, { id: 'new', name: 'Notícias', tooltip: 'Notícias do portal', onclick() {
         window.location = '#/news';
+    } }, { id: 'cover', name: 'Capas', tooltip: 'Fotos de capa', onclick() {
+        window.location = '#/covers';
     } }];
 
 var menuService = {
@@ -1852,7 +1854,7 @@ const render$6 = appEl => {
                 service$3.destroy(notice.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Produto excluído com sucesso'
+                        msg: 'Notícia excluída com sucesso'
                     });
                     window.location.reload();
                 });
@@ -1877,7 +1879,169 @@ var news = {
     }
 };
 
-var routes = [login$1, users, menus$1, articles, products, home, macros, news];
+var service$4 = {
+
+    findById(id) {
+        return __async(function* () {
+            let response = yield fetch(`${config.API_URL}/cms/cover/id/${id}`, { headers });
+            let json = yield response.json();
+            return json;
+        }());
+    },
+
+    validate(data) {
+        let errors = '';
+
+        if (!data.name) {
+            errors += ' Informe o título (nome).';
+        }
+
+        if (!data.description) {
+            errors += ' Informe a descrição.';
+        }
+
+        if (!data.group) {
+            errors += ' Selecione um grupo.';
+        }
+
+        if (!data.cover) {
+            errors += ' Selecione uma foto de capa.';
+        }
+
+        return errors;
+    },
+
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/cover/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
+        return json;
+    }()),
+
+    create: cover => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/cover/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(cover)
+        });
+
+        let newCover = yield response.json();
+
+        return newCover;
+    }()),
+
+    update: (id, cover) => __async(function* () {
+        const params = { id };
+        for (let i in cover) {
+            params[`${i}`] = cover[i];
+        }
+        const response = yield fetch(`${config.API_URL}/cms/cover/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newCover = yield response.json();
+
+        return newCover;
+    }()),
+
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/cover/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
+
+};
+
+const render$7 = appEl => {
+    let formEl, searchInput;
+
+    const formObj = form({
+        fieldCol: 3,
+        fields: [{ type: 'text', label: 'Título (nome)', name: 'name' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Grupo', name: 'group' }, { type: 'spacing' }, { type: 'single-image', label: 'Foto de capa', name: 'cover' }, { type: 'submit', label: 'Salvar' }],
+        onSubmit(data, e) {
+            const errors = service$4.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
+            if (e.target.dataset.id) {
+                service$4.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Notícia atualizada com sucesso'
+                    });
+                    window.location.reload();
+                });
+            } else {
+                service$4.create(data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Notícia salva com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        }
+    });
+
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Fotos de capa' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                bootstrap: el => searchInput = el }] }] }]);
+
+    formEl = mainEl.querySelector('form');
+    const loadData = () => service$4.retrieve(searchInput.value);
+
+    const renderGrid = () => __async(function* () {
+        const oldGrid = mainEl.querySelector('table');
+        if (oldGrid) {
+            mainEl.removeChild(oldGrid);
+        }
+        const gridEl = yield grid({
+            columns: [{ label: 'Nome', prop: cover => cover.name }, { label: 'Descrição', prop: cover => cover.description }],
+
+            loadData() {
+                return loadData();
+            },
+
+            onEdit(cover) {
+                service$4.findById(cover.id).then(cover => {
+                    dataToForm(cover, formEl);
+                    formEl.dataset.id = cover.id;
+                });
+            },
+
+            onDelete(cover) {
+                service$4.destroy(cover.id).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Capa excluída com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        });
+        mainEl.appendChild(gridEl);
+    }());
+
+    searchInput.addEventListener('keyup', () => {
+        window.searchTimeout && window.clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(renderGrid, 700);
+    });
+
+    renderGrid();
+    appEl.appendChild(template(wrpEl, 'cover'));
+};
+
+var covers = {
+    route: '#/covers',
+    render(el) {
+        render$7(el);
+    }
+};
+
+var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers];
 
 function routeChange(el, hasRouteChange) {
     let route = window.location.hash;

@@ -23,6 +23,10 @@ const menus = [
 
     {id: 'new', name: 'Notícias', tooltip: 'Notícias do portal', onclick() {
         window.location = '#/news';
+    }},
+
+    {id: 'cover', name: 'Capas', tooltip: 'Fotos de capa', onclick() {
+        window.location = '#/covers';
     }}
 ];
 

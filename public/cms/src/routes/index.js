@@ -6,6 +6,7 @@ import home from './home';
 import products from './products';
 import macros from './macros';
 import news from './news';
+import covers from './covers';
 
 export default [
     login,
@@ -15,5 +16,6 @@ export default [
     products,
     home,
     macros,
-    news
+    news,
+    covers
 ]

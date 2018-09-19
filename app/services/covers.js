@@ -1,4 +1,5 @@
 const cms = require('../repos/cms');
+
 module.exports.findById = id => {
     return cms.list({
         modelName: 'covers',
@@ -9,7 +10,7 @@ module.exports.findById = id => {
 
 module.exports.create = cover => cms.create({
     modelName: 'covers',
-    coverRegister: cover
+    newRegister: cover
 });
 
 module.exports.retrieve = search => {

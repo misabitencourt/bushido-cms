@@ -8,7 +8,7 @@ const addPriceToProduct = require('./add-price-to-product');
 const createTableMacros = require('./create-table-macros');
 const addTypeToMacro = require('./add-type-to-macro');
 const createTableNew = require('./create-table-new');
-const createTableCovers = require('./create-table-new');
+const createTableCovers = require('./create-table-covers');
 
 module.exports = [
     {id: 1, exec: createTableUsers},

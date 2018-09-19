@@ -7,10 +7,10 @@ module.exports = app => {
     });
 
     app.get('/cms/cover', (req, res) => {
-        coverSrv.retrieve('').then(news => {
-            return res.json(news.map(cover => ({
+        coverSrv.retrieve('').then(comvers => {
+            return res.json(comvers.map(cover => ({
                 id: cover.id,
-                title: cover.title,
+                name: cover.name,
                 description: cover.description,
                 group: cover.group
             })));
@@ -19,10 +19,10 @@ module.exports = app => {
 
     app.get('/cms/cover/:search', (req, res) => {
         const search = req.originalUrl.split('/').pop();
-        coverSrv.retrieve(search).then(news => {
-            return res.json(news.map(neww => ({
+        coverSrv.retrieve(search).then(comvers => {
+            return res.json(comvers.map(cover => ({
                 id: cover.id,
-                title: cover.title,
+                name: cover.name,
                 description: cover.description,
                 group: cover.group
             })));
@@ -31,13 +31,12 @@ module.exports = app => {
 
     app.post('/cms/cover/', (req, res) => {                
         coverSrv.create({
-            id: req.body.id,
-            title: req.body.title,
+            name: req.body.name,
             description: req.body.description,
             group: req.body.group,
             cover: req.body.cover
-        }).then(neww => {
-            return res.json(neww);
+        }).then(cover => {
+            return res.json(cover);
         });
     });
 
@@ -49,8 +48,8 @@ module.exports = app => {
             description: req.body.description,
             group: req.body.group,
             cover: req.body.cover
-        }).then(neww => {
-            return res.json(neww);
+        }).then(cover => {
+            return res.json(cover);
         });
     });
 

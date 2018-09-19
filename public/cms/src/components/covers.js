@@ -1,11 +1,9 @@
 import template from './template';
 import form from '../components/form';
-import service from '../service/news';
+import service from '../service/covers';
 import grid from '../components/grid';
 import {dataToForm} from '../common/form-bind';
 import error from '../dialogs/error';
-import menuSrv from '../service/menus';
-import { commonToPtBr } from '../common/date-format';
 
 const render = appEl => {
     let formEl, searchInput;
@@ -13,16 +11,11 @@ const render = appEl => {
     const formObj = form({
         fieldCol: 3,
         fields: [
-            {type: 'text', label: 'Título', name: 'title'},
+            {type: 'text', label: 'Título (nome)', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'text', label: 'Autor', name: 'author'},
-            {type: 'date', label: 'Data de publicação', name: 'published_at'},
-            {type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name'},
-            {type: 'wysiwyg', label: 'Resumo', name: 'abstract', fieldCol: '12'},
-            {type: 'wysiwyg', label: 'Texto', name: 'text', fieldCol: '12'},
-            {type: 'single-image', label: 'Capa', name: 'cover'},
+            {type: 'text', label: 'Grupo', name: 'group'},
             {type: 'spacing'},
-            {type: 'spacing'},
+            {type: 'single-image', label: 'Foto de capa', name: 'cover'},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -53,7 +46,7 @@ const render = appEl => {
         
     const wrpEl = document.createElement('div');
     const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de Notícias'},
+        {tag: 'h2', textContent: 'Cadastro de Fotos de capa'},
         formObj,
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
@@ -74,26 +67,26 @@ const render = appEl => {
         }
         const gridEl = await grid({
             columns: [
-                {label: 'Data', prop: notice => commonToPtBr(notice.published_at) },
-                {label: 'Nome', prop: notice => notice.title }
+                {label: 'Nome', prop: cover => cover.name },
+                {label: 'Descrição', prop: cover => cover.description }
             ],
 
             loadData() {
                 return loadData();
             },
     
-            onEdit(notice) {
-                service.findById(notice.id).then(notice => {
-                    dataToForm(notice, formEl);
-                    formEl.dataset.id = notice.id;
+            onEdit(cover) {
+                service.findById(cover.id).then(cover => {
+                    dataToForm(cover, formEl);
+                    formEl.dataset.id = cover.id;
                 });
             },
     
-            onDelete(notice) {
-                service.destroy(notice.id).then(() => {
+            onDelete(cover) {
+                service.destroy(cover.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Notícia excluída com sucesso'
+                        msg: 'Capa excluída com sucesso'
                     });
                     window.location.reload();    
                 });
@@ -108,7 +101,7 @@ const render = appEl => {
     });
 
     renderGrid();
-    appEl.appendChild(template(wrpEl, 'new'));
+    appEl.appendChild(template(wrpEl, 'cover'));
 };
 
 
