@@ -495,7 +495,9 @@ const render = (el, meta, selected = null) => {
         }
     });
 
-    return createEls('div', 'input-image-inner', el, [card({
+    addEvent('form:reset', () => render(el, meta));
+
+    const innerEl = createEls('div', 'input-image-inner', el, [card({
         img: selected,
         footer: [{ tag: 'div', className: 'pt-2 text-md-center', children: [{ tag: 'button', attrs: { type: 'button' }, className: 'btn btn-sm btn-primary', on: ['click', () => {
                     selectImage({
@@ -512,6 +514,10 @@ const render = (el, meta, selected = null) => {
                     render(el, meta);
                 }], children: [icon('delete', 24, 24)] }] }]
     })]);
+
+    innerEl.dataset.selected = selected ? '1' : '';
+
+    return innerEl;
 };
 
 const ptBrToCommon = str => {
@@ -637,7 +643,10 @@ var form = (({ fields, fieldCol, onSubmit, hideCancel = false }) => ({
     }),
 
     bootstrap: el => {
-        el.addEventListener('reset', () => emitEvent('form:reset'));
+        el.addEventListener('reset', () => {
+            el.dataset.id = '';
+            emitEvent('form:reset');
+        });
         el.addEventListener('submit', e => {
             e.preventDefault();
             let data = {};
@@ -667,10 +676,11 @@ var form = (({ fields, fieldCol, onSubmit, hideCancel = false }) => ({
                 data[el.dataset.fieldName].push(el.src);
             });
             getEls(el, '.single-image').forEach(imageWrp => {
-                const img = getEl(imageWrp, 'img');
-                if (!img) {
+                const hasImg = getEl(imageWrp, '[data-selected="1"]');
+                if (!hasImg) {
                     return;
                 }
+                const img = getEl(imageWrp, 'img');
                 data[imageWrp.dataset.attr] = img.src;
             });
             getEls(el, 'input.date').forEach(inputDate$$1 => {

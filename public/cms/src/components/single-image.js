@@ -13,7 +13,9 @@ const render = (el, meta, selected=null) => {
         }
     });
 
-    return createEls('div', 'input-image-inner', el, [
+    addEvent('form:reset', () => render(el, meta));
+
+    const innerEl = createEls('div', 'input-image-inner', el, [
         card({
             img: selected,
             footer: [
@@ -38,6 +40,10 @@ const render = (el, meta, selected=null) => {
             ]
         })
     ]);
+
+    innerEl.dataset.selected = selected ? '1' : '';
+
+    return innerEl;
 }
 
 export default render;

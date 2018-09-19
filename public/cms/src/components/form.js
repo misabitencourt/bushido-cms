@@ -75,7 +75,10 @@ export default ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
     }), 
 
     bootstrap: el => {
-        el.addEventListener('reset', () => emitEvent('form:reset'));
+        el.addEventListener('reset', () => {
+            el.dataset.id = '';
+            emitEvent('form:reset');
+        });
         el.addEventListener('submit', e => {
             e.preventDefault();
             let data = {};        
@@ -104,11 +107,12 @@ export default ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
                 data[el.dataset.fieldName] = data[el.dataset.fieldName] || [];
                 data[el.dataset.fieldName].push(el.src);
             })
-            getEls(el, '.single-image').forEach(imageWrp => {                
-                const img = getEl(imageWrp, 'img');
-                if (! img) {
+            getEls(el, '.single-image').forEach(imageWrp => {
+                const hasImg = getEl(imageWrp, '[data-selected="1"]');
+                if (! hasImg) {
                     return;
                 }
+                const img = getEl(imageWrp, 'img');                
                 data[imageWrp.dataset.attr] = img.src;
             });
             getEls(el, 'input.date').forEach(inputDate => {
