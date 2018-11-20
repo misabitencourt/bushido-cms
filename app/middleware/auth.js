@@ -1,7 +1,8 @@
 const userSrv = require('../services/users')
 
 const public = [
-    '/cms/login'
+    '/cms/login',
+    '/'
 ];
 
 module.exports = function (req, res, next) {
