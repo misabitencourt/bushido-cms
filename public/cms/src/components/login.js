@@ -21,7 +21,7 @@ export default el => createEls('div', 'app-wrp container', el, [
                             hideCancel: true,
                             onSubmit(auth) {                                
                                 service.login(auth).then(user => {
-                                    if (! user.token) {
+                                    if (! (user && user.token)) {
                                         return error('Usuário ou senha inválidos');
                                     }
                                     window.location.reload();

@@ -12,7 +12,8 @@ module.exports.checkToken = token => new Promise((resolve, reject) => {
         modelName: 'users',
         filters: 'token=:token',
         limit: 1,
-        params: {token}
+        params: {token},
+        ignoreCache: true
     }).then(users => {        
         if (! (users && users.length)) {
             return resolve(null);
@@ -35,7 +36,8 @@ module.exports.login = login => new Promise((resolve, reject) => {
         modelName: 'users',
         filters: 'email=:email AND password=:password',
         limit: 1,
-        params: {email, password}
+        params: {email, password},
+        ignoreCache: true
     }).then(users => {
         if (! (users && users.length)) {
             return resolve(null);

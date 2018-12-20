@@ -9,7 +9,7 @@ module.exports = function (req, res, next) {
     const url = req.originalUrl;
     const token = req.get('Auth-Token');
     
-    if (url.indexOf(public) !== -1) {
+    if (public.indexOf(url) !== -1) {
         return next();
     }
 

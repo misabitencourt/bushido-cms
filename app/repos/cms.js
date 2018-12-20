@@ -1,8 +1,30 @@
 const db = require('./db').cms;
+const kv = require('./kv');
 
-module.exports.create = ({modelName, newRegister}) => db(modelName).insert(newRegister);
+function createQueryId(params=[]) {
+    return params.join('^');
+}
 
-module.exports.list = ({select, modelName, leftJoins, limit=15}) => {
+function cacheClear() {
+    kv.clean();
+}
+ 
+module.exports.list = ({select, modelName, leftJoins, limit=15, ignoreCache=false}) => {
+    const queryId = createQueryId([
+        'list',
+        select,
+        modelName,
+        `${(leftJoins || []).map(lj => `${lj.table}-${lj.localField}-${lj.foreignField}`).join('-')}`,
+        limit
+    ]);
+
+    if (! ignoreCache) {
+        const cached = kv.get(queryId);
+        if (cached) {
+            return new Promise(resolve => resolve(cached));
+        }
+    }
+    
     let query = db(modelName);
     
     if (select) {
@@ -15,10 +37,13 @@ module.exports.list = ({select, modelName, leftJoins, limit=15}) => {
         });
     }
     
-    return query.orderBy(`${modelName}.id`, 'desc').limit(limit);
+    return query.orderBy(`${modelName}.id`, 'desc').limit(limit).then(rows => {
+        kv.put(queryId, rows);
+        return rows;
+    });
 }
 
-module.exports.retrieve = ({modelName, filters, params, select, from, leftJoins, limit=100}) => {
+module.exports.retrieve = ({modelName, filters, params, select, from, leftJoins, limit=100, ignoreCache=false}) => {
     let whereSql = filters || '';
 
     let query = db(modelName);
@@ -38,10 +63,39 @@ module.exports.retrieve = ({modelName, filters, params, select, from, leftJoins,
         whereSql = `1=1 AND (${whereSql})`;
     }
 
-    return query.whereRaw(whereSql, params || []).limit(limit);
+    const queryId = createQueryId([
+        'retrieve',
+        modelName,
+        whereSql,
+        `${(leftJoins || []).map(lj => `${lj.table}-${lj.localField}-${lj.foreignField}`).join('-')}`,
+        limit
+    ]);
+
+    if (! ignoreCache) {
+        const cached = kv.get(queryId);
+        if (cached) {
+            return new Promise(resolve => resolve(cached));
+        }
+    }
+
+    return query.whereRaw(whereSql, params || []).limit(limit).then(rows => {
+        kv.put(queryId, rows);
+        return rows;
+    });
 };
 
-module.exports.update = ({modelName, id, values}) => db(modelName).where('id', '=', id).update(values);
+module.exports.update = ({modelName, id, values}) => {
+    cacheClear();
+    return db(modelName).where('id', '=', id).update(values);
+};
 
-module.exports.destroy = ({modelName, id}) => db(modelName).where('id', '=', id).del();
+module.exports.destroy = ({modelName, id}) => {
+    cacheClear();
+    return db(modelName).where('id', '=', id).del();
+};
+
+module.exports.create = ({modelName, newRegister}) => {
+    cacheClear();
+    return db(modelName).insert(newRegister);
+};
 
