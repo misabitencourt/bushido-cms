@@ -807,7 +807,7 @@ var login = (el => createEls('div', 'app-wrp container', el, [{ tag: 'div', clas
                     hideCancel: true,
                     onSubmit(auth) {
                         service.login(auth).then(user => {
-                            if (!user.token) {
+                            if (!(user && user.token)) {
                                 return error('Usuário ou senha inválidos');
                             }
                             window.location.reload();
@@ -827,16 +827,26 @@ var login$1 = {
     }
 };
 
+const fixedItems = [{ tag: 'li', className: 'nav-item menu-toggle pt-3 pl-4 mb-3 hidden-desktop', children: [icon('menu', 32, 24)], bootstrap: el => {
+        el.addEventListener('click', () => {
+            el.parentElement.classList.toggle('mobile-open');
+        });
+    } }, { tag: 'li', className: 'nav-item menu-close pt-3 pl-4 mb-3 hidden-desktop', children: [icon('cancel', 32, 24)], bootstrap: el => {
+        el.addEventListener('click', () => {
+            el.parentElement.classList.toggle('mobile-open');
+        });
+    } }];
+
 var topnav = (menus => ({
     tag: 'ul',
     className: 'nav nav-tabs bg-primary',
-    children: menus.map(menu => ({
+    children: fixedItems.concat(menus.map(menu => ({
         tag: 'li',
         className: 'nav-item',
         children: [{ tag: 'a', className: `nav-link ${menu.active ? 'active' : ''}`,
             textContent: menu.name,
             attrs: { href: 'javascript:;' }, on: ['click', menu.onclick], title: menu.tooltip }]
-    }))
+    })))
 }));
 
 let currentUser;
