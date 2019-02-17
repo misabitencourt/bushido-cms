@@ -193,7 +193,7 @@ window.elRemoveEvt = (el) => {
 
 var card = (({ title, body, footer, img }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }, img ? { tag: 'img', attrs: { src: img }, className: 'card-img-top' } : { tag: 'span' }, footer ? { tag: 'div', className: 'card-footer', children: footer } : { tag: 'span' }] }] }));
 
-const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }];
+const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }, { name: 'event', label: 'Eventos' }];
 
 var inputAcl = (meta => ({ tag: 'div', className: 'col-md-12', children: screens.map(screen => {
         return { tag: 'label', className: 'mr-5', children: [{ tag: 'input', attrs: { type: 'checkbox', name: `acl_${screen.name}`,
@@ -807,7 +807,7 @@ var login = (el => createEls('div', 'app-wrp container', el, [{ tag: 'div', clas
                     hideCancel: true,
                     onSubmit(auth) {
                         service.login(auth).then(user => {
-                            if (!user.token) {
+                            if (!(user && user.token)) {
                                 return error('Usuário ou senha inválidos');
                             }
                             window.location.reload();
@@ -863,6 +863,8 @@ const menus = [{ id: 'user', name: 'Usuários', tooltip: 'Cadastro de usuários'
         window.location = '#/news';
     } }, { id: 'cover', name: 'Capas', tooltip: 'Fotos de capa', onclick() {
         window.location = '#/covers';
+    } }, { id: 'event', name: 'Eventos', tooltip: 'Calendário de eventos', onclick() {
+        window.location = '#/events';
     } }];
 
 var menuService = {

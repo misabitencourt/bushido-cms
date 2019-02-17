@@ -27,6 +27,10 @@ const menus = [
 
     {id: 'cover', name: 'Capas', tooltip: 'Fotos de capa', onclick() {
         window.location = '#/covers';
+    }},
+
+    {id: 'event', name: 'Eventos', tooltip: 'Calendário de eventos', onclick() {
+        window.location = '#/events';
     }}
 ];
 

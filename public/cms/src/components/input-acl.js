@@ -5,7 +5,8 @@ const screens = [
     {name: 'product', label: 'Produtos'},
     {name: 'macros', label: 'Macros'},
     {name: 'new', label: 'Notícias'},
-    {name: 'cover', label: 'Capas'}
+    {name: 'cover', label: 'Capas'},
+    {name: 'event', label: 'Eventos'}
 ];
 
 export default meta => ({tag: 'div', className: 'col-md-12', children: screens.map(screen => {
