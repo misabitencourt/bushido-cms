@@ -9,7 +9,7 @@ module.exports = {
         this.storage[k] = v;
     },
 
-    get(k, v) {
+    get(k) {
         if (this.storage[k] === 0) {
             return 0;
         }
