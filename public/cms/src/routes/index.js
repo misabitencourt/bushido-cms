@@ -7,6 +7,7 @@ import products from './products';
 import macros from './macros';
 import news from './news';
 import covers from './covers';
+import events from './events';
 
 export default [
     login,
@@ -17,5 +18,6 @@ export default [
     home,
     macros,
     news,
-    covers
+    covers,
+    events
 ]

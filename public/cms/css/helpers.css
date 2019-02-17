@@ -23,6 +23,41 @@ select.form-control {
     display: none;
 }
 
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar-table, .calendar-table th, .calendar-table td {
+    border: 1px solid #888;
+}
+
+.calendar-table th {
+    background: #333;
+    color: #eee;
+    font-weight: 100;
+}
+
+.calendar-table td {
+    padding: 5px 3px;
+    transition: 0.3s;
+}
+
+.calendar-table td:hover {
+    padding: 5px 3px;
+    background: #cdcdcd;
+    cursor: pointer;
+}
+
+.calendar-table td.today {
+    font-weight: bold;
+    background: #dedede;
+}
+
+.calendar-table td small {
+    font-size: 10px;
+}
+
 @media(max-width: 900px) {
     .hidden-desktop.hidden-desktop {
         display: inherit;
