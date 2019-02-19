@@ -48,18 +48,21 @@ const render = appEl => {
         formObj,
         {tag: 'h3', textContent: 'Eventos'},
         {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-6', bootstrap(el) {
-                const today = new Date();
+            {tag: 'div', className: 'col-md-12', bootstrap(el) {
+                const monthSelected = new Date();
 
                 const renderCalendar = config => {
                     calendar(el, config);
                 };
 
                 renderCalendar({
-                    onSelectDay: () => console.log('TODO'),
-                    onChangeMonth: () => console.log('TODO'),
-                    month: today.getMonth(),
-                    year: today.getFullYear(),
+                    onSelectDay: () => console.log('teste'),
+                    onChangeMonth: (month, year) => {
+                        monthSelected.setMonth(month);
+                        monthSelected.setMonth(year);
+                    },
+                    month: monthSelected.getMonth(),
+                    year: monthSelected.getFullYear(),
                     items: []
                 });
             }}
