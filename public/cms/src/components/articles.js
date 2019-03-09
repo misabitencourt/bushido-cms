@@ -86,9 +86,9 @@ const render = appEl => {
                 service.destroy(article.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'article excluído com sucesso'
+                        msg: 'Artigo excluído com sucesso'
                     });
-                    window.location.reload();    
+                    window.location.reload();
                 });
             }
         })
