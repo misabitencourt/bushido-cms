@@ -8,6 +8,8 @@ function createQueryId(params=[]) {
 function cacheClear() {
     kv.clean();
 }
+
+db.on('query', queryData => console.log(queryData));
  
 module.exports.list = ({select, modelName, leftJoins, limit=15, ignoreCache=false}) => {
     const queryId = createQueryId([
@@ -36,6 +38,8 @@ module.exports.list = ({select, modelName, leftJoins, limit=15, ignoreCache=fals
             query = query.leftJoin(lj.table, lj.localField, lj.foreignField);
         });
     }
+
+    console.log(query.toSQL().toNative());
     
     return query.orderBy(`${modelName}.id`, 'desc').limit(limit).then(rows => {
         kv.put(queryId, rows);
