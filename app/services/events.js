@@ -4,7 +4,7 @@ const dateToYMD = require('../formatters/string').dateToYMD;
 module.exports.create = event => cms.create({
     modelName: 'events',
     newRegister: {
-        description: event.name,
+        description: event.description,
         address: event.address,
         article_id: event.article_id,
         start: event.start,
@@ -26,14 +26,12 @@ module.exports.retrieve = search => {
 };
 
 module.exports.findByDateRange = (start, end) => {
-    const startIso = `${dateToYMD(start)}`;
-    const endIso = `${dateToYMD(end)}`;
-    
     return cms.retrieve({
+        select: 'events.*',
         modelName: 'events',
-        filters: 'start BETWEEN :start AND :end',
-        leftJoins: [{table: 'articles', foreignField: 'id', localField: 'article_id'}],
-        params: {start: `${startIso} 00:00:00`, end: `${endIso} 23:59:59`}
+        filters: 'start > :start AND start < :end',
+        leftJoins: [{table: 'articles', foreignField: 'articles.id', localField: 'events.article_id'}],
+        params: {start: start.getTime(), end: end.getTime()}
     });
 };
 

@@ -73,22 +73,37 @@ function getWeekDays() {
             'Quinta', 'Sexta', 'Sábado'];
 }
 
-function getDateRow(date, onSelectDay, today, month) {
+function getDateRow({
+    datePointer, 
+    onSelectDay, 
+    today, 
+    month,
+    items=[]
+}) {
     const cols = [];
     let print = false;
     for (let day=0; day<7; day++) {
-        let dateStr = date+'';
+        let dateStr = datePointer+'';
+        
         const col = {tag: 'td', attrs: {value: day}, on: ['click', e => {
             onSelectDay && onSelectDay(dateStr);
-        }]};
-        if (month == date.getMonth() && day == date.getDay()) {
-            col.textContent = date.getDate();
-            addDay(date, 1);
+        }], children: items.filter(item => {
+            return inSameDay(item.date, datePointer);
+        }).map(item => ({
+            tag: 'div',
+            className: 'calendar-mark',
+            textContent: item.description
+        }))};
+
+        if (month == datePointer.getMonth() && day == datePointer.getDay()) {
+            col.textContent = datePointer.getDate();
+            addDay(datePointer, 1);
             print = true;
         } else {
             col.textContent = ' ';
+            col.on.pop();
         }
-        if (inSameDay(date, today)) {
+        if (inSameDay(datePointer, today)) {
             col.className = 'today';
         }
         cols.push(col);
@@ -115,7 +130,7 @@ export default (el, {
                 {tag: 'tr', children: [
                     {tag: 'th', attrs: {colSpan: 7}, className: 'month-selector', children: [
                         {tag: 'select', children: getMonthOptions(month), on: ['change', e => {
-                            onChangeMonth && onChangeMonth(e.target.value, year);
+                            onChangeMonth && onChangeMonth(e.target.value-1, year);
                         }]},
                         {tag: 'select', children: getYearOptions(year), on: ['change', e => {
                             onChangeMonth && onChangeMonth(month, e.target.value);
@@ -129,12 +144,12 @@ export default (el, {
     
             // Calendar body
             {tag: 'tbody', children: [
-                {tag: 'tr', children: getDateRow(datePointer, onSelectDay, today, month)},
-                {tag: 'tr', children: getDateRow(datePointer, onSelectDay, today, month)},
-                {tag: 'tr', children: getDateRow(datePointer, onSelectDay, today, month)},
-                {tag: 'tr', children: getDateRow(datePointer, onSelectDay, today, month)},
-                {tag: 'tr', children: getDateRow(datePointer, onSelectDay, today, month)},
-                {tag: 'tr', children: getDateRow(datePointer, onSelectDay, today, month)}
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})}
             ]}
         ]}
     ]);

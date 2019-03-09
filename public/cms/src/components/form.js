@@ -11,6 +11,8 @@ function createField(meta) {
     switch(meta.type) {
         case 'date':
             return inputDate(meta);
+        case 'datetime':
+            return inputDate(meta, true);
         case 'spacing':
             return {tag: 'div'};
         case 'single-image':
@@ -116,7 +118,8 @@ export default ({fields, fieldCol, onSubmit, hideCancel=false}) => ({
                 data[imageWrp.dataset.attr] = img.src;
             });
             getEls(el, 'input.date').forEach(inputDate => {
-                data[inputDate.name] = ptBrToCommon(inputDate.value);
+                data[inputDate.name] = ptBrToCommon(inputDate.value, 
+                    inputDate.dataset.format == 'DD/MM/YYYY HH:mm');
             });
 
             onSubmit(data, e);

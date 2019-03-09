@@ -48,23 +48,38 @@ const render = appEl => {
         formObj,
         {tag: 'h3', textContent: 'Eventos'},
         {tag: 'div', className: 'row', children: [
-            {tag: 'div', className: 'col-md-12', bootstrap(el) {
+            {tag: 'div', className: 'col-md-12', async bootstrap(el) {
+                const start = new Date();
+                start.setDate(1);
+                const end = new Date();
+                let events = await service.findByRange(start, end);
                 const monthSelected = new Date();
 
                 const renderCalendar = config => {
                     calendar(el, config);
                 };
+                const eventFormatter = e => ({
+                    date: new Date(e.start),
+                    description: e.description
+                });
 
-                renderCalendar({
-                    onSelectDay: () => console.log('teste'),
-                    onChangeMonth: (month, year) => {
+                const params = {
+                    onChangeMonth: async (month, year) => {
                         monthSelected.setMonth(month);
-                        monthSelected.setMonth(year);
+                        monthSelected.setFullYear(year);
+                        events = await service.findByRange(start, end);
+                        params.month = monthSelected.getMonth();
+                        params.year = monthSelected.getFullYear();
+                        params.items = events.map(eventFormatter);
+                        el.innerHTML = '';
+                        renderCalendar(params);
                     },
                     month: monthSelected.getMonth(),
                     year: monthSelected.getFullYear(),
-                    items: []
-                });
+                    items: events.map(eventFormatter)
+                };
+
+                renderCalendar(params);
             }}
         ]}
     ]);

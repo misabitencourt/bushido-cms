@@ -26,6 +26,7 @@ select.form-control {
 .calendar-table {
     width: 100%;
     border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .calendar-table, .calendar-table th, .calendar-table td {
@@ -40,13 +41,10 @@ select.form-control {
 
 .calendar-table td {
     padding: 5px 3px;
-    transition: 0.3s;
-}
-
-.calendar-table td:hover {
-    padding: 5px 3px;
-    background: #cdcdcd;
-    cursor: pointer;
+    height: 89px;
+    vertical-align: top;
+    overflow-y: auto;
+    width: 14.3%;
 }
 
 .calendar-table td.today {

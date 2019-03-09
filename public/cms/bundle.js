@@ -520,48 +520,81 @@ const render = (el, meta, selected = null) => {
     return innerEl;
 };
 
-const ptBrToCommon = str => {
+const inSameDay = (d1, d2) => d1.getDate() == d2.getDate() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear();
+
+const ptBrToCommon = (str, datetime = false) => {
+    let hour;
+
+    if (datetime) {
+        let spaceSplit = str.split(' ');
+        hour = spaceSplit.pop().split(':');
+        str = spaceSplit.pop();
+    }
+
     const split = str.split('/');
     if (split.length !== 3) {
         return null;
     }
 
-    return `${split[2]}-${split[1]}-${split[0]}`;
+    return `${split[2]}-${split[1]}-${split[0]} ${datetime ? `${hour[0]}:${hour[1]}:00` : ''}`;
 };
 
-const commonToPtBr = str => {
+const commonToPtBr = (str, datetime = false) => {
+    let hour;
+
+    if (datetime) {
+        let spaceSplit = str.split(' ');
+        hour = spaceSplit.pop().split(':');
+        str = spaceSplit.pop();
+    }
+
     const split = str.split('-');
+
+    if (datetime && hour.length !== 3) {
+        return null;
+    }
+
     if (split.length !== 3) {
         return null;
     }
 
-    return `${split[2]}/${split[1]}/${split[0]}`;
+    return `${split[2]}/${split[1]}/${split[0]} ${datetime ? `${hour[0]}:${hour[1]}` : ''}`;
 };
 
-var inputDate = (meta => ({
+var inputDate = ((meta, datetime = false) => ({
     tag: 'input',
     className: 'form-control date',
     attrs: {
         type: 'text',
-        placeholder: 'DD/MM/YYYY',
+        placeholder: datetime ? 'DD/MM/YYYY HH:mm' : 'DD/MM/YYYY',
         name: meta.name,
-        'data-format': 'DD/MM/YYYY'
+        'data-format': datetime ? 'DD/MM/YYYY HH:mm' : 'DD/MM/YYYY'
     },
     bootstrap(el) {
         addEvent('form:edit', data => {
             const value = data[meta.name];
             if (value) {
-                el.value = commonToPtBr(value);
+                el.value = commonToPtBr(value, datetime);
             }
         });
 
         el.addEventListener('change', e => {
-            const dateStr = e.target.value;
+            let dateStr = e.target.value;
+            let hour;
+            if (datetime) {
+                let spaceSplit = dateStr.split(' ');
+                hour = spaceSplit.pop().split(':');
+                dateStr = spaceSplit.pop();
+            }
             const dateArr = dateStr.split('/');
             if (dateArr.length !== 3) {
                 return e.target.value = '';
             }
             const date = new Date(dateArr[0] * 1, dateArr[1] * 1, dateArr[2] * 1);
+            if (datetime) {
+                date.setHours(hour[0]);
+                date.setMinutes(hour[1]);
+            }
             if (isNaN(date.getTime())) {
                 return e.target.value = '';
             }
@@ -572,11 +605,28 @@ var inputDate = (meta => ({
                 return;
             }
 
-            if ([2, 5].indexOf(el.value.length) === -1) {
+            if ([2, 5].indexOf(el.value.length) !== -1) {
+                el.value += '/';
                 return;
             }
 
-            el.value += '/';
+            if (!datetime) {
+                return;
+            }
+
+            if (el.value.length === 10) {
+                el.value += ' ';
+                return;
+            }
+
+            if (el.value.length === 13) {
+                el.value += ':';
+                return;
+            }
+
+            if (el.value.length > 16) {
+                el.value = el.value.substr(0, 16);
+            }
         });
     }
 }));
@@ -585,6 +635,8 @@ function createField(meta) {
     switch (meta.type) {
         case 'date':
             return inputDate(meta);
+        case 'datetime':
+            return inputDate(meta, true);
         case 'spacing':
             return { tag: 'div' };
         case 'single-image':
@@ -684,7 +736,7 @@ var form = (({ fields, fieldCol, onSubmit, hideCancel = false }) => ({
                 data[imageWrp.dataset.attr] = img.src;
             });
             getEls(el, 'input.date').forEach(inputDate$$1 => {
-                data[inputDate$$1.name] = ptBrToCommon(inputDate$$1.value);
+                data[inputDate$$1.name] = ptBrToCommon(inputDate$$1.value, inputDate$$1.dataset.format == 'DD/MM/YYYY HH:mm');
             });
 
             onSubmit(data, e);
@@ -1236,7 +1288,7 @@ var menus$1 = {
     }
 };
 
-var service$1 = {
+var articleSrv = {
 
     validate(data) {
         let errors = '';
@@ -1306,13 +1358,13 @@ const render$3 = appEl => {
         fieldCol: 3,
         fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name' }, { type: 'wysiwyg', name: 'text', fieldCol: 12 }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
-            const errors = service$1.validate(data);
+            const errors = articleSrv.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$1.update(e.target.dataset.id, data).then(() => {
+                articleSrv.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Artigo atualizado com sucesso'
@@ -1320,7 +1372,7 @@ const render$3 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$1.create(data).then(() => {
+                articleSrv.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Artigo salvo com sucesso'
@@ -1336,7 +1388,7 @@ const render$3 = appEl => {
                 bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$1.retrieve(searchInput.value);
+    const loadData = () => articleSrv.retrieve(searchInput.value);
 
     const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
@@ -1356,7 +1408,7 @@ const render$3 = appEl => {
             },
 
             onDelete(article) {
-                service$1.destroy(article.id).then(() => {
+                articleSrv.destroy(article.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'article excluído com sucesso'
@@ -1400,7 +1452,7 @@ var home = {
     }
 };
 
-var service$2 = {
+var service$1 = {
 
     findById(id) {
         return __async(function* () {
@@ -1500,15 +1552,15 @@ const render$4 = appEl => {
 
     const formObj = form({
         fieldCol: 3,
-        fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'short_description' }, { type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0 }, { type: 'wysiwyg', name: 'long_description', fieldCol: 12 }, { type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$2 }, { type: 'submit', label: 'Salvar' }],
+        fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'short_description' }, { type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0 }, { type: 'wysiwyg', name: 'long_description', fieldCol: 12 }, { type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$1 }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
-            const errors = service$2.validate(data);
+            const errors = service$1.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$2.update(e.target.dataset.id, data).then(() => {
+                service$1.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Produto atualizado com sucesso'
@@ -1516,7 +1568,7 @@ const render$4 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$2.create(data).then(() => {
+                service$1.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Produto salvo com sucesso'
@@ -1532,7 +1584,7 @@ const render$4 = appEl => {
                 bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$2.retrieve(searchInput.value);
+    const loadData = () => service$1.retrieve(searchInput.value);
 
     const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
@@ -1547,14 +1599,14 @@ const render$4 = appEl => {
             },
 
             onEdit(product) {
-                service$2.findById(product.id).then(product => {
+                service$1.findById(product.id).then(product => {
                     dataToForm(product, formEl);
                     formEl.dataset.id = product.id;
                 });
             },
 
             onDelete(product) {
-                service$2.destroy(product.id).then(() => {
+                service$1.destroy(product.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Produto excluído com sucesso'
@@ -1735,7 +1787,7 @@ var macros = {
     }
 };
 
-var service$3 = {
+var service$2 = {
 
     findById(id) {
         return __async(function* () {
@@ -1821,13 +1873,13 @@ const render$6 = appEl => {
         fieldCol: 3,
         fields: [{ type: 'text', label: 'Título', name: 'title' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Autor', name: 'author' }, { type: 'date', label: 'Data de publicação', name: 'published_at' }, { type: 'single-entity', label: 'Menu', name: 'menu', etity: 'menu', service: menuSrv, descriptionField: 'name' }, { type: 'wysiwyg', label: 'Resumo', name: 'abstract', fieldCol: '12' }, { type: 'wysiwyg', label: 'Texto', name: 'text', fieldCol: '12' }, { type: 'single-image', label: 'Capa', name: 'cover' }, { type: 'spacing' }, { type: 'spacing' }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
-            const errors = service$3.validate(data);
+            const errors = service$2.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$3.update(e.target.dataset.id, data).then(() => {
+                service$2.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Notícia atualizada com sucesso'
@@ -1835,7 +1887,7 @@ const render$6 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$3.create(data).then(() => {
+                service$2.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Notícia salva com sucesso'
@@ -1851,7 +1903,7 @@ const render$6 = appEl => {
                 bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$3.retrieve(searchInput.value);
+    const loadData = () => service$2.retrieve(searchInput.value);
 
     const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
@@ -1866,14 +1918,14 @@ const render$6 = appEl => {
             },
 
             onEdit(notice) {
-                service$3.findById(notice.id).then(notice => {
+                service$2.findById(notice.id).then(notice => {
                     dataToForm(notice, formEl);
                     formEl.dataset.id = notice.id;
                 });
             },
 
             onDelete(notice) {
-                service$3.destroy(notice.id).then(() => {
+                service$2.destroy(notice.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Notícia excluída com sucesso'
@@ -1901,7 +1953,7 @@ var news = {
     }
 };
 
-var service$4 = {
+var service$3 = {
 
     findById(id) {
         return __async(function* () {
@@ -1983,13 +2035,13 @@ const render$7 = appEl => {
         fieldCol: 3,
         fields: [{ type: 'text', label: 'Título (nome)', name: 'name' }, { type: 'text', label: 'Descrição', name: 'description' }, { type: 'text', label: 'Grupo', name: 'group' }, { type: 'spacing' }, { type: 'single-image', label: 'Foto de capa', name: 'cover' }, { type: 'submit', label: 'Salvar' }],
         onSubmit(data, e) {
-            const errors = service$4.validate(data);
+            const errors = service$3.validate(data);
             if (errors) {
                 return error(errors);
             }
 
             if (e.target.dataset.id) {
-                service$4.update(e.target.dataset.id, data).then(() => {
+                service$3.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Notícia atualizada com sucesso'
@@ -1997,7 +2049,7 @@ const render$7 = appEl => {
                     window.location.reload();
                 });
             } else {
-                service$4.create(data).then(() => {
+                service$3.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Notícia salva com sucesso'
@@ -2013,7 +2065,7 @@ const render$7 = appEl => {
                 bootstrap: el => searchInput = el }] }] }]);
 
     formEl = mainEl.querySelector('form');
-    const loadData = () => service$4.retrieve(searchInput.value);
+    const loadData = () => service$3.retrieve(searchInput.value);
 
     const renderGrid = () => __async(function* () {
         const oldGrid = mainEl.querySelector('table');
@@ -2028,14 +2080,14 @@ const render$7 = appEl => {
             },
 
             onEdit(cover) {
-                service$4.findById(cover.id).then(cover => {
+                service$3.findById(cover.id).then(cover => {
                     dataToForm(cover, formEl);
                     formEl.dataset.id = cover.id;
                 });
             },
 
             onDelete(cover) {
-                service$4.destroy(cover.id).then(() => {
+                service$3.destroy(cover.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
                         msg: 'Capa excluída com sucesso'
@@ -2063,7 +2115,295 @@ var covers = {
     }
 };
 
-var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers];
+var service$4 = {
+
+    findById(id) {
+        return __async(function* () {
+            let response = yield fetch(`${config.API_URL}/cms/event/id/${id}`, { headers });
+            let json = yield response.json();
+            return json;
+        }());
+    },
+
+    validate(data) {
+        let errors = '';
+
+        if (!data.description) {
+            errors += ' Informe a descrição.';
+        }
+
+        if (!data.start) {
+            errors += ' Informe o início.';
+        }
+
+        if (!data.end) {
+            errors += ' Informe o término.';
+        }
+
+        return errors;
+    },
+
+    retrieve: search => __async(function* () {
+        let response = yield fetch(`${config.API_URL}/cms/event/${encodeURIComponent(search)}`, { headers });
+        let json = yield response.json();
+        return json;
+    }()),
+
+    findByRange: (start, end) => __async(function* () {
+        const dateRange = `${encodeURIComponent(start + '')}/${encodeURIComponent(end + '')}`;
+        let response = yield fetch(`${config.API_URL}/cms/event/date-range/${dateRange}`, { headers });
+        let json = yield response.json();
+        return json;
+    }()),
+
+    create: event => __async(function* () {
+        const response = yield fetch(`${config.API_URL}/cms/event/`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(event)
+        });
+
+        let newData = yield response.json();
+
+        return newData;
+    }()),
+
+    update: (id, event) => __async(function* () {
+        const params = { id };
+        for (let i in event) {
+            params[`${i}`] = event[i];
+        }
+        const response = yield fetch(`${config.API_URL}/cms/event/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(params),
+            headers
+        });
+
+        let newData = yield response.json();
+
+        return newData;
+    }()),
+
+    destroy: id => __async(function* () {
+        return fetch(`${config.API_URL}/cms/event/${id}`, {
+            headers,
+            method: 'DELETE'
+        });
+    }())
+
+};
+
+function addDay(date, days = 1) {
+    let time = date.getTime();
+    let currentDate = date.getDate();
+    while (date.getDate() == currentDate) {
+        time += 1 * 60 * 60 * 1000;
+        date.setTime(time);
+    }
+}
+
+function getMonthName(number) {
+    switch (number) {
+        case 1:
+            return 'Janeiro';
+        case 2:
+            return 'Fevereiro';
+        case 3:
+            return 'Março';
+        case 4:
+            return 'Abril';
+        case 5:
+            return 'Maio';
+        case 6:
+            return 'Junho';
+        case 7:
+            return 'Julho';
+        case 8:
+            return 'Agosto';
+        case 9:
+            return 'Setembro';
+        case 10:
+            return 'Outubro';
+        case 11:
+            return 'Novembro';
+        case 12:
+            return 'Dezembro';
+    }
+
+    return '';
+}
+
+function getMonthOptions(selected) {
+    const options = [];
+    for (let i = 0; i < 12; i++) {
+        let option = { tag: 'option', attrs: { value: i + 1 }, textContent: getMonthName(i + 1) };
+        if (selected == i) {
+            option.attrs.SELECTED = true;
+        }
+        options.push(option);
+    }
+
+    return options;
+}
+
+function getYearOptions(selected) {
+    const options = [];
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 30; i < currentYear + 20; i++) {
+        const option = { tag: 'option', attrs: { value: i }, textContent: i };
+        if (i == selected) {
+            option.attrs.SELECTED = true;
+        }
+        options.push(option);
+    }
+
+    return options;
+}
+
+function getWeekDays() {
+    return ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+}
+
+function getDateRow({
+    datePointer,
+    onSelectDay,
+    today,
+    month,
+    items = []
+}) {
+    const cols = [];
+    let print = false;
+    for (let day = 0; day < 7; day++) {
+        let dateStr = datePointer + '';
+
+        const col = { tag: 'td', attrs: { value: day }, on: ['click', e => {
+                onSelectDay && onSelectDay(dateStr);
+            }], children: items.filter(item => {
+                return inSameDay(item.date, datePointer);
+            }).map(item => ({
+                tag: 'div',
+                className: 'calendar-mark',
+                textContent: item.description
+            })) };
+
+        if (month == datePointer.getMonth() && day == datePointer.getDay()) {
+            col.textContent = datePointer.getDate();
+            addDay(datePointer, 1);
+            print = true;
+        } else {
+            col.textContent = ' ';
+            col.on.pop();
+        }
+        if (inSameDay(datePointer, today)) {
+            col.className = 'today';
+        }
+        cols.push(col);
+    }
+
+    return print ? cols : [];
+}
+
+var calendar = ((el, {
+    onSelectDay,
+    onChangeMonth,
+    month,
+    year,
+    items
+}) => {
+    const today = new Date();
+    const datePointer = new Date(year, month, 1);
+
+    return createEls('div', 'calendar', el, [{ tag: 'table', className: 'calendar-table', children: [
+
+        // Calendar head
+        { tag: 'thead', children: [{ tag: 'tr', children: [{ tag: 'th', attrs: { colSpan: 7 }, className: 'month-selector', children: [{ tag: 'select', children: getMonthOptions(month), on: ['change', e => {
+                            onChangeMonth && onChangeMonth(e.target.value - 1, year);
+                        }] }, { tag: 'select', children: getYearOptions(year), on: ['change', e => {
+                            onChangeMonth && onChangeMonth(month, e.target.value);
+                        }] }] }] }, { tag: 'tr', children: getWeekDays().map(wd => ({ tag: 'th', textContent: wd })) }] },
+
+        // Calendar body
+        { tag: 'tbody', children: [{ tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }] }] }]);
+});
+
+const render$8 = appEl => {
+    const formObj = form({
+        fieldCol: 3,
+        fields: [{ type: 'text', label: 'Endereço', name: 'address' }, { type: 'text', label: 'Descrição curta', name: 'description' }, { type: 'single-entity', label: 'Artigo explicativo', name: 'article_id', etity: 'article', service: articleSrv, descriptionField: 'title' }, { type: 'datetime', label: 'Início', name: 'start' }, { type: 'datetime', label: 'Fim', name: 'end' }, { type: 'submit', label: 'Salvar' }],
+        onSubmit(data, e) {
+            const errors = service$4.validate(data);
+            if (errors) {
+                return error(errors);
+            }
+
+            if (e.target.dataset.id) {
+                service$4.update(e.target.dataset.id, data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Evento atualizado com sucesso'
+                    });
+                    window.location.reload();
+                });
+            } else {
+                service$4.create(data).then(() => {
+                    sessionStorage.flash = JSON.stringify({
+                        type: 'success',
+                        msg: 'Evento salvo com sucesso'
+                    });
+                    window.location.reload();
+                });
+            }
+        }
+    });
+
+    const wrpEl = document.createElement('div');
+    const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Eventos' }, formObj, { tag: 'h3', textContent: 'Eventos' }, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-12', bootstrap(el) {
+                return __async(function* () {
+                    const start = new Date();
+                    start.setDate(1);
+                    const end = new Date();
+                    let events = yield service$4.findByRange(start, end);
+                    const monthSelected = new Date();
+
+                    const renderCalendar = config => {
+                        calendar(el, config);
+                    };
+                    const eventFormatter = e => ({
+                        date: new Date(e.start),
+                        description: e.description
+                    });
+
+                    const params = {
+                        onChangeMonth: (month, year) => __async(function* () {
+                            monthSelected.setMonth(month);
+                            monthSelected.setFullYear(year);
+                            events = yield service$4.findByRange(start, end);
+                            params.month = monthSelected.getMonth();
+                            params.year = monthSelected.getFullYear();
+                            params.items = events.map(eventFormatter);
+                            el.innerHTML = '';
+                            renderCalendar(params);
+                        }()),
+                        month: monthSelected.getMonth(),
+                        year: monthSelected.getFullYear(),
+                        items: events.map(eventFormatter)
+                    };
+
+                    renderCalendar(params);
+                }());
+            } }] }]);
+    wrpEl.appendChild(mainEl);
+    appEl.appendChild(template(wrpEl, 'event'));
+};
+
+var events = {
+    route: '#/events',
+    render(el) {
+        render$8(el);
+    }
+};
+
+var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers, events];
 
 function routeChange(el, hasRouteChange) {
     let route = window.location.hash;

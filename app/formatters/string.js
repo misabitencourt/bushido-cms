@@ -1,13 +1,14 @@
 
-
-module.exports.lpad = (value, length, char=' ') => {
+const lpad = (value, length, char=' ') => {
     let result = `${value}` || '';
     while (result.length < length) {
         result = `${char}${result}`;
     }
 
     return result;
-}
+};
+
+module.exports.lpad = lpad;
 
 
 module.exports.dateToYMD = date => {

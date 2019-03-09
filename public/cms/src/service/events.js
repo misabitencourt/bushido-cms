@@ -13,7 +13,7 @@ export default {
         let errors = '';
 
         if (! data.description) {
-            errors += ' Informe o description.';
+            errors += ' Informe a descrição.';
         }
 
         if (! data.start) {
@@ -44,19 +44,19 @@ export default {
         const response = await fetch(`${config.API_URL}/cms/event/`, {
             method: 'POST',
             headers,
-            body: JSON.stringify(user)
+            body: JSON.stringify(event)
         });
 
-        let newUser = await response.json();
+        let newData = await response.json();
 
-        return newUser;
+        return newData;
     },
 
 
     update: async (id, event) => {
         const params = {id};
-        for (let i in user) {
-            params[`${i}`] = user[i];
+        for (let i in event) {
+            params[`${i}`] = event[i];
         }
         const response = await fetch(`${config.API_URL}/cms/event/${id}`, {
             method: 'PUT',
@@ -64,9 +64,9 @@ export default {
             headers
         });
 
-        let newUser = await response.json();
+        let newData = await response.json();
 
-        return newUser;
+        return newData;
     },
 
 
