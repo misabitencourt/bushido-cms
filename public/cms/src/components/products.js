@@ -80,6 +80,7 @@ const render = appEl => {
             onEdit(product) {
                 service.findById(product.id).then(product => {
                     dataToForm(product, formEl);
+                    formEl.querySelector('input').focus();
                     formEl.dataset.id = product.id;
                 });
             },

@@ -85,6 +85,7 @@ const render = appEl => {
             onEdit(notice) {
                 service.findById(notice.id).then(notice => {
                     dataToForm(notice, formEl);
+                    formEl.querySelector('input').focus();
                     formEl.dataset.id = notice.id;
                 });
             },

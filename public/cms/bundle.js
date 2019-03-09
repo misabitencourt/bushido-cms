@@ -1137,6 +1137,7 @@ const render$1 = appEl => {
 
             onEdit(user) {
                 dataToForm(user, formEl);
+                formEl.querySelector('input').focus();
                 formEl.dataset.id = user.id;
             },
 
@@ -1281,6 +1282,7 @@ const render$2 = appEl => {
 
             onEdit(menu) {
                 dataToForm(menu, formEl);
+                formEl.querySelector('input').focus();
                 formEl.dataset.id = menu.id;
             },
 
@@ -1429,6 +1431,7 @@ const render$3 = appEl => {
 
             onEdit(article) {
                 dataToForm(article, formEl);
+                formEl.querySelector('input').focus();
                 formEl.dataset.id = article.id;
             },
 
@@ -1626,6 +1629,7 @@ const render$4 = appEl => {
             onEdit(product) {
                 service$1.findById(product.id).then(product => {
                     dataToForm(product, formEl);
+                    formEl.querySelector('input').focus();
                     formEl.dataset.id = product.id;
                 });
             },
@@ -1945,6 +1949,7 @@ const render$6 = appEl => {
             onEdit(notice) {
                 service$2.findById(notice.id).then(notice => {
                     dataToForm(notice, formEl);
+                    formEl.querySelector('input').focus();
                     formEl.dataset.id = notice.id;
                 });
             },
@@ -2107,6 +2112,7 @@ const render$7 = appEl => {
             onEdit(cover) {
                 service$3.findById(cover.id).then(cover => {
                     dataToForm(cover, formEl);
+                    formEl.querySelector('input').focus();
                     formEl.dataset.id = cover.id;
                 });
             },
@@ -2423,6 +2429,7 @@ const render$8 = appEl => {
                             event.end = new Date(event.end);
                             event.article_id = event.article;
                             dataToForm(event, formEl);
+                            formEl.querySelector('input').focus();
                         }
                     };
 

@@ -78,6 +78,7 @@ const render = appEl => {
             onEdit(cover) {
                 service.findById(cover.id).then(cover => {
                     dataToForm(cover, formEl);
+                    formEl.querySelector('input').focus();
                     formEl.dataset.id = cover.id;
                 });
             },

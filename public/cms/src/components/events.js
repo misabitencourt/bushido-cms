@@ -87,6 +87,7 @@ const render = appEl => {
                         event.end = new Date(event.end);
                         event.article_id = event.article;
                         dataToForm(event, formEl);
+                        formEl.querySelector('input').focus();
                     }
                 };
 

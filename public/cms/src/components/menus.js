@@ -76,6 +76,7 @@ const render = appEl => {
     
             onEdit(menu) {
                 dataToForm(menu, formEl);
+                formEl.querySelector('input').focus();
                 formEl.dataset.id = menu.id;
             },
     
