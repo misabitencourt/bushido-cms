@@ -1,5 +1,5 @@
 import { addEvent } from '../common/event';
-import { commonToPtBr } from '../common/date-format';
+import { commonToPtBr, dateToPtBr } from '../common/date-format';
 
 export default (meta, datetime=false) => ({
     tag: 'input',
@@ -14,6 +14,10 @@ export default (meta, datetime=false) => ({
         addEvent('form:edit', data => {
             const value = data[meta.name];
             if (value) {
+                if (value.getTime && value.getDate) {
+                    el.value = dateToPtBr(value, datetime);
+                    return;
+                }
                 el.value = commonToPtBr(value, datetime);
             }
         });

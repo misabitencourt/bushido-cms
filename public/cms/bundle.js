@@ -520,6 +520,15 @@ const render = (el, meta, selected = null) => {
     return innerEl;
 };
 
+const lpad = (str, char = '0', size = 2) => {
+    str = `${str}`;
+    while (str.length < size) {
+        str = `${char}${str}`;
+    }
+
+    return str;
+};
+
 const inSameDay = (d1, d2) => d1.getDate() == d2.getDate() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear();
 
 const ptBrToCommon = (str, datetime = false) => {
@@ -561,6 +570,18 @@ const commonToPtBr = (str, datetime = false) => {
     return `${split[2]}/${split[1]}/${split[0]} ${datetime ? `${hour[0]}:${hour[1]}` : ''}`;
 };
 
+const dateToPtBr = (date, datetime = false) => {
+    if (!date) {
+        return '';
+    }
+
+    if (typeof date !== 'object') {
+        date = new Date(date + '');
+    }
+
+    return `${lpad(date.getDate())}/${lpad(date.getMonth() + 1)}/${date.getFullYear()}${datetime ? ` ${lpad(date.getHours())}:${lpad(date.getMinutes())}` : ''}`;
+};
+
 var inputDate = ((meta, datetime = false) => ({
     tag: 'input',
     className: 'form-control date',
@@ -574,6 +595,10 @@ var inputDate = ((meta, datetime = false) => ({
         addEvent('form:edit', data => {
             const value = data[meta.name];
             if (value) {
+                if (value.getTime && value.getDate) {
+                    el.value = dateToPtBr(value, datetime);
+                    return;
+                }
                 el.value = commonToPtBr(value, datetime);
             }
         });
@@ -2267,6 +2292,7 @@ function getWeekDays() {
 function getDateRow({
     datePointer,
     onSelectDay,
+    onItemClick,
     today,
     month,
     items = []
@@ -2283,7 +2309,8 @@ function getDateRow({
             }).map(item => ({
                 tag: 'div',
                 className: 'calendar-mark',
-                textContent: item.description
+                textContent: item.description,
+                on: ['click', e => onItemClick(item)]
             })) };
 
         if (month == datePointer.getMonth() && day == datePointer.getDay()) {
@@ -2306,6 +2333,7 @@ function getDateRow({
 var calendar = ((el, {
     onSelectDay,
     onChangeMonth,
+    onItemClick,
     month,
     year,
     items
@@ -2323,10 +2351,11 @@ var calendar = ((el, {
                         }] }] }] }, { tag: 'tr', children: getWeekDays().map(wd => ({ tag: 'th', textContent: wd })) }] },
 
         // Calendar body
-        { tag: 'tbody', children: [{ tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items }) }] }] }]);
+        { tag: 'tbody', children: [{ tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items, onItemClick }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items, onItemClick }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items, onItemClick }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items, onItemClick }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items, onItemClick }) }, { tag: 'tr', children: getDateRow({ datePointer, onSelectDay, today, month, items, onItemClick }) }] }] }]);
 });
 
 const render$8 = appEl => {
+    let formEl;
     const formObj = form({
         fieldCol: 3,
         fields: [{ type: 'text', label: 'Endereço', name: 'address' }, { type: 'text', label: 'Descrição curta', name: 'description' }, { type: 'single-entity', label: 'Artigo explicativo', name: 'article_id', etity: 'article', service: articleSrv, descriptionField: 'title' }, { type: 'datetime', label: 'Início', name: 'start' }, { type: 'datetime', label: 'Fim', name: 'end' }, { type: 'submit', label: 'Salvar' }],
@@ -2369,6 +2398,7 @@ const render$8 = appEl => {
                         calendar(el, config);
                     };
                     const eventFormatter = e => ({
+                        id: e.id,
                         date: new Date(e.start),
                         description: e.description
                     });
@@ -2386,13 +2416,21 @@ const render$8 = appEl => {
                         }()),
                         month: monthSelected.getMonth(),
                         year: monthSelected.getFullYear(),
-                        items: events.map(eventFormatter)
+                        items: events.map(eventFormatter),
+                        onItemClick: item => {
+                            const event = events.find(e => e.id === item.id);
+                            event.start = new Date(event.start);
+                            event.end = new Date(event.end);
+                            event.article_id = event.article;
+                            dataToForm(event, formEl);
+                        }
                     };
 
                     renderCalendar(params);
                 }());
             } }] }]);
     wrpEl.appendChild(mainEl);
+    formEl = mainEl.querySelector('form');
     appEl.appendChild(template(wrpEl, 'event'));
 };
 

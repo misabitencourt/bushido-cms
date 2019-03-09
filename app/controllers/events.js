@@ -42,12 +42,13 @@ module.exports = app => {
                 const start = new Date();
                 const end = new Date();
                 start.setTime(event.start);
-                end.setTime(event.start);
+                end.setTime(event.end);
                 return {
                     id: event.id,
                     description: event.description,
                     address: event.address,
                     article_id: event.article_id,
+                    article: {id: event.article_id, title: event.article_title},
                     start,
                     end
                 };

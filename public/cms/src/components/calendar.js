@@ -76,6 +76,7 @@ function getWeekDays() {
 function getDateRow({
     datePointer, 
     onSelectDay, 
+    onItemClick,
     today, 
     month,
     items=[]
@@ -92,7 +93,8 @@ function getDateRow({
         }).map(item => ({
             tag: 'div',
             className: 'calendar-mark',
-            textContent: item.description
+            textContent: item.description,
+            on: ['click', e => onItemClick(item)]
         }))};
 
         if (month == datePointer.getMonth() && day == datePointer.getDay()) {
@@ -115,6 +117,7 @@ function getDateRow({
 export default (el, {
     onSelectDay,
     onChangeMonth,
+    onItemClick,
     month,
     year,
     items
@@ -144,12 +147,12 @@ export default (el, {
     
             // Calendar body
             {tag: 'tbody', children: [
-                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
-                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
-                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
-                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
-                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})},
-                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items})}
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items, onItemClick})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items, onItemClick})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items, onItemClick})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items, onItemClick})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items, onItemClick})},
+                {tag: 'tr', children: getDateRow({datePointer, onSelectDay, today, month, items, onItemClick})}
             ]}
         ]}
     ]);

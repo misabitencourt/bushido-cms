@@ -1,4 +1,13 @@
 
+const lpad = (str, char='0', size=2) => {
+    str = `${str}`;
+    while (str.length < size) {
+        str  = `${char}${str}`;
+    }
+
+    return str;
+}
+
 export const lastDayOfMonth = date => {
     date = date || (new Date());
     date = addMonth(date);
@@ -68,5 +77,19 @@ export const commonToPtBr = (str, datetime=false) => {
 
     return `${split[2]}/${split[1]}/${split[0]} ${
         datetime ? `${hour[0]}:${hour[1]}` : ''
+    }`;
+}
+
+export const dateToPtBr = (date, datetime=false) => {
+    if (! date) {
+        return '';
+    }
+
+    if (typeof(date) !== 'object') {
+        date = new Date(date+'');
+    }
+
+    return `${lpad(date.getDate())}/${lpad(date.getMonth()+1)}/${date.getFullYear()}${
+        datetime ? ` ${lpad(date.getHours())}:${lpad(date.getMinutes())}` : ''
     }`;
 }

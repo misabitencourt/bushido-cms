@@ -27,7 +27,7 @@ module.exports.retrieve = search => {
 
 module.exports.findByDateRange = (start, end) => {
     return cms.retrieve({
-        select: 'events.*',
+        select: ['events.*', 'articles.title as article_title'],
         modelName: 'events',
         filters: 'start > :start AND start < :end',
         leftJoins: [{table: 'articles', foreignField: 'articles.id', localField: 'events.article_id'}],

@@ -4,8 +4,11 @@ import service from '../service/events';
 import articleSrv from '../service/articles';
 import error from '../dialogs/error';
 import calendar from './calendar';
+import { dataToForm } from '../common/form-bind'
+import { commonToPtBr } from '../common/date-format';
 
 const render = appEl => {
+    let formEl;
     const formObj = form({
         fieldCol: 3,
         fields: [
@@ -59,6 +62,7 @@ const render = appEl => {
                     calendar(el, config);
                 };
                 const eventFormatter = e => ({
+                    id: e.id,
                     date: new Date(e.start),
                     description: e.description
                 });
@@ -76,7 +80,14 @@ const render = appEl => {
                     },
                     month: monthSelected.getMonth(),
                     year: monthSelected.getFullYear(),
-                    items: events.map(eventFormatter)
+                    items: events.map(eventFormatter),
+                    onItemClick: item => {
+                        const event = events.find(e => e.id === item.id);
+                        event.start = new Date(event.start);
+                        event.end = new Date(event.end);
+                        event.article_id = event.article;
+                        dataToForm(event, formEl);
+                    }
                 };
 
                 renderCalendar(params);
@@ -84,6 +95,7 @@ const render = appEl => {
         ]}
     ]);
     wrpEl.appendChild(mainEl);
+    formEl = mainEl.querySelector('form');
     appEl.appendChild(template(wrpEl, 'event'));
 };
 
