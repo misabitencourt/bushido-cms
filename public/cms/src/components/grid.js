@@ -1,4 +1,5 @@
 export default async ({columns, loadData, onEdit, onDelete}) => {
+    const div = document.createElement('div');
     const table = document.createElement('table');
     table.className = 'table table-bordered table-stripped';
 
@@ -54,6 +55,10 @@ export default async ({columns, loadData, onEdit, onDelete}) => {
         row.appendChild(actionsTableData);
         tbody.appendChild(row);
     });
+    div.appendChild(table);
+    div.style.width = '100%';
+    div.style.overflowX = 'auto';
+    table.minWidth = '600px';
 
-    return table;
+    return div;
 }

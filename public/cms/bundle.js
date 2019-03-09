@@ -986,6 +986,7 @@ var template = ((child, currentMenuId = '') => {
 });
 
 var grid = (({ columns, loadData, onEdit, onDelete }) => __async(function* () {
+    const div = document.createElement('div');
     const table = document.createElement('table');
     table.className = 'table table-bordered table-stripped';
 
@@ -1041,8 +1042,12 @@ var grid = (({ columns, loadData, onEdit, onDelete }) => __async(function* () {
         row.appendChild(actionsTableData);
         tbody.appendChild(row);
     });
+    div.appendChild(table);
+    div.style.width = '100%';
+    div.style.overflowX = 'auto';
+    table.minWidth = '600px';
 
-    return table;
+    return div;
 }()));
 
 const dataToForm = (data, form) => {
