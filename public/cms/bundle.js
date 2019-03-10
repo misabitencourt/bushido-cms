@@ -1444,7 +1444,7 @@ const render$3 = appEl => {
                 articleSrv.destroy(article.id).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'article excluído com sucesso'
+                        msg: 'Artigo excluído com sucesso'
                     });
                     window.location.reload();
                 });
@@ -2367,6 +2367,7 @@ var calendar = ((el, {
 
 const render$8 = appEl => {
     let formEl;
+    let deleteBtn;
     const formObj = form({
         fieldCol: 3,
         fields: [{ type: 'text', label: 'Endereço', name: 'address' }, { type: 'text', label: 'Descrição curta', name: 'description' }, { type: 'single-entity', label: 'Artigo explicativo', name: 'article_id', etity: 'article', service: articleSrv, descriptionField: 'title' }, { type: 'datetime', label: 'Início', name: 'start' }, { type: 'datetime', label: 'Fim', name: 'end' }, { type: 'submit', label: 'Salvar' }],
@@ -2435,6 +2436,8 @@ const render$8 = appEl => {
                             event.article_id = event.article;
                             dataToForm(event, formEl);
                             formEl.querySelector('input').focus();
+                            formEl.dataset.id = event.id;
+                            deleteBtn.style.display = 'inherit';
                         }
                     };
 
@@ -2443,6 +2446,19 @@ const render$8 = appEl => {
             } }] }]);
     wrpEl.appendChild(mainEl);
     formEl = mainEl.querySelector('form');
+    createEls('div', 'col-md-12', formEl, [{ tag: 'button', className: 'btn btn-danger', attrs: { type: 'button' }, textContent: 'Deletar', bootstrap: el => {
+            deleteBtn = el;
+            el.style.display = 'none';
+            el.addEventListener('click', () => __async(function* () {
+                yield service$4.destroy(formEl.dataset.id);
+                sessionStorage.flash = JSON.stringify({
+                    type: 'success',
+                    msg: 'Evento excluído com sucesso'
+                });
+                window.location.reload();
+            }()));
+        } }]);
+    formEl.addEventListener('reset', () => deleteBtn.style.display = 'none');
     appEl.appendChild(template(wrpEl, 'event'));
 };
 

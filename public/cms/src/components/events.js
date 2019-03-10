@@ -9,6 +9,7 @@ import { commonToPtBr } from '../common/date-format';
 
 const render = appEl => {
     let formEl;
+    let deleteBtn;
     const formObj = form({
         fieldCol: 3,
         fields: [
@@ -88,6 +89,8 @@ const render = appEl => {
                         event.article_id = event.article;
                         dataToForm(event, formEl);
                         formEl.querySelector('input').focus();
+                        formEl.dataset.id = event.id;
+                        deleteBtn.style.display = 'inherit';
                     }
                 };
 
@@ -97,6 +100,21 @@ const render = appEl => {
     ]);
     wrpEl.appendChild(mainEl);
     formEl = mainEl.querySelector('form');
+    createEls('div', 'col-md-12', formEl, [
+        {tag: 'button', className: 'btn btn-danger', attrs: {type: 'button'}, textContent: 'Deletar', bootstrap: el => {
+            deleteBtn = el;
+            el.style.display = 'none';
+            el.addEventListener('click', async () => {
+                await service.destroy(formEl.dataset.id);
+                sessionStorage.flash = JSON.stringify({
+                    type: 'success',
+                    msg: 'Evento excluído com sucesso'
+                });
+                window.location.reload();
+            });
+        }}
+    ]);
+    formEl.addEventListener('reset', () => deleteBtn.style.display = 'none');
     appEl.appendChild(template(wrpEl, 'event'));
 };
 
