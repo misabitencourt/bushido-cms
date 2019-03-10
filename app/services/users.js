@@ -102,3 +102,13 @@ module.exports.destroy = id => cms.destroy({
 });
 
 
+module.exports.resourcesAvaliable = [
+    'user',
+    'article',
+    'cover',
+    'event',
+    'macros',
+    'menu',
+    'new',
+    'product'
+];
