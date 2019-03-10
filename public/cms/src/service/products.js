@@ -34,11 +34,11 @@ export default {
     },
 
 
-    create: async user => {
+    create: async product => {
         const response = await fetch(`${config.API_URL}/cms/product/`, {
             method: 'POST',
             headers,
-            body: JSON.stringify(user)
+            body: JSON.stringify(product)
         });
 
         let newUser = await response.json();
@@ -47,10 +47,10 @@ export default {
     },
 
 
-    update: async (id, user) => {
+    update: async (id, product) => {
         const params = {id};
-        for (let i in user) {
-            params[`${i}`] = user[i];
+        for (let i in product) {
+            params[`${i}`] = product[i];
         }
         const response = await fetch(`${config.API_URL}/cms/product/${id}`, {
             method: 'PUT',

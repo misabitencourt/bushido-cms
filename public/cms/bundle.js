@@ -1519,11 +1519,11 @@ var cms = (function () {
             return json;
         }()),
 
-        create: user => __async(function* () {
+        create: product => __async(function* () {
             const response = yield fetch(`${config.API_URL}/cms/product/`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify(user)
+                body: JSON.stringify(product)
             });
 
             let newUser = yield response.json();
@@ -1531,10 +1531,10 @@ var cms = (function () {
             return newUser;
         }()),
 
-        update: (id, user) => __async(function* () {
+        update: (id, product) => __async(function* () {
             const params = { id };
-            for (let i in user) {
-                params[`${i}`] = user[i];
+            for (let i in product) {
+                params[`${i}`] = product[i];
             }
             const response = yield fetch(`${config.API_URL}/cms/product/${id}`, {
                 method: 'PUT',
@@ -1585,7 +1585,7 @@ var cms = (function () {
 
         const formObj = form({
             fieldCol: 3,
-            fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'short_description' }, { type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0 }, { type: 'wysiwyg', name: 'long_description', fieldCol: 12 }, { type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$1 }, { type: 'submit', label: 'Salvar' }],
+            fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'short_description' }, { type: 'text', label: 'Grupo (categoria)', name: 'group' }, { type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0 }, { type: 'wysiwyg', name: 'long_description', fieldCol: 12 }, { type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$1 }, { type: 'submit', label: 'Salvar' }],
             onSubmit(data, e) {
                 const errors = service$1.validate(data);
                 if (errors) {
@@ -1625,7 +1625,7 @@ var cms = (function () {
                 mainEl.removeChild(oldGrid);
             }
             const gridEl = yield grid({
-                columns: [{ label: 'Nome', prop: product => product.name }, { label: 'Descrição curta', prop: product => product.short_description }, { label: 'Valor', prop: product => priceFormat(product.price) }],
+                columns: [{ label: 'Nome', prop: product => product.name }, { label: 'Descrição curta', prop: product => product.short_description }, { label: 'Grupo', prop: product => product.group }, { label: 'Valor', prop: product => priceFormat(product.price) }],
 
                 loadData() {
                     return loadData();

@@ -14,6 +14,7 @@ const render = appEl => {
         fields: [
             {type: 'text', label: 'Nome', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'short_description'},
+            {type: 'text', label: 'Grupo (categoria)', name: 'group'},
             {type: 'number', label: 'Valor', name: 'price', step: '0.01', min: 0},
             {type: 'wysiwyg', name: 'long_description', fieldCol: 12},
             {type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service},
@@ -70,6 +71,7 @@ const render = appEl => {
             columns: [
                 {label: 'Nome', prop: product => product.name },
                 {label: 'Descrição curta', prop: product => product.short_description },
+                {label: 'Grupo', prop: product => product.group },
                 {label: 'Valor', prop: product => priceFormat(product.price) }
             ],
 
