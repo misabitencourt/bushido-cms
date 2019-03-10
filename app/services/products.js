@@ -20,7 +20,8 @@ module.exports.create = product => cms.create({
         name: product.name,
         short_description: product.short_description,
         long_description: product.long_description,
-        price: product.price
+        price: product.price,
+        group: product.group
     }
 }).then(created => {
     return Promise.all(product.photos.map(photo => {

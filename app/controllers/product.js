@@ -13,7 +13,8 @@ module.exports = app => {
                 name: product.name,
                 short_description: product.short_description,
                 long_description: product.long_description,
-                price: product.price
+                price: product.price,
+                group: product.group
             })));
         });
     });
@@ -26,7 +27,8 @@ module.exports = app => {
                 name: product.name,
                 short_description: product.short_description,
                 long_description: product.long_description,
-                price: product.price
+                price: product.price,
+                group: product.group
             })));
         });
     });
@@ -37,7 +39,8 @@ module.exports = app => {
             short_description: req.body.short_description,
             long_description: req.body.long_description,
             photos: req.body.photos || [],
-            price: req.body.price
+            price: req.body.price,
+            group: req.body.group
         }).then(product => {
             return res.json(product);
         });
@@ -65,7 +68,8 @@ module.exports = app => {
             id,
             short_description: req.body.short_description,
             long_description: req.body.long_description,
-            price: req.body.price
+            price: req.body.price,
+            group: req.body.group
         }).then(product => {
             return res.json(product);
         });

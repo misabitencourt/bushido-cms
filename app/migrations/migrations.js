@@ -10,6 +10,7 @@ const addTypeToMacro = require('./add-type-to-macro');
 const createTableNew = require('./create-table-new');
 const createTableCovers = require('./create-table-covers');
 const createTableEvents = require('./create-table-events');
+const addGroupToProducts = require('./add-group-to-product');
 
 module.exports = [
     {id: 1, exec: createTableUsers},
@@ -23,5 +24,6 @@ module.exports = [
     {id: 9, exec: addTypeToMacro},
     {id: 10, exec: createTableNew},
     {id: 11, exec: createTableCovers},
-    {id: 12, exec: createTableEvents}
+    {id: 12, exec: createTableEvents},
+    {id: 13, exec: addGroupToProducts}
 ];
