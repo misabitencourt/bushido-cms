@@ -2,7 +2,7 @@ const config = require('dotenv').config().parsed;
 const request = require('supertest');
 const fs = require('fs');
 const session = require('./session')();
-
+const { assert, expect } = require('chai');
 fs.unlinkSync('cms.test.db');
 
 module.exports = app => {
@@ -34,6 +34,9 @@ module.exports = app => {
                     if (err) throw err;
                     const user = res.body;
                     session.user = user;
+                    assert(user.email, config.ADMIN_EMAIL);
+                    expect(user).to.not.have.own.property('password');
+                    expect(user).to.have.own.property('token');
                     done();
                 });
         });
