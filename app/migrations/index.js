@@ -3,34 +3,22 @@ const migrations = require('./migrations');
 const cmsDb = require('../repos/cms');
 const config = require('dotenv').config().parsed;
 const resources = require('../services/users').resourcesAvaliable;
+const sha1 = require('sha1');
 
 module.exports = () => {
     const migrated = `${fs.readFileSync('./migrated.dat')}`;
     const migratedIds = migrated.split(';');
-    const toMigrate = migrations.filter(migration => migratedIds.indexOf(`${migration.id}`) === -1);
     const success = [];
+    let toMigrate;
 
-    cmsDb.retrieve({
-        modelName: 'users', 
-        filters: 'email = :email',
-        params: {email: config.ADMIN_EMAIL}
-    }).then(users => {
-        if (! users.length) {
-            console.log('Admin user does not exists. Creating it...');
-            return cmsDb.create({modelName: 'users', newRegister: {
-                name: 'admin',
-                email: config.ADMIN_EMAIL,
-                password: config.SECRET_WORD,
-                phone: '9999999999',
-                acl: resources.join(';')
-            }}).then(() => {
-                console.log('Admin user created!');
-            }).catch(err => console.error(err));
-        }
-    }).catch(err => console.error(err));
+    if (global.TESTING) {
+        toMigrate = migrations;
+    } else {
+        toMigrate = migrations.filter(migration => migratedIds.indexOf(`${migration.id}`) === -1);
+    }
 
     Promise.all(toMigrate.map(migration => {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
             migration.exec().then(() => {
                 console.log(`Migration #${migration.id} SUCCESS!!!`);
                 success.push(migration.id);
@@ -44,5 +32,24 @@ module.exports = () => {
     })).then(() => {
         fs.writeFileSync('./migrated.dat', migratedIds.concat(success).join(';'));
         console.log('All migration finished');
+        cmsDb.retrieve({
+            modelName: 'users', 
+            filters: 'email = :email',
+            params: {email: config.ADMIN_EMAIL}
+        }).then(users => {
+            if (! users.length) {
+                console.log('Admin user does not exists. Creating it...');
+                let password = sha1(`${config.SECRET_WORD}${config.SECRET_WORD}`);
+                return cmsDb.create({modelName: 'users', newRegister: {
+                    name: 'admin',
+                    email: config.ADMIN_EMAIL,
+                    password,
+                    phone: '9999999999',
+                    acl: resources.join(';')
+                }}).then(() => {
+                    console.log('Admin user created!');
+                }).catch(err => console.error(err));
+            }
+        }).catch(err => console.error(err));
     });
 }
