@@ -30,7 +30,9 @@ module.exports = () => {
             });
         });
     })).then(() => {
-        fs.writeFileSync('./migrated.dat', migratedIds.concat(success).join(';'));
+        if (! global.TESTING) {
+            fs.writeFileSync('./migrated.dat', migratedIds.concat(success).join(';'));
+        }
         console.log('All migration finished');
         cmsDb.retrieve({
             modelName: 'users', 

@@ -4,55 +4,61 @@ const { assert, expect } = require('chai');
 
 module.exports = app => {
     describe('User CRUD should be working', function() {
-        const userSent = { 
-            name: 'John Deere',
-            email: 'john@company.com', 
-            password: 'testing',
-            acl: 'user;menu',
-            phone: '5555 5555'
+        const menuSent = { 
+            name: 'Products',
+            description: 'Our products',
+            order: 1
         };
 
         it("Create", done => {
             request(app)
-                .post('/cms/user/')
-                .send(userSent)
+                .post('/cms/menu/')
+                .send(menuSent)
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
-                    done();
+                    request(app)
+                        .post('/cms/menu/')
+                        .send(menuSent)
+                        .set('Accept', 'application/json')
+                        .set('Auth-Token', session.user.token)
+                        .expect(200)
+                        .end(function(err, res) {
+                            if (err) throw err;
+                            done();
+                        });
                 });
         });
 
         it("Retrieve", done => {
             request(app)
-                .get('/cms/user')
+                .get('/cms/menu')
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
-                    const users = res.body;
-                    expect(users).to.not.be.eql(undefined);
-                    const user = users.reverse().pop();
-                    expect(user).to.not.be.eql(null);
-                    assert(user.name, userSent.name);
-                    assert(user.acl, userSent.acl);
-                    assert(user.phone, userSent.phone);
-                    userSent.id = user.id;
+                    const menus = res.body;
+                    expect(menus).to.not.be.eql(undefined);
+                    const menu = menus.reverse().pop();
+                    expect(menu).to.not.be.eql(null);
+                    assert(menu.name, menu.name);
+                    assert(menu.description, menu.description);
+                    assert(menu.order, menu.order);
+                    menuSent.id = menu.id;
                     done();
                 });
         });
 
         it("Update", done => {
-            userSent.name = `${userSent.name} UPDATED`;
-            userSent.phone = `${userSent.phone} UPDATED`;
-            userSent.acl = `${userSent.acl};article`;
-            userSent.email = `aaa${userSent.email}`;
+            menuSent.name = `${menuSent.name} UPDATED`;
+            menuSent.description = `${menuSent.description} UPDATED`;
+            menuSent.order = 2;
             request(app)
-                .put(`/cms/user/${userSent.id}`)
-                .send(userSent)
+                .put(`/cms/menu/${menuSent.id}`)
+                .send(menuSent)
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
@@ -64,27 +70,26 @@ module.exports = app => {
 
         it("Check update", done => {
             request(app)
-                .get('/cms/user')
+                .get('/cms/menu')
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
-                    const users = res.body;
-                    expect(users).to.not.be.eql(undefined);
-                    const user = users.pop();
-                    expect(user).to.not.be.eql(null);
-                    assert(user.name, userSent.name);
-                    assert(user.acl, userSent.acl);
-                    assert(user.phone, userSent.phone);
-                    assert(user.id, userSent.id);
+                    const menus = res.body;
+                    expect(menus).to.not.be.eql(undefined);
+                    const menu = menus.pop();
+                    expect(menu).to.not.be.eql(null);
+                    assert(menu.name, menuSent.name);
+                    assert(menu.description, menuSent.description);
+                    assert(menu.order, menuSent.order);
                     done();
                 });
         });
 
         it("Delete", done => {
             request(app)
-                .delete(`/cms/user/${userSent.id}`)
+                .delete(`/cms/menu/${menuSent.id}`)
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
@@ -96,14 +101,14 @@ module.exports = app => {
 
         it("Check deletion", done => {
             request(app)
-                .get('/cms/user/')
+                .get('/cms/menu/')
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
-                    const users = res.body;
-                    expect(users.length).to.not.be.eql(2);
+                    const menus = res.body;
+                    expect(menus.length).to.not.be.eql(2);
                     done();
                 });
         });
