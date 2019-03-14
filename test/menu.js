@@ -3,7 +3,7 @@ const session = require('./session')();
 const { assert, expect } = require('chai');
 
 module.exports = app => {
-    describe('User CRUD should be working', function() {
+    describe('Menu CRUD should be working', function() {
         const menuSent = { 
             name: 'Products',
             description: 'Our products',
@@ -44,9 +44,9 @@ module.exports = app => {
                     expect(menus).to.not.be.eql(undefined);
                     const menu = menus.reverse().pop();
                     expect(menu).to.not.be.eql(null);
-                    assert(menu.name, menu.name);
-                    assert(menu.description, menu.description);
-                    assert(menu.order, menu.order);
+                    assert(menu.name, menuSent.name);
+                    assert(menu.description, menuSent.description);
+                    assert(menu.order, menuSent.order);
                     menuSent.id = menu.id;
                     done();
                 });
