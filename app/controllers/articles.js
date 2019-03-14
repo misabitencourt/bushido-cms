@@ -50,7 +50,7 @@ module.exports = app => {
     app.put('/cms/article/:id', (req, res) => {
         const id = req.originalUrl.split('/').pop()*1;
         articleSrv.update({
-            id: req.body.id,
+            id,
             title: req.body.title,
             description: req.body.description,
             menu: req.body.menu,
