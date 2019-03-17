@@ -3,7 +3,13 @@ const request = require('supertest');
 const fs = require('fs');
 const session = require('./session')();
 const { assert, expect } = require('chai');
-fs.unlinkSync('cms.test.db');
+
+try {
+    fs.unlinkSync('cms.test.db');
+} catch (e) {
+    // Silent...
+}
+
 
 module.exports = app => {
     describe('Login should be authenticating', function() {

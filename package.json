@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "cms-front-watch": "rollup -c -w",
-    "cms-front-compile": "rollup -c"
+    "cms-front-compile": "rollup -c",
+    "test": "mocha --timeout 7000"
   },
   "author": "",
   "license": "ISC",
