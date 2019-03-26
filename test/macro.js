@@ -4,24 +4,26 @@ const { assert, expect } = require('chai');
 
 module.exports = app => {
     describe('Macros CRUD should be working', function() {
-        const menuSent = { 
-            name: 'Products',
-            description: 'Our products',
-            order: 1
+        const macroSent = { 
+            name: 'Page title',
+            description: 'The page header title',
+            strval: 'Company name',
+            textval: 'Company name text',
+            type: '1'
         };
 
         it("Create", done => {
             request(app)
-                .post('/cms/macro/')
-                .send(menuSent)
+                .post('/cms/macros/')
+                .send(macroSent)
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
                     request(app)
-                        .post('/cms/macro/')
-                        .send(menuSent)
+                        .post('/cms/macros/')
+                        .send(macroSent)
                         .set('Accept', 'application/json')
                         .set('Auth-Token', session.user.token)
                         .expect(200)
@@ -34,31 +36,35 @@ module.exports = app => {
 
         it("Retrieve", done => {
             request(app)
-                .get('/cms/macro')
+                .get('/cms/macros')
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
-                    const menus = res.body;
-                    expect(menus).to.not.be.eql(undefined);
-                    const menu = menus.reverse().pop();
-                    expect(menu).to.not.be.eql(null);
-                    assert(menu.name, menuSent.name);
-                    assert(menu.description, menuSent.description);
-                    assert(menu.order, menuSent.order);
-                    menuSent.id = menu.id;
+                    const macros = res.body;
+                    expect(macros).to.not.be.eql(undefined);
+                    const macro = macros.reverse().pop();
+                    expect(macro).to.not.be.eql(null);
+                    assert(macro.name, macroSent.name);
+                    assert(macro.description, macroSent.description);
+                    assert(macro.strval, macroSent.strval);
+                    assert(macro.textval, macroSent.textval);
+                    assert(macro.type, macroSent.type);
+                    macroSent.id = macro.id;
                     done();
                 });
         });
 
         it("Update", done => {
-            menuSent.name = `${menuSent.name} UPDATED`;
-            menuSent.description = `${menuSent.description} UPDATED`;
-            menuSent.order = 2;
+            macroSent.name = `${macroSent.name} UPDATED`;
+            macroSent.description = `${macroSent.description} UPDATED`;
+            macroSent.strval = `${macroSent.strval} UPDATED`;
+            macroSent.textval = `${macroSent.textval} UPDATED`;
+            macroSent.type = '2';
             request(app)
-                .put(`/cms/macro/${menuSent.id}`)
-                .send(menuSent)
+                .put(`/cms/macros/${macroSent.id}`)
+                .send(macroSent)
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
@@ -70,26 +76,28 @@ module.exports = app => {
 
         it("Check update", done => {
             request(app)
-                .get('/cms/macro')
+                .get('/cms/macros')
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
                 .end(function(err, res) {
                     if (err) throw err;
-                    const menus = res.body;
-                    expect(menus).to.not.be.eql(undefined);
-                    const menu = menus.pop();
-                    expect(menu).to.not.be.eql(null);
-                    assert(menu.name, menuSent.name);
-                    assert(menu.description, menuSent.description);
-                    assert(menu.order, menuSent.order);
+                    const macros = res.body;
+                    expect(macros).to.not.be.eql(undefined);
+                    const macro = macros.reverse().pop();
+                    expect(macro).to.not.be.eql(null);
+                    assert(macro.name, macroSent.name);
+                    assert(macro.description, macroSent.description);
+                    assert(macro.strval, macroSent.strval);
+                    assert(macro.textval, macroSent.textval);
+                    assert(macro.type, macroSent.type);
                     done();
                 });
         });
 
         it("Delete", done => {
             request(app)
-                .delete(`/cms/macro/${menuSent.id}`)
+                .delete(`/cms/macros/${macroSent.id}`)
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
@@ -101,7 +109,7 @@ module.exports = app => {
 
         it("Check deletion", done => {
             request(app)
-                .get('/cms/macro/')
+                .get('/cms/macros/')
                 .set('Accept', 'application/json')
                 .set('Auth-Token', session.user.token)
                 .expect(200)
