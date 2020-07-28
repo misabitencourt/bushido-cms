@@ -13,8 +13,30 @@ function retrieveMenus(news) {
     }));
 }
 
+module.exports.getIds = async () => cms.retrieve({
+    select: 'id',
+    modelName: 'news',
+    limit: 99999
+});
+
+module.exports.getOffset = async page => cms.list({
+    modelName: 'news',
+    limit: '4',
+    offset: page * 4
+});
+
+module.exports.findByIdNoMenu = async id => {
+    const list = await cms.retrieve({
+        modelName: 'news',
+        filters: 'id = :id',
+        params: {id},
+        limit: 9999
+    });
+    return list.pop();
+}
+
 module.exports.findById = id => {
-    return cms.list({
+    return cms.retrieve({
         modelName: 'news',
         filters: 'id = :id',
         params: {id}
@@ -24,7 +46,7 @@ module.exports.findById = id => {
             return null;
         }
 
-        return cms.list({
+        return cms.retrieve({
             modelName: 'menus',
             filters: 'id = :menu',
             params: {menu: neww.menu}
@@ -43,7 +65,7 @@ module.exports.create = neww => cms.create({
 module.exports.retrieve = search => {
     let list;
 
-    if (search.trim()) {
+    if ((search || '').trim()) {
         list = cms.retrieve({
             modelName: 'news',
             filters: 'title LIKE :search OR description LIKE :search',

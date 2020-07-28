@@ -1,7 +1,7 @@
 const cms = require('../repos/cms');
 
 module.exports.findById = id => {
-    return cms.list({
+    return cms.retrieve({
         modelName: 'covers',
         filters: 'id = :id',
         params: {id}
@@ -16,7 +16,7 @@ module.exports.create = cover => cms.create({
 module.exports.retrieve = search => {
     let list;
 
-    if (search.trim()) {
+    if ((search || '').trim()) {
         list = cms.retrieve({
             modelName: 'covers',
             filters: 'name LIKE :search OR description LIKE :search',

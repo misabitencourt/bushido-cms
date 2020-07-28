@@ -49,7 +49,7 @@ module.exports.retrieve = search => {
 };
 
 module.exports.findById = id => {
-    return cms.list({
+    return cms.retrieve({
         modelName: 'products',
         filters: 'id = :id',
         params: {id}

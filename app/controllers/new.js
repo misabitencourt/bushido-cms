@@ -6,6 +6,18 @@ module.exports = app => {
         newSrv.findById(id).then(neww => res.json(neww));
     });
 
+    app.get('/new/id/:id/image', (req, res) => {
+        const id = req.originalUrl.split('/').reverse()[1];
+        newSrv.findById(id).then(neww => {
+            const img = Buffer.from(neww.cover.split(',').pop(), 'base64')
+            res.writeHead(200, {
+                'Content-Type': 'image/png',
+                'Content-Length': img.length
+            });
+            res.end(img);
+        });
+    });
+
     app.get('/cms/new', (req, res) => {
         newSrv.retrieve('').then(news => {
             return res.json(news.map(neww => ({

@@ -11,21 +11,22 @@ function cacheClear() {
 
 db.on('query', queryData => console.log(queryData));
  
-module.exports.list = ({select, modelName, leftJoins, limit=15, ignoreCache=false}) => {
+module.exports.list = ({select, modelName, leftJoins, limit=15, ignoreCache=false, offset}) => {
     const queryId = createQueryId([
         'list',
         select,
         modelName,
         `${(leftJoins || []).map(lj => `${lj.table}-${lj.localField}-${lj.foreignField}`).join('-')}`,
-        limit
+        limit,
+        offset
     ]);
 
-    if (! ignoreCache) {
-        const cached = kv.get(queryId);
-        if (cached) {
-            return new Promise(resolve => resolve(cached));
-        }
-    }
+    // if (! ignoreCache) {
+    //     const cached = kv.get(queryId);
+    //     if (cached) {
+    //         return new Promise(resolve => resolve(cached));
+    //     }
+    // }
     
     let query = db(modelName);
     
@@ -40,8 +41,13 @@ module.exports.list = ({select, modelName, leftJoins, limit=15, ignoreCache=fals
     }
 
     console.log(query.toSQL().toNative());
+
+    query = query.orderBy(`${modelName}.id`, 'desc').limit(limit);
+    if (offset) {
+        query = query.offset(offset);
+    }
     
-    return query.orderBy(`${modelName}.id`, 'desc').limit(limit).then(rows => {
+    return query.then(rows => {
         kv.put(queryId, rows);
         return rows;
     });
@@ -72,15 +78,16 @@ module.exports.retrieve = ({modelName, filters, params, select, from, leftJoins,
         modelName,
         whereSql,
         `${(leftJoins || []).map(lj => `${lj.table}-${lj.localField}-${lj.foreignField}`).join('-')}`,
-        limit
+        limit,
+        JSON.stringify(params || {})
     ]);
 
-    if (! ignoreCache) {
-        const cached = kv.get(queryId);
-        if (cached) {
-            return new Promise(resolve => resolve(cached));
-        }
-    }
+    // if (! ignoreCache) {
+    //     const cached = kv.get(queryId);
+    //     if (cached) {
+    //         return new Promise(resolve => resolve(cached));
+    //     }
+    // }
 
     return query.whereRaw(whereSql, params || []).limit(limit).then(rows => {
         kv.put(queryId, rows);

@@ -36,7 +36,7 @@ module.exports.findByDateRange = (start, end) => {
 };
 
 module.exports.findById = id => {
-    return cms.list({
+    return cms.retrieve({
         modelName: 'events',
         filters: 'id = :id',
         params: {id}

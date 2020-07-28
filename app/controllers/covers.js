@@ -6,6 +6,18 @@ module.exports = app => {
         coverSrv.findById(id).then(cover => res.json(cover));
     });
 
+    app.get('/cover/id/:id/image', (req, res) => {
+        const id = req.originalUrl.split('/').reverse()[1];
+        coverSrv.findById(id).then(cover => {
+            const img = Buffer.from(cover.cover.split(',').pop(), 'base64')
+            res.writeHead(200, {
+                'Content-Type': 'image/png',
+                'Content-Length': img.length
+            });
+            res.end(img);
+        });
+    });
+
     app.get('/cms/cover', (req, res) => {
         coverSrv.retrieve('').then(comvers => {
             return res.json(comvers.map(cover => ({
