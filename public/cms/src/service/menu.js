@@ -31,6 +31,10 @@ const menus = [
 
     {id: 'event', name: 'Eventos', tooltip: 'Calendário de eventos', onclick() {
         window.location = '#/events';
+    }},
+
+    {id: 'team-member', name: 'Equipe', tooltip: 'Cadastrar perfis da equipe', onclick() {
+        window.location = '#/team-members';
     }}
 ];
 

@@ -8,6 +8,7 @@ import macros from './macros';
 import news from './news';
 import covers from './covers';
 import events from './events';
+import teamMembers from './team-members';
 
 export default [
     login,
@@ -19,5 +20,6 @@ export default [
     macros,
     news,
     covers,
-    events
+    events,
+    teamMembers
 ]

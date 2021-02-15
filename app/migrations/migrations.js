@@ -11,6 +11,7 @@ const createTableNew = require('./create-table-new');
 const createTableCovers = require('./create-table-covers');
 const createTableEvents = require('./create-table-events');
 const addGroupToProducts = require('./add-group-to-product');
+const createTeamMember = require('./create-table-team-member');
 
 module.exports = [
     {id: 1, exec: createTableUsers},
@@ -25,5 +26,6 @@ module.exports = [
     {id: 10, exec: createTableNew},
     {id: 11, exec: createTableCovers},
     {id: 12, exec: createTableEvents},
-    {id: 13, exec: addGroupToProducts}
+    {id: 13, exec: addGroupToProducts},
+    {id: 14, exec: createTeamMember}
 ];

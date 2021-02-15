@@ -193,7 +193,7 @@ var cms = (function () {
 
     var card = (({ title, body, footer, img }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }, img ? { tag: 'img', attrs: { src: img }, className: 'card-img-top' } : { tag: 'span' }, footer ? { tag: 'div', className: 'card-footer', children: footer } : { tag: 'span' }] }] }));
 
-    const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }, { name: 'event', label: 'Eventos' }];
+    const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }, { name: 'event', label: 'Eventos' }, { name: 'team-member', label: 'Equipe' }];
 
     var inputAcl = (meta => ({ tag: 'div', className: 'col-md-12', children: screens.map(screen => {
             return { tag: 'label', className: 'mr-5', children: [{ tag: 'input', attrs: { type: 'checkbox', name: `acl_${screen.name}`,
@@ -952,6 +952,8 @@ var cms = (function () {
             window.location = '#/covers';
         } }, { id: 'event', name: 'Eventos', tooltip: 'Calendário de eventos', onclick() {
             window.location = '#/events';
+        } }, { id: 'team-member', name: 'Equipe', tooltip: 'Cadastrar perfis da equipe', onclick() {
+            window.location = '#/team-members';
         } }];
 
     var menuService = {
@@ -1131,7 +1133,7 @@ var cms = (function () {
         const renderGrid = () => __async(function* () {
             const oldGrid = mainEl.querySelector('table');
             if (oldGrid) {
-                mainEl.removeChild(oldGrid);
+                oldGrid.parentElement.removeChild(oldGrid);
             }
             const gridEl = yield grid({
                 columns: [{ label: 'Nome', prop: user => user.name }, { label: 'E-mail', prop: user => user.email }, { label: 'Telefone', prop: user => user.phone }],
@@ -1276,7 +1278,7 @@ var cms = (function () {
         const renderGrid = () => __async(function* () {
             const oldGrid = mainEl.querySelector('table');
             if (oldGrid) {
-                mainEl.removeChild(oldGrid);
+                oldGrid.parentElement.removeChild(oldGrid);
             }
             const gridEl = yield grid({
                 columns: [{ label: 'Nome', prop: menu => menu.name }, { label: 'Descrição', prop: menu => menu.description }, { label: 'Ordem', prop: menu => menu.order }],
@@ -1425,7 +1427,7 @@ var cms = (function () {
         const renderGrid = () => __async(function* () {
             const oldGrid = mainEl.querySelector('table');
             if (oldGrid) {
-                mainEl.removeChild(oldGrid);
+                oldGrid.parentElement.removeChild(oldGrid);
             }
             const gridEl = yield grid({
                 columns: [{ label: 'Título', prop: article => article.title }, { label: 'Descrição', prop: article => article.description }, { label: 'Menu', prop: article => (article.menu || {}).name || '' }],
@@ -1622,7 +1624,7 @@ var cms = (function () {
         const renderGrid = () => __async(function* () {
             const oldGrid = mainEl.querySelector('table');
             if (oldGrid) {
-                mainEl.removeChild(oldGrid);
+                oldGrid.parentElement.removeChild(oldGrid);
             }
             const gridEl = yield grid({
                 columns: [{ label: 'Nome', prop: product => product.name }, { label: 'Descrição curta', prop: product => product.short_description }, { label: 'Grupo', prop: product => product.group }, { label: 'Valor', prop: product => priceFormat(product.price) }],
@@ -1942,7 +1944,7 @@ var cms = (function () {
         const renderGrid = () => __async(function* () {
             const oldGrid = mainEl.querySelector('table');
             if (oldGrid) {
-                mainEl.removeChild(oldGrid);
+                oldGrid.parentElement.removeChild(oldGrid);
             }
             const gridEl = yield grid({
                 columns: [{ label: 'Data', prop: notice => commonToPtBr(notice.published_at) }, { label: 'Nome', prop: notice => notice.title }],
@@ -2079,7 +2081,7 @@ var cms = (function () {
                     service$3.update(e.target.dataset.id, data).then(() => {
                         sessionStorage.flash = JSON.stringify({
                             type: 'success',
-                            msg: 'Notícia atualizada com sucesso'
+                            msg: 'Capa atualizada com sucesso'
                         });
                         window.location.reload();
                     });
@@ -2087,7 +2089,7 @@ var cms = (function () {
                     service$3.create(data).then(() => {
                         sessionStorage.flash = JSON.stringify({
                             type: 'success',
-                            msg: 'Notícia salva com sucesso'
+                            msg: 'Capa salva com sucesso'
                         });
                         window.location.reload();
                     });
@@ -2469,7 +2471,166 @@ var cms = (function () {
         }
     };
 
-    var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers, events];
+    var service$5 = {
+
+        findById(id) {
+            return __async(function* () {
+                let response = yield fetch(`${config.API_URL}/cms/team-member/id/${id}`, { headers });
+                let json = yield response.json();
+                return json;
+            }());
+        },
+
+        validate(data) {
+            let errors = '';
+
+            if (!data.name) {
+                errors += ' Informe o título (nome).';
+            }
+
+            if (!data.role) {
+                errors += ' Informe o cargo.';
+            }
+
+            if (!data.avatar) {
+                errors += ' Selecione uma foto de perfil.';
+            }
+
+            return errors;
+        },
+
+        retrieve: search => __async(function* () {
+            let response = yield fetch(`${config.API_URL}/cms/team-member/${encodeURIComponent(search)}`, { headers });
+            let json = yield response.json();
+            return json;
+        }()),
+
+        create: teamMember => __async(function* () {
+            const response = yield fetch(`${config.API_URL}/cms/team-member/`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(teamMember)
+            });
+
+            let newTeamMember = yield response.json();
+
+            return newTeamMember;
+        }()),
+
+        update: (id, teamMember) => __async(function* () {
+            const params = { id };
+            for (let i in teamMember) {
+                params[`${i}`] = teamMember[i];
+            }
+            const response = yield fetch(`${config.API_URL}/cms/team-member/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(params),
+                headers
+            });
+
+            let newTeamMember = yield response.json();
+
+            return newTeamMember;
+        }()),
+
+        destroy: id => __async(function* () {
+            return fetch(`${config.API_URL}/cms/team-member/${id}`, {
+                headers,
+                method: 'DELETE'
+            });
+        }())
+
+    };
+
+    const render$9 = appEl => {
+        let formEl, searchInput;
+
+        const formObj = form({
+            fieldCol: 3,
+            fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Cargo', name: 'role' }, { type: 'text', label: 'Link (rede social, LinkedIn)', name: 'social_media' }, { type: 'spacing' }, { type: 'single-image', label: 'Foto de perfil', name: 'avatar' }, { type: 'submit', label: 'Salvar' }],
+            onSubmit(data, e) {
+                const errors = service$5.validate(data);
+                if (errors) {
+                    return error(errors);
+                }
+
+                if (e.target.dataset.id) {
+                    service$5.update(e.target.dataset.id, data).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Perfil atualizado com sucesso'
+                        });
+                        window.location.reload();
+                    });
+                } else {
+                    service$5.create(data).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Perfil salvo com sucesso'
+                        });
+                        window.location.reload();
+                    });
+                }
+            }
+        });
+
+        const wrpEl = document.createElement('div');
+        const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Equipe' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                    bootstrap: el => searchInput = el }] }] }]);
+
+        formEl = mainEl.querySelector('form');
+        const loadData = () => service$5.retrieve(searchInput.value);
+
+        const renderGrid = () => __async(function* () {
+            const oldGrid = mainEl.querySelector('table');
+            if (oldGrid) {
+                oldGrid.parentElement.removeChild(oldGrid);
+            }
+            const gridEl = yield grid({
+                columns: [{ label: 'Nome', prop: member => member.name }, { label: 'Cargo', prop: member => member.role }],
+
+                loadData() {
+                    return loadData();
+                },
+
+                onEdit(member) {
+                    service$5.findById(member.id).then(member => {
+                        dataToForm(member, formEl);
+                        formEl.querySelector('input').focus();
+                        formEl.dataset.id = member.id;
+                    });
+                },
+
+                onDelete(member) {
+                    service$5.destroy(member.id).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Perfil excluído com sucesso'
+                        });
+                        window.location.reload();
+                    });
+                }
+            });
+            mainEl.appendChild(gridEl);
+        }());
+
+        searchInput.addEventListener('keyup', () => {
+            window.searchTimeout && window.clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(renderGrid, 700);
+        });
+
+        renderGrid();
+        appEl.appendChild(template(wrpEl, 'member'));
+    };
+
+    var teamMembers = {
+        route: '#/team-members',
+        render(el) {
+            render$9(el);
+        }
+    };
+
+    var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers, events, teamMembers];
 
     function routeChange(el, hasRouteChange) {
         let route = window.location.hash;
