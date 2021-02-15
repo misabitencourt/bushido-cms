@@ -26,18 +26,18 @@ module.exports.retrieve = search => {
         list = cms.list({modelName: 'team_members'});
     }
     
-    return list.then(teamMembers => teamMembers.map(cover => ({
-        id: cover.id,
-        name: cover.name,
-        description: cover.description,
-        group: cover.group
+    return list.then(teamMembers => teamMembers.map(teamMember => ({
+        id: teamMember.id,
+        name: teamMember.name,
+        description: teamMember.description,
+        social_media: teamMember.social_media
     })));
 };
 
-module.exports.update = cover => cms.update({
+module.exports.update = teamMember => cms.update({
     modelName: 'team_members',
-    id: cover.id,
-    values: cover
+    id: teamMember.id,
+    values: teamMember
 });
 
 module.exports.destroy = id => cms.destroy({
