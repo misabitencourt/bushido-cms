@@ -28,7 +28,7 @@ const render = appEl => {
                 service.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Notícia atualizada com sucesso'
+                        msg: 'Capa atualizada com sucesso'
                     });
                     window.location.reload();
                 });
@@ -36,7 +36,7 @@ const render = appEl => {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Notícia salva com sucesso'
+                        msg: 'Capa salva com sucesso'
                     });
                     window.location.reload();
                 });
@@ -63,7 +63,7 @@ const render = appEl => {
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
-            mainEl.removeChild(oldGrid);
+            oldGrid.parentElement.removeChild(oldGrid);
         }
         const gridEl = await grid({
             columns: [
