@@ -46,14 +46,14 @@ export const ptBrToCommon = (str, datetime=false) => {
         str = spaceSplit.pop();  
     }
 
-    const split = str.split('/');
+    const split = str.split('/').map(s => s.trim());
     if (split.length !== 3) {
         return null;
     }
 
     return `${split[2]}-${split[1]}-${split[0]} ${
         datetime ? `${hour[0]}:${hour[1]}:00` : ''
-    }`;
+    }`.trim();
 } 
 
 export const commonToPtBr = (str, datetime=false) => {
