@@ -63,7 +63,7 @@ const render = appEl => {
     const renderGrid = async () => {
         const oldGrid = mainEl.querySelector('table');
         if (oldGrid) {
-            oldGrid.parentElement.removeChild(oldGrid);
+            mainEl.removeChild(oldGrid);
         }
         const gridEl = await grid({
             columns: [
