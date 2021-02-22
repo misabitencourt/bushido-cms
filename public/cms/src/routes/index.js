@@ -9,6 +9,7 @@ import news from './news';
 import covers from './covers';
 import events from './events';
 import teamMembers from './team-members';
+import galleries from './galleries';
 
 export default [
     login,
@@ -21,5 +22,6 @@ export default [
     news,
     covers,
     events,
-    teamMembers
+    teamMembers,
+    galleries
 ]

@@ -31,6 +31,7 @@ module.exports.login = login => new Promise((resolve, reject) => {
 
     let email = login.email;
     let password = sha1(`${login.passwd}${config.SECRET_WORD}`);
+    console.log('>>>>>>>>>>>>', password);
 
     return cms.retrieve({
         modelName: 'users',
@@ -110,6 +111,5 @@ module.exports.resourcesAvaliable = [
     'macros',
     'menu',
     'new',
-    'product',
-    'team-member'
+    'product'
 ];

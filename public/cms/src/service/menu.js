@@ -35,6 +35,10 @@ const menus = [
 
     {id: 'team-member', name: 'Equipe', tooltip: 'Cadastrar perfis da equipe', onclick() {
         window.location = '#/team-members';
+    }},
+
+    {id: 'galleries', name: 'Galerias', tooltip: 'Cadastrar galerias de fotos', onclick() {
+        window.location = '#/galleries';
     }}
 ];
 
