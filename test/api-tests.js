@@ -7,6 +7,7 @@ const productCrud = require('./product');
 const newCrud = require('./new');
 const macroCrud = require('./macro');
 const teamMemberCrud = require('./team-member');
+const galleryCrud = require('./gallery');
 
 module.exports = [
     loginTest,
@@ -17,5 +18,6 @@ module.exports = [
     productCrud,
     newCrud,
     macroCrud,
-    teamMemberCrud
+    teamMemberCrud,
+    galleryCrud
 ];
