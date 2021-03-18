@@ -4,7 +4,7 @@ import headers from './headers'
 export default {
 
     async findById(id) {
-        let response = await fetch(`${config.API_URL}/cms/event/id/${id}`, {headers});
+        let response = await fetch(`${config.API_URL}/cms/event/${id}`, {headers});
         let json = await response.json();
         return json;
     },

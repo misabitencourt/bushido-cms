@@ -111,7 +111,5 @@ module.exports.resourcesAvaliable = [
     'macros',
     'menu',
     'new',
-    'product',
-    'team-member',
-    'galleries'
+    'product'
 ];

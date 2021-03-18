@@ -193,7 +193,7 @@ var cms = (function () {
 
     var card = (({ title, body, footer, img }) => ({ tag: 'div', className: 'card', children: [{ tag: 'div', className: 'card-body', children: [{ tag: 'h5', className: 'card-title', textContent: title }, { tag: 'div', className: 'card-body', children: body }, img ? { tag: 'img', attrs: { src: img }, className: 'card-img-top' } : { tag: 'span' }, footer ? { tag: 'div', className: 'card-footer', children: footer } : { tag: 'span' }] }] }));
 
-    const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }, { name: 'event', label: 'Eventos' }, { name: 'team-member', label: 'Equipe' }];
+    const screens = [{ name: 'user', label: 'Usuários' }, { name: 'menu', label: 'Menus' }, { name: 'article', label: 'Artigos' }, { name: 'product', label: 'Produtos' }, { name: 'macros', label: 'Macros' }, { name: 'new', label: 'Notícias' }, { name: 'cover', label: 'Capas' }, { name: 'event', label: 'Eventos' }, { name: 'team-member', label: 'Equipe' }, { name: 'galleries', label: 'Galerias' }];
 
     var inputAcl = (meta => ({ tag: 'div', className: 'col-md-12', children: screens.map(screen => {
             return { tag: 'label', className: 'mr-5', children: [{ tag: 'input', attrs: { type: 'checkbox', name: `acl_${screen.name}`,
@@ -540,12 +540,12 @@ var cms = (function () {
             str = spaceSplit.pop();
         }
 
-        const split = str.split('/');
+        const split = str.split('/').map(s => s.trim());
         if (split.length !== 3) {
             return null;
         }
 
-        return `${split[2]}-${split[1]}-${split[0]} ${datetime ? `${hour[0]}:${hour[1]}:00` : ''}`;
+        return `${split[2]}-${split[1]}-${split[0]} ${datetime ? `${hour[0]}:${hour[1]}:00` : ''}`.trim();
     };
 
     const commonToPtBr = (str, datetime = false) => {
@@ -770,7 +770,7 @@ var cms = (function () {
     }));
 
     var config = {
-        API_URL: 'http://localhost:3000'
+        API_URL: 'http://localhost:3001'
     };
 
     const headers = {
@@ -954,6 +954,8 @@ var cms = (function () {
             window.location = '#/events';
         } }, { id: 'team-member', name: 'Equipe', tooltip: 'Cadastrar perfis da equipe', onclick() {
             window.location = '#/team-members';
+        } }, { id: 'galleries', name: 'Galerias', tooltip: 'Cadastrar galerias de fotos', onclick() {
+            window.location = '#/galleries';
         } }];
 
     var menuService = {
@@ -2157,7 +2159,7 @@ var cms = (function () {
 
         findById(id) {
             return __async(function* () {
-                let response = yield fetch(`${config.API_URL}/cms/event/id/${id}`, { headers });
+                let response = yield fetch(`${config.API_URL}/cms/event/${id}`, { headers });
                 let json = yield response.json();
                 return json;
             }());
@@ -2372,7 +2374,7 @@ var cms = (function () {
         let deleteBtn;
         const formObj = form({
             fieldCol: 3,
-            fields: [{ type: 'text', label: 'Endereço', name: 'address' }, { type: 'text', label: 'Descrição curta', name: 'description' }, { type: 'single-entity', label: 'Artigo explicativo', name: 'article_id', etity: 'article', service: articleSrv, descriptionField: 'title' }, { type: 'datetime', label: 'Início', name: 'start' }, { type: 'datetime', label: 'Fim', name: 'end' }, { type: 'submit', label: 'Salvar' }],
+            fields: [{ type: 'text', label: 'Endereço', name: 'address' }, { type: 'text', label: 'Descrição curta', name: 'description' }, { type: 'single-entity', label: 'Artigo explicativo', name: 'article_id', etity: 'article', service: articleSrv, descriptionField: 'title' }, { type: 'datetime', label: 'Início', name: 'start' }, { type: 'datetime', label: 'Fim', name: 'end' }, { type: 'single-image', label: 'Foto de capa', name: 'cover' }, { type: 'submit', label: 'Salvar' }],
             onSubmit(data, e) {
                 const errors = service$4.validate(data);
                 if (errors) {
@@ -2431,8 +2433,8 @@ var cms = (function () {
                             month: monthSelected.getMonth(),
                             year: monthSelected.getFullYear(),
                             items: events.map(eventFormatter),
-                            onItemClick: item => {
-                                const event = events.find(e => e.id === item.id);
+                            onItemClick: item => __async(function* () {
+                                const event = yield service$4.findById(item.id);
                                 event.start = new Date(event.start);
                                 event.end = new Date(event.end);
                                 event.article_id = event.article;
@@ -2440,7 +2442,7 @@ var cms = (function () {
                                 formEl.querySelector('input').focus();
                                 formEl.dataset.id = event.id;
                                 deleteBtn.style.display = 'inherit';
-                            }
+                            }())
                         };
 
                         renderCalendar(params);
@@ -2630,7 +2632,181 @@ var cms = (function () {
         }
     };
 
-    var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers, events, teamMembers];
+    var service$6 = {
+
+        findById(id) {
+            return __async(function* () {
+                let response = yield fetch(`${config.API_URL}/cms/galleries/id/${id}`, { headers });
+                let json = yield response.json();
+                return json;
+            }());
+        },
+
+        validate(data) {
+            let errors = '';
+
+            if (!data.name) {
+                errors += ' Informe o nome.';
+            }
+
+            if (!data.short_description) {
+                errors += ' Informe a descrição curta.';
+            }
+
+            if (!(data.photos && data.photos.length)) {
+                errors += ' Selecione uma foto.';
+            }
+
+            return errors;
+        },
+
+        retrieve: search => __async(function* () {
+            let response = yield fetch(`${config.API_URL}/cms/galleries/${encodeURIComponent(search)}`, { headers });
+            let json = yield response.json();
+            return json;
+        }()),
+
+        create: product => __async(function* () {
+            const response = yield fetch(`${config.API_URL}/cms/galleries/`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(product)
+            });
+
+            let newUser = yield response.json();
+
+            return newUser;
+        }()),
+
+        update: (id, product) => __async(function* () {
+            const params = { id };
+            for (let i in product) {
+                params[`${i}`] = product[i];
+            }
+            const response = yield fetch(`${config.API_URL}/cms/galleries/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(params),
+                headers
+            });
+
+            let newUser = yield response.json();
+
+            return newUser;
+        }()),
+
+        destroy: id => __async(function* () {
+            return fetch(`${config.API_URL}/cms/galleries/${id}`, {
+                headers,
+                method: 'DELETE'
+            });
+        }()),
+
+        createImage: (id, image) => __async(function* () {
+            return fetch(`${config.API_URL}/cms/galleries/image`, {
+                body: JSON.stringify({ id, image }),
+                headers,
+                method: 'POST'
+            }).then(res => res.json());
+        }()),
+
+        destroyImage: id => __async(function* () {
+            return fetch(`${config.API_URL}/cms/galleries/image/${id}`, {
+                headers,
+                method: 'DELETE'
+            });
+        }())
+
+    };
+
+    const render$a = appEl => {
+        let formEl, searchInput;
+
+        const formObj = form({
+            fieldCol: 3,
+            fields: [{ type: 'text', label: 'Nome', name: 'name' }, { type: 'text', label: 'Descrição', name: 'short_description' }, { type: 'text', label: 'Grupo (categoria)', name: 'group' }, { type: 'wysiwyg', name: 'long_description', fieldCol: 12 }, { type: 'image-list', name: 'photos', label: 'Fotos', fieldCol: 12, service: service$6 }, { type: 'submit', label: 'Salvar' }],
+            onSubmit(data, e) {
+                const errors = service$6.validate(data);
+                if (errors) {
+                    return error(errors);
+                }
+
+                if (e.target.dataset.id) {
+                    service$6.update(e.target.dataset.id, data).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Galeria atualizada com sucesso'
+                        });
+                        window.location.reload();
+                    });
+                } else {
+                    service$6.create(data).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Galeria salva com sucesso'
+                        });
+                        window.location.reload();
+                    });
+                }
+            }
+        });
+
+        const wrpEl = document.createElement('div');
+        const mainEl = createEls('div', '', wrpEl, [{ tag: 'h2', textContent: 'Cadastro de Galerias' }, formObj, { tag: 'div', className: 'row', children: [{ tag: 'div', className: 'col-md-8' }, { tag: 'div', className: 'col-md-4 pl-4 pt-2 pb-2', children: [{ tag: 'input', className: 'form-control', attrs: { placeholder: 'Pesquisar' },
+                    bootstrap: el => searchInput = el }] }] }]);
+
+        formEl = mainEl.querySelector('form');
+        const loadData = () => service$6.retrieve(searchInput.value);
+
+        const renderGrid = () => __async(function* () {
+            const oldGrid = mainEl.querySelector('table');
+            if (oldGrid) {
+                oldGrid.parentElement.removeChild(oldGrid);
+            }
+            const gridEl = yield grid({
+                columns: [{ label: 'Nome', prop: gallery => gallery.name }, { label: 'Descrição curta', prop: gallery => gallery.short_description }],
+
+                loadData() {
+                    return loadData();
+                },
+
+                onEdit(gallery) {
+                    service$6.findById(gallery.id).then(gallery => {
+                        dataToForm(gallery, formEl);
+                        formEl.querySelector('input').focus();
+                        formEl.dataset.id = gallery.id;
+                    });
+                },
+
+                onDelete(gallery) {
+                    service$6.destroy(gallery.id).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Galeria excluída com sucesso'
+                        });
+                        window.location.reload();
+                    });
+                }
+            });
+            mainEl.appendChild(gridEl);
+        }());
+
+        searchInput.addEventListener('keyup', () => {
+            window.searchTimeout && window.clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(renderGrid, 700);
+        });
+
+        renderGrid();
+        appEl.appendChild(template(wrpEl, 'gallery'));
+    };
+
+    var galleries = {
+        route: '#/galleries',
+        render(el) {
+            render$a(el);
+        }
+    };
+
+    var routes = [login$1, users, menus$1, articles, products, home, macros, news, covers, events, teamMembers, galleries];
 
     function routeChange(el, hasRouteChange) {
         let route = window.location.hash;

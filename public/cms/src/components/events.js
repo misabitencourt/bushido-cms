@@ -18,6 +18,7 @@ const render = appEl => {
             {type: 'single-entity', label: 'Artigo explicativo', name: 'article_id', etity: 'article', service: articleSrv, descriptionField: 'title'},
             {type: 'datetime', label: 'Início', name: 'start'},
             {type: 'datetime', label: 'Fim', name: 'end'},
+            {type: 'single-image', label: 'Foto de capa', name: 'cover'},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -82,8 +83,8 @@ const render = appEl => {
                     month: monthSelected.getMonth(),
                     year: monthSelected.getFullYear(),
                     items: events.map(eventFormatter),
-                    onItemClick: item => {
-                        const event = events.find(e => e.id === item.id);
+                    onItemClick: async item => {
+                        const event = await service.findById(item.id);
                         event.start = new Date(event.start);
                         event.end = new Date(event.end);
                         event.article_id = event.article;

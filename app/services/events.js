@@ -7,6 +7,7 @@ module.exports.create = event => cms.create({
         description: event.description,
         address: event.address,
         article_id: event.article_id,
+        cover: event.cover,
         start: event.start,
         end: event.end
     }

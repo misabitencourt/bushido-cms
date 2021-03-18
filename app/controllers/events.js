@@ -61,6 +61,7 @@ module.exports = app => {
             description: req.body.description,
             address: req.body.address,
             article_id: req.body.article_id,
+            cover: req.body.cover,
             start: new Date(req.body.start+''),
             end: new Date(req.body.end+'')
         }).then(event => {
@@ -74,6 +75,7 @@ module.exports = app => {
             id,
             description: req.body.name,
             address: req.body.address,
+            cover: req.body.cover,
             article_id: req.body.article_id,
             start: new Date(req.body.start+''),
             end: new Date(req.body.end+'')
