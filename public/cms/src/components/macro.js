@@ -1,13 +1,46 @@
 import { emitEvent } from '../common/event';
+import fileOpen from '../common/file-open';
 import imageResize from '../common/image-resize';
 import macroSrv from '../service/macros';
 import msg from '../dialogs/msg';
+
+export const MACRO_TYPES = {
+    TEXT: '1',
+    LONGTEXT: '2',
+    IMAGE: '3',
+    FILE: '4'
+};
 
 function getMacroInput(list, macro={}) {
     const placeholder = 'Conteúdo';
 
     switch(macro.type) {
-        case '3':
+        case MACRO_TYPES.FILE:
+            return {tag: 'div', className: 'form-group', children: [
+                
+                macro.textval ? 
+                    {tag: 'div', className: 'mb-2', children: [
+                        macro.textval ? (
+                            {tag: 'a', attrs: {
+                                href: macro.textval,
+                                download: macro.name,
+                                title: 'Clique para baixar o arquivo'
+                            }, textContent: 'Baixar'}
+                        ) : (
+                            {tag: 'span', textContent: 'Nenhum arquivo selecionado'}
+                        )
+                    ]} : {tag: 'span'},
+
+                    {tag: 'button', className: 'btn btn-primary', textContent: 'Trocar arquivo', on: ['click', () => {
+                        fileOpen().then(base64 => {
+                            macro.textval = base64;
+                            emitEvent('macros:refresh', list);
+                        });
+                    }]
+                }
+            ]};
+
+        case MACRO_TYPES.IMAGE:
             return {tag: 'div', className: 'form-group', children: [
                 
                 macro.textval ? 
@@ -25,7 +58,8 @@ function getMacroInput(list, macro={}) {
                     }]
                 }
             ]};
-        case '2':
+
+        case MACRO_TYPES.LONGTEXT:
             return {tag: 'div', className: 'form-group', children: [
                 {tag: 'textarea', className: 'form-control', bootstrap: el => el.innerHTML = macro.textval || '',
                     attrs: {name: macro.name, placeholder, rows: 10}, on: ['change', e => {
@@ -33,6 +67,7 @@ function getMacroInput(list, macro={}) {
                     }]
                 }
             ]};
+
         default:
             return {tag: 'div', className: 'form-group', children: [
                 {tag: 'input', className: 'form-control', 
@@ -59,9 +94,10 @@ export default list => ({
                     ]},
                     {tag: 'div', className: 'col-md-6 text-md-right', children: [
                         {tag: 'select', className: 'form-control', children: [
-                            {tag: 'option', attrs: {value: '1'}, textContent: 'Texto pequeno'},
-                            {tag: 'option', attrs: {value: '2'}, textContent: 'Texto extenso'},
-                            {tag: 'option', attrs: {value: '3'}, textContent: 'Imagem'}
+                            {tag: 'option', attrs: {value: MACRO_TYPES.TEXT}, textContent: 'Texto pequeno'},
+                            {tag: 'option', attrs: {value: MACRO_TYPES.LONGTEXT}, textContent: 'Texto extenso'},
+                            {tag: 'option', attrs: {value: MACRO_TYPES.IMAGE}, textContent: 'Imagem'},
+                            {tag: 'option', attrs: {value: MACRO_TYPES.FILE}, textContent: 'Arquivo para download'}
                         ], on: ['change', e => {
                             macroData.type = e.target.value;
                             emitEvent('macros:refresh', list);
