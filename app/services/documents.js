@@ -6,7 +6,7 @@ module.exports.findById = id => {
         filters: 'id = :id',
         params: {id}
     }).then(documents => {
-        const document = documents.pop();
+        const document = documents.pop() || {};
         return {...document, doc: document.data}
     });
 }

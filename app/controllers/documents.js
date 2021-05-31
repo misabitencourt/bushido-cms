@@ -24,7 +24,7 @@ module.exports = app => {
                 id: doc.id,
                 name: doc.name,
                 description: doc.description,
-                group: doc.group
+                category: doc.category
             })));
         });
     });
@@ -35,7 +35,7 @@ module.exports = app => {
                 id: doc.id,
                 name: doc.name,
                 description: doc.description,
-                group: doc.group
+                category: doc.category
             })));
         });
     });
@@ -47,7 +47,7 @@ module.exports = app => {
                 id: doc.id,
                 name: doc.name,
                 description: doc.description,
-                group: doc.group
+                category: doc.category
             })));
         });
     });
