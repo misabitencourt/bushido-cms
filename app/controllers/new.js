@@ -24,8 +24,6 @@ module.exports = app => {
                 id: neww.id,
                 title: neww.title,
                 description: neww.description,
-                abstract: neww.abstract,
-                text: neww.text,
                 menu: neww.menu,
                 author: neww.author,
                 published_at: neww.published_at

@@ -46,9 +46,11 @@ function hideLoading() {
     if (loadingEl && loadingEl.parentElement) {
         loadingEl.parentElement.removeChild(loadingEl);
     }
+    loadingEl = null;
 }
 
 function showLoading() {
+    hideLoading();
     loadingEl = document.createElement('div');
     loadingEl.style.position = 'fixed';
     loadingEl.style.top = loadingEl.style.left = '0';
