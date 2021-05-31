@@ -10,6 +10,7 @@ import covers from './covers';
 import events from './events';
 import teamMembers from './team-members';
 import galleries from './galleries';
+import documents from './documents';
 
 export default [
     login,
@@ -23,5 +24,6 @@ export default [
     covers,
     events,
     teamMembers,
-    galleries
+    galleries,
+    documents
 ]

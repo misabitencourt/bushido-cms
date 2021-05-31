@@ -15,6 +15,7 @@ const createTeamMember = require('./create-table-team-member');
 const createTableGalleries = require('./create-table-galleries');
 const createTableGalleryPhotos = require('./create-table-gallery-photos');
 const addCoverToEvents = require('./add-cover-to-events');
+const createTableDocuments = require('./create-table-documents');
 
 module.exports = [
     {id: 1, exec: createTableUsers},
@@ -33,5 +34,6 @@ module.exports = [
     {id: 14, exec: createTeamMember},
     {id: 15, exec: createTableGalleries},
     {id: 16, exec: createTableGalleryPhotos},
-    {id: 17, exec: addCoverToEvents}
+    {id: 17, exec: addCoverToEvents},
+    {id: 18, exec: createTableDocuments}
 ];

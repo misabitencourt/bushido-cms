@@ -1,3 +1,4 @@
+import './components/block-loading';
 import '../../../node_modules/npm-dom-helper/index';
 import routes from './routes/index';
 import msg from './dialogs/msg';

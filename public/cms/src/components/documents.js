@@ -1,7 +1,7 @@
 import template from './template';
-import form from '../components/form';
-import service from '../service/covers';
-import grid from '../components/grid';
+import form from './form';
+import service from '../service/documents';
+import grid from './grid';
 import {dataToForm} from '../common/form-bind';
 import error from '../dialogs/error';
 
@@ -11,11 +11,10 @@ const render = appEl => {
     const formObj = form({
         fieldCol: 3,
         fields: [
-            {type: 'text', label: 'Título (nome)', name: 'name'},
             {type: 'text', label: 'Descrição', name: 'description'},
-            {type: 'text', label: 'Grupo', name: 'group'},
+            {type: 'text', label: 'Categoria', name: 'category'},
+            {type: 'single-file', label: 'Arquivo PDF', name: 'doc', accept: 'application/pdf'},
             {type: 'spacing'},
-            {type: 'single-image', label: 'Foto de capa', name: 'cover'},
             {type: 'submit', label: 'Salvar'}
         ],
         onSubmit(data, e) {
@@ -28,7 +27,7 @@ const render = appEl => {
                 service.update(e.target.dataset.id, data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Capa atualizada com sucesso'
+                        msg: 'Documento atualizado com sucesso'
                     });
                     window.location.reload();
                 });
@@ -36,7 +35,7 @@ const render = appEl => {
                 service.create(data).then(() => {
                     sessionStorage.flash = JSON.stringify({
                         type: 'success',
-                        msg: 'Capa salva com sucesso'
+                        msg: 'Documento salvo com sucesso'
                     });
                     window.location.reload();
                 });
@@ -46,7 +45,7 @@ const render = appEl => {
         
     const wrpEl = document.createElement('div');
     const mainEl = createEls('div', '', wrpEl, [
-        {tag: 'h2', textContent: 'Cadastro de Fotos de capa'},
+        {tag: 'h2', textContent: 'Cadastro de Documentos'},
         formObj,
         {tag: 'div', className: 'row', children: [
             {tag: 'div', className: 'col-md-8'},
@@ -55,45 +54,50 @@ const render = appEl => {
                     bootstrap: el => searchInput = el}
             ]}
         ]}
-    ])    
+    ])
 
     formEl = mainEl.querySelector('form')
     const loadData = () => service.retrieve(searchInput.value)    
 
     const renderGrid = async () => {
-        const oldGrid = mainEl.querySelector('table');
-        if (oldGrid && oldGrid.parentElement) {
-            oldGrid.parentElement.removeChild(oldGrid);
-        }
-        const gridEl = await grid({
-            columns: [
-                {label: 'Nome', prop: cover => cover.name },
-                {label: 'Descrição', prop: cover => cover.description }
-            ],
-
-            loadData() {
-                return loadData();
-            },
-    
-            onEdit(cover) {
-                service.findById(cover.id).then(cover => {
-                    dataToForm(cover, formEl);
-                    formEl.querySelector('input').focus();
-                    formEl.dataset.id = cover.id;
-                });
-            },
-    
-            onDelete(cover) {
-                service.destroy(cover.id).then(() => {
-                    sessionStorage.flash = JSON.stringify({
-                        type: 'success',
-                        msg: 'Capa excluída com sucesso'
-                    });
-                    window.location.reload();    
-                });
+        try {
+            const oldGrid = mainEl.querySelector('table');
+            if (oldGrid && oldGrid.parentElement) {
+                oldGrid.parentElement.removeChild(oldGrid);
             }
-        })
-        mainEl.appendChild(gridEl);
+            const gridEl = await grid({
+                columns: [
+                    {label: 'Descrição', prop: doc => doc.description },
+                    {label: 'Categoria', prop: doc => doc.category }
+                ],
+
+                loadData() {
+                    return loadData();
+                },
+        
+                onEdit(doc) {
+                    service.findById(doc.id).then(doc => {
+                        dataToForm(doc, formEl);
+                        formEl.querySelector('input').focus();
+                        formEl.dataset.id = doc.id;
+                    });
+                },
+        
+                onDelete(doc) {
+                    service.destroy(doc.id).then(() => {
+                        sessionStorage.flash = JSON.stringify({
+                            type: 'success',
+                            msg: 'Documento excluído com sucesso'
+                        });
+                        window.location.reload();    
+                    });
+                }
+            })
+            mainEl.appendChild(gridEl);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     searchInput.addEventListener('keyup', () => {
@@ -101,8 +105,8 @@ const render = appEl => {
         window.searchTimeout = setTimeout(renderGrid, 700);
     });
 
-    renderGrid();
-    appEl.appendChild(template(wrpEl, 'cover'));
+    renderGrid().catch(err => console.error(err));
+    appEl.appendChild(template(wrpEl, 'documents'));
 };
 
 

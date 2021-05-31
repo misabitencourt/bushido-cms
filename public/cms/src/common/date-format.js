@@ -59,6 +59,10 @@ export const ptBrToCommon = (str, datetime=false) => {
 export const commonToPtBr = (str, datetime=false) => {
     let hour;
 
+    if (!str) {
+        return '';
+    }
+
     if (datetime) {
         let spaceSplit = str.split(' ');
         hour = spaceSplit.pop().split(':');

@@ -39,6 +39,10 @@ const menus = [
 
     {id: 'galleries', name: 'Galerias', tooltip: 'Cadastrar galerias de fotos', onclick() {
         window.location = '#/galleries';
+    }},
+
+    {id: 'documents', name: 'Documentos', tooltip: 'Cadastrar documentos', onclick() {
+        window.location = '#/documents';
     }}
 ];
 

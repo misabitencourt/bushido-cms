@@ -4,11 +4,17 @@ import singleEntity from './single-entity';
 import imageList from './image-list';
 import {emitEvent} from '../common/event';
 import singleImage from './single-image';
+import singleFile from './single-file';
 import inputDate from './input-date';
 import { ptBrToCommon } from '../common/date-format';
 
 function createField(meta) {
     switch(meta.type) {
+        case 'single-file':
+            return {tag: 'div', className: 'single-image', attrs: {'data-name': meta.name}, bootstrap(el) {
+                el.dataset.skipbind = '1';
+                singleFile(el, meta);
+            }};
         case 'date':
             return inputDate(meta);
         case 'datetime':

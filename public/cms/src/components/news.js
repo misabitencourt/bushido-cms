@@ -74,7 +74,7 @@ const render = appEl => {
         }
         const gridEl = await grid({
             columns: [
-                {label: 'Data', prop: notice => commonToPtBr(notice.published_at) },
+                {label: 'Data', prop: notice => commonToPtBr(notice.published_at)},
                 {label: 'Nome', prop: notice => notice.title }
             ],
 
