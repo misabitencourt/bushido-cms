@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^6.0.2",
+    "mocha": "^10.2.0",
     "rollup": "^1.5.0",
     "supertest": "^4.0.0"
   }
